@@ -1,0 +1,1419 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Power & Oxygen Supply Survey</title>
+<style>
+/* Layout: field-clipboard app — sticky header, outline rail of numbered questions (as on the paper form), one question per screen */
+:root{
+  --bg:#eef2f3; --surface:#ffffff; --sunk:#f6f8f9; --ink:#14232b; --muted:#5a6a72; --line:#d3dcdf; --line-strong:#b4c2c7;
+  --accent:#0b6b72; --accent-ink:#ffffff; --accent-soft:#dcefef;
+  --elec:#a86400; --elec-soft:#fbefd9; --oxy:#1d64a8; --oxy-soft:#e1ecf8; --intr:#9c2f55; --intr-soft:#f6e3ea;
+  --req:#c62828; --ok:#2e7d4f; --ok-soft:#e1f2e7; --warn:#9a5b00; --warn-soft:#fff2d6; --bad:#b3261e;
+  --lane-me:#d48a00; --lane-eb:#f2c46b; --lane-mo:#1d64a8; --lane-ob:#8bb7e6;
+  --f-display:"Segoe UI Semibold","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --f-body:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --f-mono:ui-monospace,"Cascadia Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --r:8px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1619; --surface:#152024; --sunk:#111b1e; --ink:#e2ebed; --muted:#93a5ab; --line:#2a3a3f; --line-strong:#3c5157;
+  --accent:#43b5bb; --accent-ink:#06191b; --accent-soft:#163538;
+  --elec:#f0a53a; --elec-soft:#3a2a10; --oxy:#74aee8; --oxy-soft:#142a40; --intr:#e57fa3; --intr-soft:#3a1824;
+  --req:#ff6b6b; --ok:#5cc489; --ok-soft:#14301f; --warn:#f0b54a; --warn-soft:#3a2c10; --bad:#ff7a70;
+  --lane-me:#f0a53a; --lane-eb:#8a6a2a; --lane-mo:#74aee8; --lane-ob:#3c5f86; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1619; --surface:#152024; --sunk:#111b1e; --ink:#e2ebed; --muted:#93a5ab; --line:#2a3a3f; --line-strong:#3c5157;
+  --accent:#43b5bb; --accent-ink:#06191b; --accent-soft:#163538;
+  --elec:#f0a53a; --elec-soft:#3a2a10; --oxy:#74aee8; --oxy-soft:#142a40; --intr:#e57fa3; --intr-soft:#3a1824;
+  --req:#ff6b6b; --ok:#5cc489; --ok-soft:#14301f; --warn:#f0b54a; --warn-soft:#3a2c10; --bad:#ff7a70;
+  --lane-me:#f0a53a; --lane-eb:#8a6a2a; --lane-mo:#74aee8; --lane-ob:#3c5f86; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+img{max-width:100%}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--surface)}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;line-height:1.15;text-wrap:balance;margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:.875rem}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand .mark{width:30px;height:30px;border-radius:6px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:15px;flex:none}
+.brand h1{font-size:1.15rem;letter-spacing:.01em;white-space:nowrap}
+.brand .fac{font-size:.85rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40vw}
+.top .sp{flex:1}
+.save{font-size:.8rem;color:var(--muted)}
+.only-xs{display:none}
+@media (max-width:600px){.save{display:none}.top{flex-wrap:nowrap}.brand{flex:1}.brand h1{font-size:1rem;overflow:hidden;text-overflow:ellipsis}.brand .fac{max-width:none}.top .sp{display:none}.hide-narrow{display:none}.only-xs{display:inline}}
+.btn{border:1px solid var(--line-strong);background:var(--surface);border-radius:6px;padding:7px 13px;cursor:pointer;font-weight:600;font-size:.92rem;display:inline-flex;align-items:center;gap:6px;line-height:1.2}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:4px 9px;font-size:.82rem}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);cursor:pointer;font-weight:600;text-decoration:underline;text-underline-offset:2px}
+
+/* shell */
+.shell{display:block;min-height:calc(100% - 60px)}
+.rail{background:var(--sunk);padding:14px 10px 40px;overflow-y:auto;position:fixed;inset:0 auto 0 0;width:min(340px,88vw);height:100%;z-index:40;transform:translateX(-102%);transition:transform .2s;padding-top:calc(14px + env(safe-area-inset-top,0px));box-shadow:0 0 40px rgba(0,0,0,.25);visibility:hidden}
+.rail.open{transform:none;visibility:visible}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:35}
+.pbar-wrap{display:flex;align-items:center;gap:10px;background:var(--surface);border-bottom:1px solid var(--line);padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.pbar{flex:1;height:12px;border-radius:6px;background:var(--line);overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--accent);border-radius:6px;transition:width .2s}
+.pbar-pct{font-weight:600;font-size:.9rem;min-width:3.2em;text-align:right;color:var(--accent)}
+.main{min-width:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 120px}
+.wrap{max-width:760px;margin:0 auto}
+@media (prefers-reduced-motion:reduce){ .rail{transition:none} }
+
+/* outline */
+.prog{padding:4px 8px 14px}
+.prog .bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:6px}
+.prog .bar i{display:block;height:100%;background:var(--accent)}
+.part{margin-top:10px}
+.part-h{display:flex;align-items:baseline;gap:6px;padding:6px 8px;font-family:var(--f-display);font-weight:600;font-size:.95rem;text-transform:uppercase;letter-spacing:.05em}
+.part-h .sk{margin-left:auto;font-family:var(--f-body);text-transform:none;letter-spacing:0;font-weight:400;font-size:.75rem;color:var(--muted)}
+.sec-h{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:8px 8px 2px 34px}
+.nav-i{display:flex;align-items:center;gap:8px;width:100%;text-align:left;border:0;background:none;padding:5px 8px;border-radius:6px;cursor:pointer;font-size:.9rem;line-height:1.25}
+.nav-i:hover{background:var(--surface)}
+.nav-i.cur{background:var(--surface);box-shadow:inset 3px 0 0 var(--accent);font-weight:600}
+.qn{font-family:var(--f-mono);font-size:.75rem;min-width:24px;height:20px;padding:0 4px;border-radius:10px;display:inline-grid;place-items:center;border:1px solid var(--line-strong);color:var(--muted);flex:none}
+.qn.req{border-color:var(--req);color:var(--req)}
+.qn.blank{border-style:dashed}
+.st{width:9px;height:9px;border-radius:50%;flex:none;margin-left:auto;border:1.5px solid var(--line-strong)}
+.st.done{background:var(--ok);border-color:var(--ok)}
+.st.partial{background:linear-gradient(90deg,var(--warn) 50%,transparent 50%);border-color:var(--warn)}
+.st.na{background:var(--muted);border-color:var(--muted)}
+.st.missing{border-color:var(--req)}
+.p1 .part-h{color:var(--accent)} .p2 .part-h{color:var(--elec)} .p3 .part-h{color:var(--oxy)} .p4 .part-h{color:var(--intr)} .p5 .part-h{color:var(--elec)}
+
+/* step */
+.eyebrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.8rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;font-size:.75rem;letter-spacing:.03em;text-transform:none;font-weight:600}
+.chip.p1{background:var(--accent-soft);color:var(--accent)} .chip.p2,.chip.p5{background:var(--elec-soft);color:var(--elec)} .chip.p3{background:var(--oxy-soft);color:var(--oxy)} .chip.p4{background:var(--intr-soft);color:var(--intr)} .chip.p0,.chip.p6{background:var(--accent-soft);color:var(--accent)}
+.chip.req{background:transparent;border:1px solid var(--req);color:var(--req)}
+.chip.dep{background:var(--sunk);border:1px dashed var(--line-strong);color:var(--muted)}
+.step-h{display:flex;gap:14px;align-items:flex-start;margin:10px 0 6px}
+.bignum{font-family:var(--f-mono);font-size:1.05rem;font-weight:500;min-width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line-strong);color:var(--muted);flex:none}
+.bignum.req{border-color:var(--req);color:var(--req)}
+.step-h h2{font-size:1.9rem;padding-top:4px}
+.help{color:var(--muted);margin:4px 0 0;max-width:65ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;margin-top:18px;display:flex;flex-direction:column;gap:22px}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fld>label,.fld>.lbl{font-weight:600}
+.fld .hint{font-size:.85rem;color:var(--muted);margin-top:-2px}
+.opt-tag{font-weight:400;color:var(--muted);font-size:.82rem;margin-left:6px}
+.sub-h{font-family:var(--f-display);font-size:1.15rem;font-weight:600;border-bottom:1px solid var(--line);padding-bottom:4px;margin-bottom:-8px}
+.row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+input[type=text],input[type=email],input[type=tel],input[type=number],input[type=date],input[type=time],select,textarea{
+  width:100%;border:1px solid var(--line-strong);background:var(--surface);border-radius:6px;padding:8px 10px;min-height:40px}
+textarea{min-height:90px;resize:vertical}
+input[type=number]{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.unit{display:flex;align-items:stretch}
+.unit input{border-top-right-radius:0;border-bottom-right-radius:0}
+.unit span{border:1px solid var(--line-strong);border-left:0;background:var(--sunk);border-radius:0 6px 6px 0;padding:0 10px;display:grid;place-items:center;font-size:.85rem;color:var(--muted);white-space:nowrap}
+.unit.narrow{max-width:260px}
+.money{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:8px;max-width:360px}
+.choices{display:flex;flex-direction:column;gap:6px}
+.choice{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border:1px solid var(--line);border-radius:6px;cursor:pointer;background:var(--surface)}
+.choice:hover{border-color:var(--line-strong)}
+.choice input{margin-top:4px;accent-color:var(--accent);width:17px;height:17px;flex:none}
+.choice.on{border-color:var(--accent);background:var(--accent-soft)}
+.choice .def{display:block;font-size:.84rem;color:var(--muted)}
+.choice.excl{border-style:dashed}
+.spec{margin:-2px 0 4px 38px}
+.grp-l{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:8px 0 0 2px}
+.yn{display:inline-flex;border:1px solid var(--line-strong);border-radius:6px;overflow:hidden;width:max-content}
+.yn label{padding:8px 22px;cursor:pointer;border-right:1px solid var(--line-strong);font-weight:600}
+.yn label:last-child{border-right:0}
+.yn input{position:absolute;opacity:0;pointer-events:none}
+.yn label.on{background:var(--accent);color:var(--accent-ink)}
+.yn label:focus-within{outline:2px solid var(--accent);outline-offset:-2px}
+.clear{font-size:.8rem}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+table.g{border-collapse:collapse;width:100%;font-size:.92rem}
+table.g th,table.g td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:middle}
+table.g thead th{background:var(--sunk);font-size:.78rem;font-weight:600;color:var(--muted);line-height:1.25;vertical-align:bottom}
+table.g tbody th{font-weight:600;min-width:150px}
+table.g tbody th .rs{display:block;font-weight:400;font-size:.8rem;color:var(--muted)}
+table.g td input{min-width:84px;min-height:36px;padding:6px 8px}
+table.g td.x{color:var(--muted);text-align:center}
+table.g tr:last-child>*{border-bottom:0}
+table.g tfoot td,table.g tfoot th{background:var(--sunk);font-weight:600;border-top:1px solid var(--line-strong)}
+.computed{background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-size:.92rem}
+.computed b{font-family:var(--f-mono);font-weight:500}
+.derived{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border:1px dashed var(--line-strong);border-radius:6px;background:var(--sunk)}
+.derived .val{font-weight:700}
+.info{font-size:.92rem;color:var(--ink);background:var(--sunk);border-radius:6px;padding:12px 14px;border:1px solid var(--line)}
+.info table{border-collapse:collapse;width:100%;font-size:.85rem}
+.info th,.info td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.info th{background:var(--surface)}
+.info p{margin:.3em 0}
+.warns{display:flex;flex-direction:column;gap:6px}
+.warn{background:var(--warn-soft);color:var(--ink);border-left:3px solid var(--warn);padding:8px 12px;border-radius:4px;font-size:.92rem}
+.note-ok{background:var(--ok-soft);border-left:3px solid var(--ok);padding:8px 12px;border-radius:4px;font-size:.92rem}
+.check{display:flex;gap:10px;align-items:center;cursor:pointer}
+.check input{width:18px;height:18px;accent-color:var(--accent)}
+.foot{position:fixed;left:0;right:0;bottom:0;z-index:15;background:var(--surface);border-top:1px solid var(--line);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px calc(10px + env(safe-area-inset-bottom,0px))}
+.foot .in{max-width:780px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.foot .sp{flex:1}
+.na-tog{font-size:.85rem;color:var(--muted);display:flex;gap:6px;align-items:center;cursor:pointer}
+.na-box{border:1px dashed var(--line-strong);border-radius:6px;padding:12px;background:var(--sunk)}
+.rep-actions{display:flex;gap:8px;margin-top:8px}
+
+/* home */
+.home{max-width:980px;margin:0 auto;padding-block:28px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:28px;align-items:end;margin-bottom:26px}
+@media (max-width:760px){.hero{grid-template-columns:minmax(0,1fr)}}
+.hero h2{font-size:2.5rem;letter-spacing:-.005em}
+.hero p{max-width:60ch}
+.legend{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;font-size:.88rem;align-items:center}
+.alist{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.acard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:8px}
+.acard h3{font-size:1.25rem}
+.acard .meta{font-size:.85rem;color:var(--muted)}
+.acard .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:6px}
+.tag-ex{font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;font-weight:700;color:var(--warn);border:1px solid var(--warn);border-radius:4px;padding:1px 6px;width:max-content}
+.minibar{height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+.minibar i{display:block;height:100%;background:var(--accent)}
+.home-acts{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 18px}
+.banner{background:var(--warn-soft);border:1px solid var(--warn);border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:.92rem}
+.confirm{background:var(--warn-soft);border:1px solid var(--warn);border-radius:6px;padding:8px 10px;font-size:.88rem;display:flex;flex-direction:column;gap:6px}
+
+/* diary */
+.lanes-key{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem}
+.lanes-key span{display:inline-flex;align-items:center;gap:6px}
+.lanes-key i{width:18px;height:8px;border-radius:2px;display:inline-block}
+.dstrip{display:grid;grid-template-columns:78px minmax(0,1fr);gap:2px 8px;align-items:center;font-size:.78rem}
+.dstrip .dl{font-family:var(--f-mono);color:var(--muted);white-space:nowrap}
+.dstrip svg{width:100%;height:auto;display:block}
+.ev-list{display:flex;flex-direction:column;gap:6px}
+.ev{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:6px;font-size:.9rem}
+.ev .sw{width:10px;height:28px;border-radius:2px}
+.ev .t{font-family:var(--f-mono);font-size:.85rem}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
+.sumtbl td,.sumtbl th{white-space:nowrap}
+
+/* review */
+.rv-part{margin-top:22px}
+.rv-q{border-top:1px solid var(--line);padding:10px 0;display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px}
+.rv-q .ans{font-size:.9rem}
+.rv-q .ans div{margin:1px 0}
+.rv-q .ans .k{color:var(--muted)}
+.exp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:60;display:grid;place-items:center;padding:16px}
+.modal .box{background:var(--surface);border-radius:var(--r);padding:18px;max-width:720px;width:100%;display:flex;flex-direction:column;gap:10px;max-height:90vh}
+.modal textarea{min-height:300px;font-family:var(--f-mono);font-size:.8rem}
+.toast{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:6px;z-index:70;font-size:.9rem}
+
+/* survey */
+.welcome{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.welcome h2{font-size:2.3rem;margin-top:4px}
+.lead{font-size:1.1rem;max-width:62ch;margin:0}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.facts div{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-left:3px solid var(--accent);background:var(--surface)}
+.facts span{color:var(--muted);font-size:.9rem}
+.privacy ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;max-width:65ch}
+.drafts{display:flex;flex-direction:column;gap:8px}
+.draft{display:flex;align-items:center;gap:12px;justify-content:space-between;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.idbox{border:1px dashed var(--accent);background:var(--accent-soft);border-radius:var(--r);padding:12px 16px;width:max-content;max-width:100%}
+.idcode{font-size:1.6rem;font-weight:600;letter-spacing:.06em;color:var(--accent)}
+a.btn{text-decoration:none;color:inherit}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+<noscript><p style="padding:16px">This survey needs JavaScript. Please open it in a current browser (Chrome, Firefox, Edge, Safari).</p></noscript>
+<script>
+/* =====================================================================
+   SETTINGS – fill in before sending the survey (see LIESMICH.txt)
+   Then open this file, click "Connection test" at the bottom of the start page.
+   ===================================================================== */
+const CONFIG = {
+  // Private GitHub repository that stores the encrypted answers
+  GITHUB_OWNER:  "adecky73",            // GitHub user or organisation, e.g. "andreas-example"
+  GITHUB_REPO:   "o2e-responses",            // private repository, e.g. "o2e-responses"
+  GITHUB_BRANCH: "main",
+  GITHUB_PATH:   "responses",   // folder inside the repository
+  GITHUB_TOKEN:  "enc:VEV0c2VxcVc3VlFGM0pYTW9vUmE5a0ZSblV0blJYQ1dMYllHUUVIaWJvejlzb3Bjd3FmTWhvam5YdVpfdHVpdzBPZ3ZNR1YyMElKM0xZUkExMV90YXBfYnVodGln",            // fine-grained token, only this repository, permission "Contents: Read and write".
+                                // Paste it as is, or encoded ("enc:…", made in the dashboard) if this file is published on GitHub Pages.
+  // Public key from the dashboard (Setup → Create key pair). Only the matching private key can decrypt the answers.
+  PUBLIC_KEY: `-----BEGIN PUBLIC KEY-----
+MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAzglr98EMvYMB+5bvv96q
+Zx87ntDkbjtA+2cpKENLzVA/k3cJZITE5o+/359RfR9kctQK2FogVIb8+r3kudL6
+rqs4Jt7Cag8ztE5PLKwB0kOCgAicovX2KLCHI9H4odQGnYc7upPcqBF2ZkZT/siV
+/XTQuomdh0vmOICLPOQqhoC0fLP0YML73HAw2pbsIYafcMMFYNZHXwfuIce4WJUn
+fe7FJG63vSgNvQUhHqafetpHpv8hwgLnQatbWgKVqDh5cDK0cqzpu2eCEWCkPEg0
+Lw7NiPj9wZ45l8kWnIMrIeqzXOBmWqOwabNjxg3ukHdYZ6tjZYtDm2H/rrOlXNIF
+ZQD1Dk6TdAyeH+yUrFVH8WSXJgApW0QMieKYmW67eckIP/32S9L5ZpzIqpPQKuYI
+9Arj5/6fnSPJY1wpiooVd4d4BTuivb3wTUUGAzUlkWlgxljDc59t4EQPpx6J6X7f
+KB3uGgLl1zC/kDGX8FUQ4bpwrvjo8bZs1ZKcLVHS2DffAgMBAAE=
+-----END PUBLIC KEY-----`,
+  CONTACT: "",                  // shown to participants, e.g. "Dr. A. Example, Heidelberg Institute of Global Health"
+  PROJECT: "Heidelberg Institute of Global Health (HIGH), Heidelberg University"
+};
+</script>
+<script>
+(function(){
+"use strict";
+const COUNTRIES = [["AF","Afghanistan"],["AL","Albania"],["DZ","Algeria"],["AS","American Samoa"],["AD","Andorra"],["AO","Angola"],["AI","Anguilla"],["AQ","Antarctica"],["AG","Antigua and Barbuda"],["AR","Argentina"],["AM","Armenia"],["AW","Aruba"],["AU","Australia"],["AT","Austria"],["AZ","Azerbaijan"],["BS","Bahamas"],["BH","Bahrain"],["BD","Bangladesh"],["BB","Barbados"],["BY","Belarus"],["BE","Belgium"],["BZ","Belize"],["BJ","Benin"],["BM","Bermuda"],["BT","Bhutan"],["BO","Bolivia"],["BQ","Bonaire, Sint Eustatius and Saba"],["BA","Bosnia and Herzegovina"],["BW","Botswana"],["BV","Bouvet Island"],["BR","Brazil"],["IO","British Indian Ocean Territory"],["BN","Brunei Darussalam"],["BG","Bulgaria"],["BF","Burkina Faso"],["BI","Burundi"],["CV","Cabo Verde"],["KH","Cambodia"],["CM","Cameroon"],["CA","Canada"],["KY","Cayman Islands"],["CF","Central African Republic"],["TD","Chad"],["CL","Chile"],["CN","China"],["CX","Christmas Island"],["CC","Cocos (Keeling) Islands"],["CO","Colombia"],["KM","Comoros"],["CG","Congo (Republic)"],["CD","Congo (Democratic Republic)"],["CK","Cook Islands"],["CR","Costa Rica"],["HR","Croatia"],["CU","Cuba"],["CW","Curaçao"],["CY","Cyprus"],["CZ","Czechia"],["CI","Côte d'Ivoire"],["DK","Denmark"],["DJ","Djibouti"],["DM","Dominica"],["DO","Dominican Republic"],["EC","Ecuador"],["EG","Egypt"],["SV","El Salvador"],["GQ","Equatorial Guinea"],["ER","Eritrea"],["EE","Estonia"],["SZ","Eswatini"],["ET","Ethiopia"],["FK","Falkland Islands (Malvinas)"],["FO","Faroe Islands"],["FJ","Fiji"],["FI","Finland"],["FR","France"],["GF","French Guiana"],["PF","French Polynesia"],["TF","French Southern Territories"],["GA","Gabon"],["GM","Gambia"],["GE","Georgia"],["DE","Germany"],["GH","Ghana"],["GI","Gibraltar"],["GR","Greece"],["GL","Greenland"],["GD","Grenada"],["GP","Guadeloupe"],["GU","Guam"],["GT","Guatemala"],["GG","Guernsey"],["GN","Guinea"],["GW","Guinea-Bissau"],["GY","Guyana"],["HT","Haiti"],["HM","Heard Island and McDonald Islands"],["VA","Holy See (Vatican City State)"],["HN","Honduras"],["HK","Hong Kong"],["HU","Hungary"],["IS","Iceland"],["IN","India"],["ID","Indonesia"],["IR","Iran"],["IQ","Iraq"],["IE","Ireland"],["IM","Isle of Man"],["IL","Israel"],["IT","Italy"],["JM","Jamaica"],["JP","Japan"],["JE","Jersey"],["JO","Jordan"],["KZ","Kazakhstan"],["KE","Kenya"],["KI","Kiribati"],["KW","Kuwait"],["KG","Kyrgyzstan"],["LA","Laos"],["LV","Latvia"],["LB","Lebanon"],["LS","Lesotho"],["LR","Liberia"],["LY","Libya"],["LI","Liechtenstein"],["LT","Lithuania"],["LU","Luxembourg"],["MO","Macao"],["MG","Madagascar"],["MW","Malawi"],["MY","Malaysia"],["MV","Maldives"],["ML","Mali"],["MT","Malta"],["MH","Marshall Islands"],["MQ","Martinique"],["MR","Mauritania"],["MU","Mauritius"],["YT","Mayotte"],["MX","Mexico"],["FM","Micronesia, Federated States of"],["MD","Moldova"],["MC","Monaco"],["MN","Mongolia"],["ME","Montenegro"],["MS","Montserrat"],["MA","Morocco"],["MZ","Mozambique"],["MM","Myanmar"],["NA","Namibia"],["NR","Nauru"],["NP","Nepal"],["NL","Netherlands"],["NC","New Caledonia"],["NZ","New Zealand"],["NI","Nicaragua"],["NE","Niger"],["NG","Nigeria"],["NU","Niue"],["NF","Norfolk Island"],["KP","North Korea"],["MK","North Macedonia"],["MP","Northern Mariana Islands"],["NO","Norway"],["OM","Oman"],["PK","Pakistan"],["PW","Palau"],["PS","Palestine, State of"],["PA","Panama"],["PG","Papua New Guinea"],["PY","Paraguay"],["PE","Peru"],["PH","Philippines"],["PN","Pitcairn"],["PL","Poland"],["PT","Portugal"],["PR","Puerto Rico"],["QA","Qatar"],["RO","Romania"],["RU","Russian Federation"],["RW","Rwanda"],["RE","Réunion"],["BL","Saint Barthélemy"],["SH","Saint Helena, Ascension and Tristan da Cunha"],["KN","Saint Kitts and Nevis"],["LC","Saint Lucia"],["MF","Saint Martin (French part)"],["PM","Saint Pierre and Miquelon"],["VC","Saint Vincent and the Grenadines"],["WS","Samoa"],["SM","San Marino"],["ST","Sao Tome and Principe"],["SA","Saudi Arabia"],["SN","Senegal"],["RS","Serbia"],["SC","Seychelles"],["SL","Sierra Leone"],["SG","Singapore"],["SX","Sint Maarten (Dutch part)"],["SK","Slovakia"],["SI","Slovenia"],["SB","Solomon Islands"],["SO","Somalia"],["ZA","South Africa"],["GS","South Georgia and the South Sandwich Islands"],["KR","South Korea"],["SS","South Sudan"],["ES","Spain"],["LK","Sri Lanka"],["SD","Sudan"],["SR","Suriname"],["SJ","Svalbard and Jan Mayen"],["SE","Sweden"],["CH","Switzerland"],["SY","Syria"],["TW","Taiwan"],["TJ","Tajikistan"],["TZ","Tanzania"],["TH","Thailand"],["TL","Timor-Leste"],["TG","Togo"],["TK","Tokelau"],["TO","Tonga"],["TT","Trinidad and Tobago"],["TN","Tunisia"],["TM","Turkmenistan"],["TC","Turks and Caicos Islands"],["TV","Tuvalu"],["TR","Türkiye"],["UG","Uganda"],["UA","Ukraine"],["AE","United Arab Emirates"],["GB","United Kingdom"],["US","United States"],["UM","United States Minor Outlying Islands"],["UY","Uruguay"],["UZ","Uzbekistan"],["VU","Vanuatu"],["VE","Venezuela"],["VN","Vietnam"],["VG","Virgin Islands, British"],["VI","Virgin Islands, U.S."],["WF","Wallis and Futuna"],["EH","Western Sahara"],["YE","Yemen"],["ZM","Zambia"],["ZW","Zimbabwe"],["AX","Åland Islands"]];
+/* ---------- helpers ---------- */
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num = v => { if (v === undefined || v === null || v === "") return null; const n = Number(String(v).replace(",", ".")); return isFinite(n) ? n : null; };
+const filled = v => v !== undefined && v !== null && String(v).trim() !== "";
+const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+const fmt = (n, d = 0) => n == null ? "–" : Number(n).toLocaleString("en-GB", {maximumFractionDigits: d, minimumFractionDigits: 0});
+const has = (a, id, v) => Array.isArray(a[id]) && a[id].includes(v);
+const any = (a, id) => Array.isArray(a[id]) && a[id].length > 0;
+
+/* ---------- reusable option sets ---------- */
+const AG4 = [["ad","Adults > 14 y"],["c514","Children 5–14 y"],["u5","Children < 5 y"],["nb","Newborns < 28 d"]];
+const AG3 = AG4.slice(0,3);
+const APN = [["ad","Adult"],["pa","Paediatric"],["ne","Neonate"]];
+const FUNC = [["f","Functional"],["nf","Non-functional"]];
+const ELEC_TECH = [["grid","Grid"],["gen","Fuel-based generator"],["solar","Solar modules (photovoltaic)"],["batt","Electrical energy storage (battery)"],["wind","Wind turbine and generator"],["water","Water turbine and generator"]];
+const O2_TECH = [["cyl","Cylinders"],["conc","Concentrators"],["psa","On-site oxygen plant (PSA)"],["lox","Liquid oxygen"]];
+const CYL = [["D",340],["E",680],["F",1360],["G",3400],["J",6800]];
+const NF_REASONS = [["spare","No spare parts"],["funds","No funds for maintenance"],["train","No training to use or to repair"],["cons","No consumables (cables, sensors)"],["notinst","Not installed"],["distr","No distributor in country"],["other","Others",{spec:"Specify"}]];
+const FAC_TYPES = [
+  ["phc","Peripheral health center","Limited options for hospitalisation"],
+  ["rhc","Referral health center","Options for short-term hospitalisation"],
+  ["dh","District hospital","Referral hospital for primary + referral health centers"],
+  ["reg","Regional hospital","Referral hospital for district hospitals"],
+  ["tert","Tertiary/university hospital","Referral hospital for regional hospitals"],
+  ["inf","Infectious diseases dedicated treatment center","Specialisation on a disease, e.g. COVID-19, malaria"],
+  ["oth","Others","e.g. specialised on maternity + neonatal health"]];
+const DEPTS = [
+  ["none","No defined departments",{excl:1}],
+  ["triage","Triage area"],["ed","Emergency department"],
+  ["icu_g","General intensive care unit",{grp:"Intensive care unit"}],["icu_p","Paediatric intensive care unit"],["icu_a","Adult intensive care unit"],
+  ["sdu_g","General step-down unit",{grp:"Step-down unit"}],["sdu_p","Paediatric step-down unit"],["sdu_a","Adult step-down unit"],
+  ["gw_g","General ward",{grp:"General ward"}],["gw_p","Paediatric general ward"],["gw_a","Adult general ward"],
+  ["sw_g","General surgical ward",{grp:"Surgical ward"}],["sw_p","Paediatric surgical ward"],["sw_a","Adult surgical ward"],
+  ["neo","Neonatal unit",{grp:"Other units"}],["mat","Maternity"],["ot","Operating theatre"],["nut","Paediatrics & nutritional rehabilitation"],
+  ["pharm","Pharmacy",{nobeds:1}],["lab","Laboratory",{nobeds:1}]];
+const DEPT_L = Object.fromEntries(DEPTS.map(d=>[d[0],d[1]]));
+const opts = arr => arr.map(x => ({v:x[0], k:x[0], l:x[1], ...(x[2]||{})}));
+
+/* ---------- dependency helpers ---------- */
+const elecNone = a => has(a,"p2_main","none");
+const elecBridgeNone = a => has(a,"p2_br_type","none");
+const elecTech = a => { const s = new Set(); if (!elecNone(a)) { (a.p2_main||[]).forEach(x=>s.add(x)); if (!elecBridgeNone(a)) (a.p2_br_type||[]).forEach(x=>s.add(x)); } s.delete("none"); return s; };
+const eT = k => a => elecTech(a).has(k);
+const o2None = a => has(a,"p3_main","none");
+const o2BridgeNone = a => has(a,"p3_br_type","none");
+const o2Tech = a => { const s = new Set(); if (!o2None(a)) { (a.p3_main||[]).forEach(x=>s.add(x)); if (!o2BridgeNone(a)) (a.p3_br_type||[]).forEach(x=>s.add(x)); } s.delete("none"); return s; };
+const oT = k => a => o2Tech(a).has(k);
+const gridSum = (a, id, col) => { const g = a[id]||{}; let s = 0, n = 0; for (const r in g) for (const c in g[r]) { if (col && c !== col) continue; const v = num(g[r][c]); if (v != null) { s += v; n++; } } return n ? s : 0; };
+const cell = (a,id,r,c) => num(((a[id]||{})[r]||{})[c]);
+const selDepts = a => (a.p1_depts||[]).filter(d => d!=="none");
+const otherDepts = a => (a.p1_depts_other||[]).map(r => (r.name||"").trim()).filter(Boolean);
+const deptOptions = a => [...selDepts(a).map(d => ({v:d, l:DEPT_L[d]})), ...otherDepts(a).map(n => ({v:"o:"+n, l:n}))];
+const bridgeTag = (k, label) => a => {
+  if (!a.p2_br_type || !a.p2_br_type.length) return {v:null, txt:"Not yet answered in question 19"};
+  const yes = (a.p2_br_type||[]).includes(k);
+  return {v: yes ? "Yes" : "No", txt: yes ? `${label} is selected as bridging system in question 19.` : `${label} is not selected as bridging system in question 19.`};
+};
+const problems = (extra=[]) => [{v:"noprob", l:"No problems in the last 6 months", excl:1}, ...opts([["spare","No spare parts"],["funds","No funds for maintenance"],["train","No training to use or to repair"],...extra,["other","Others",{spec:"Specify"}]])];
+const nfReasonsField = (id, gridId, col) => ({t:"multi", id, label:"Reasons for non-functionality", hint:"Multiple selection possible", options: opts(NF_REASONS), when: a => gridSum(a, gridId, col) > 0, depNote:"Shown because at least one device is non-functional"});
+const costField = (id, label="Running costs per year") => ({t:"money", id, label, hint:"In local currency, e.g. 3,000.00"});
+
+/* ---------- static info blocks ---------- */
+const FAC_DEF = `<table><tr><th>Facility type</th><th>Definition</th></tr>${FAC_TYPES.map(f=>`<tr><td>${esc(f[1])}</td><td>${esc(f[2])}</td></tr>`).join("")}</table>`;
+const LOC_DEF = `<p><b>Essential emergency equipment: “ABCD management” + O₂</b></p><div style="overflow-x:auto"><table>
+<tr><th>Organ function</th><th>Level 1 – essential</th><th>Level 2 – intermediate</th><th>Level 3 – advanced</th></tr>
+<tr><td>Respiratory support</td><td>Provision of O₂: nasal prongs, face masks; chest-drain insertion/pleural fluid aspiration</td><td>Non-invasive respiratory support (e.g. bubble CPAP; HHFNC, non-invasive BiPAP modes)</td><td>Advanced airway management; mechanical ventilation</td></tr>
+<tr><td>Circulation</td><td>Management of shock/dehydration & severe anaemia: adequate fluid resuscitation and maintenance fluids; transfusion</td><td>Low-dose adrenaline/noradrenaline; infusion pumps ± volumetric pumps; consider PICC or mid-lines</td><td>Central venous lines; infusions of vaso-active medication</td></tr>
+<tr><td>Neurological function</td><td>Treatment of coma/convulsions; pain treatment</td><td>Optimise neuro-protective measures (e.g. low-dose vasopressors)</td><td>–</td></tr>
+<tr><td>Renal function & electrolytes</td><td>Prevention of AKI; treatment of pre-renal factors; fluid balance input/output; avoid nephro-toxic drugs</td><td>Treatment of AKI complications: acid-base and electrolyte correction; peritoneal dialysis in some contexts</td><td>Consider renal replacement therapy; PD can be an initial option in some settings</td></tr>
+<tr><td>Monitoring</td><td>SpO₂/HR; manual BP</td><td>Automated BP ± multiparameter monitors; 12-lead ECG</td><td>Capnography; multi-parameter monitors</td></tr></table></div>
+<p><b>Across all levels:</b> treatment of severe infections and source control; nutrition of the critically ill; imaging (POCUS priority, mobile X-ray if feasible); laboratory (safe blood bank, point-of-care tests: glycaemia, Hb, RDTs); HR (nurse-to-patient ratio 1:5–10 → 1:2 depending on level); patient-centred care; follow-up of patients recovering from critical illness.</p>`;
+
+/* ---------- questionnaire schema ---------- */
+const PARTS = [
+  {k:"p0", l:"Start"},
+  {k:"p1", l:"Part 1 · General information"},
+  {k:"p2", l:"Part 2 · Electricity"},
+  {k:"p3", l:"Part 3 · Oxygen"},
+  {k:"p4", l:"Part 4 · Interruptions"},
+  {k:"p5", l:"Part 5 · Power consumers"},
+  {k:"p6", l:"Finish"}];
+
+const STEPS = [
+/* ---- Start ---- */
+{id:"about", part:"p0", title:"About you", block:a=>(filled(a.meta_name)&&filled(a.meta_country))?"":"Enter your name and country to continue.", help:"Your survey ID identifies this response. Please note it down: you need it if you contact us or send an update later.",
+ fields:[
+  {t:"idbox"},
+  {t:"text", id:"meta_name", label:"Your name", ex:"Respondent name"},
+  {t:"country", id:"meta_country", label:"Your country", ex:"Respondent country"},
+  {t:"info", html:`<p><b>Structure of the survey:</b> 1 General information · 2 Electricity · 3 Oxygen · 4 Interruption diary (2–3 weeks) · 5 Power consumers · Review & submit.</p><p>Questions with a <b style="color:var(--req)">red number</b> should be answered to ensure a useful evaluation. Questions that do not apply to your facility are skipped automatically. Your answers are saved on this device, so you can stop and continue later; at the end they are sent encrypted to the workshop organisers.</p>`}
+ ]},
+
+/* ---- Part 1 ---- */
+{id:"q1", part:"p1", no:1, sec:"Facility identification", title:"Location", help:"All fields on this page are optional.",
+ fields:[
+  {t:"row", fields:[{t:"text", id:"p1_region", label:"Province / region", opt:1},{t:"text", id:"p1_town", label:"Town / city", opt:1}]},
+  {t:"text", id:"p1_addr", label:"Facility address", opt:1},
+  {t:"row", fields:[{t:"number", id:"p1_lat", label:"GPS latitude", unit:"°", step:"any", opt:1, hint:"Decimal degrees, e.g. −15.7167"},{t:"number", id:"p1_lon", label:"GPS longitude", unit:"°", step:"any", opt:1, hint:"e.g. 46.3167"}]},
+ ],
+ warn:a=>{const w=[]; const la=num(a.p1_lat), lo=num(a.p1_lon); if(la!=null&&(la<-90||la>90)) w.push("Latitude must be between −90 and 90."); if(lo!=null&&(lo<-180||lo>180)) w.push("Longitude must be between −180 and 180."); return w;}},
+{id:"q2", part:"p1", no:2, req:1, title:"Facility type", block:a=>filled(a.p1_type)?"":"Please choose the facility type to continue.",
+ fields:[
+  {t:"single", id:"p1_type", label:"Type of facility", options:FAC_TYPES.map(f=>({v:f[0], l:f[1], d:f[2], spec: f[0]==="inf" ? "Which disease(s)?" : f[0]==="oth" ? "Specify facility type" : null}))},
+  {t:"info", html:FAC_DEF, collapsed:"Definitions of facility types"}
+ ]},
+{id:"q3", part:"p1", no:3, title:"Managing authority",
+ fields:[{t:"single", id:"p1_auth", label:"Managing authority", options:opts([["gov","Government, public"],["govnp","Government, non-public (e.g. military)"],["pfp","Private, for-profit"],["pnp","Private, non-profit"],["oth","Other",{spec:"Specify"}]])}]},
+{id:"q4", part:"p1", no:4, sec:"Basic epidemiology of the health region", title:"Population of the health region", help:"Health region = catchment area of the health facility.",
+ fields:[{t:"row", fields:[
+  {t:"number", id:"p1_pop", label:"Total population"},{t:"number", id:"p1_pop_u5", label:"Population under 5 years"},
+  {t:"number", id:"p1_pop_514", label:"Population 5–14 years"},{t:"number", id:"p1_deliv_y", label:"Estimated deliveries per year"}]}],
+ warn:a=>{const t=num(a.p1_pop), u=num(a.p1_pop_u5)||0, c=num(a.p1_pop_514)||0; return (t!=null && u+c>t) ? ["Children under 15 exceed the total population. Please check."] : [];}},
+{id:"q5", part:"p1", no:5, title:"Number of hospitals in the health region",
+ fields:[{t:"grid", id:"p1_hosp", label:"Number of facilities by type", rows:FAC_TYPES.map(f=>({k:f[0], l:f[1]})), cols:[{k:"n", l:"Number of"}]}]},
+{id:"q6", part:"p1", no:6, title:"Recent outbreaks in the health region", help:"Number of reported cases in the last 6 months. Enter 0 where there were none.",
+ fields:[
+  {t:"grid", id:"p1_outb", label:"Reported cases (last 6 months)", rows:opts([["measles","Measles"],["cholera","Cholera"],["dengue","Dengue"],["plague","Plague"],["vhf","Lassa / Ebola"],["malaria","Malaria"],["covid","SARS-CoV-2"],["leish","Leishmaniasis"],["tryp","Trypanosomiasis"],["schisto","Schistosomiasis"]]), cols:[{k:"n", l:"Number of cases"}]},
+  {t:"number", id:"p1_hiv", label:"HIV prevalence", unit:"%", step:"any", opt:1}
+ ]},
+{id:"q7", part:"p1", no:7, sec:"General details of the health facility", title:"Patients", help:"Number of patients in the last 6 months, by age group.",
+ fields:[
+  {t:"grid", id:"p1_pat", label:"General", rows:[{k:"adm", l:"Total hospital admissions"},{k:"o2", l:"Patients needing oxygen"}], cols:AG4.map(c=>({k:c[0], l:c[1]})), live:1},
+  {t:"grid", id:"p1_icu", label:"Intensive care unit", rows:[{k:"adm", l:"Patients admitted to intensive care units"}], cols:AG4.map(c=>({k:c[0], l:c[1]})), live:1},
+  {t:"number", id:"p1_los", label:"Average length of stay", unit:"days", step:"any", narrow:1},
+  {t:"grid", id:"p1_surg", label:"Surgery", rows:[{k:"ga", l:"General anaesthesia"},{k:"sa", l:"Spinal anaesthesia"}], cols:AG4.map(c=>({k:c[0], l:c[1]})), opt:1},
+  {t:"grid", id:"p1_deliv", label:"Deliveries", rows:[{k:"n", l:"Number of deliveries"}], cols:[{k:"norm", l:"Normal"},{k:"cs", l:"Caesarean section"},{k:"instr", l:"Instrumental"}], opt:1}
+ ],
+ warn:a=>{const w=[]; for(const [k,l] of AG4){const adm=cell(a,"p1_pat","adm",k); const o2=cell(a,"p1_pat","o2",k); const icu=cell(a,"p1_icu","adm",k); if(adm!=null&&o2!=null&&o2>adm) w.push(`${l}: patients needing oxygen (${o2}) exceed total admissions (${adm}).`); if(adm!=null&&icu!=null&&icu>adm) w.push(`${l}: ICU admissions (${icu}) exceed total admissions (${adm}).`);} return w;}},
+{id:"q8", part:"p1", no:8, req:1, title:"Blood bank",
+ fields:[
+  {t:"yn", id:"p1_bb", label:"Existence of a blood bank"},
+  {t:"number", id:"p1_transf", label:"Number of transfusions per year", narrow:1, hint:"Also relevant without an own blood bank (e.g. blood supplied by a regional centre)."},
+  {t:"multi", id:"p1_bb_stored", label:"Stored blood products", hint:"Multiple selection possible", when:a=>a.p1_bb==="yes", depNote:"Shown because a blood bank exists", options:opts([["prbc","Packed red blood cells"],["wb","Whole blood"],["ffp","Fresh frozen plasma"],["oth","Others",{spec:"Specify"}]])}
+ ]},
+{id:"q9", part:"p1", no:9, title:"Bed capacity & departments",
+ fields:[
+  {t:"row", fields:[{t:"number", id:"p1_beds", label:"Total bed capacity", unit:"beds"},{t:"number", id:"p1_bedocc", label:"Bed utilisation rate (estimate)", unit:"%", step:"any"}]},
+  {t:"multi", id:"p1_depts", label:"Step 1 · Select all existing departments", hint:"Add departments that are not listed in the table below the list.", options:opts(DEPTS), cols2:1},
+  {t:"repeat", id:"p1_depts_other", label:"Departments not listed above", opt:1, when:a=>!has(a,"p1_depts","none"), cols:[{k:"name", l:"Department", t:"text"},{k:"ad", l:"Beds adults > 14 y", t:"number"},{k:"c514", l:"Beds 5–14 y", t:"number"},{k:"u5", l:"Beds < 5 y", t:"number"}], addLabel:"Add department", live:1},
+  {t:"grid", id:"p1_deptbeds", label:"Step 2 · Bed capacity per department and age group", hint:"Pharmacy and laboratory have no beds.", when:a=>selDepts(a).filter(d=>!DEPTS.find(x=>x[0]===d)[2]?.nobeds).length>0, depNote:"Rows follow the departments selected in step 1",
+   rowsFn:a=>selDepts(a).filter(d=>!(DEPTS.find(x=>x[0]===d)[2]||{}).nobeds).map(d=>({k:d, l:DEPT_L[d]})), cols:AG3.map(c=>({k:c[0], l:c[1]})), total:1, live:1}
+ ],
+ warn:a=>{const w=[]; const t=num(a.p1_beds); let s=gridSum(a,"p1_deptbeds"); (a.p1_depts_other||[]).forEach(r=>["ad","c514","u5"].forEach(k=>{const v=num(r[k]); if(v!=null) s+=v;})); if(t!=null && s>0 && s!==t) w.push(`Beds per department add up to ${s}, total bed capacity is ${t}.`); const u=num(a.p1_bedocc); if(u!=null&&u>150) w.push("Bed utilisation above 150 % is unusual. Please check."); const icu=gridSum(a,"p1_icu"); if(icu>0 && any(a,"p1_depts") && !selDepts(a).some(d=>d.startsWith("icu"))) w.push("ICU admissions were reported in question 7, but no intensive care unit is selected."); return w;}},
+{id:"q10", part:"p1", no:10, req:1, title:"Level of care", help:"Define the level of care that can be provided.",
+ fields:[
+  {t:"single", id:"p1_loc", label:"Level of care", options:[{v:"1", l:"Level of care 1 – essential level of care"},{v:"2", l:"Level of care 2 – intermediate"},{v:"3", l:"Level of care 3 – advanced level"}]},
+  {t:"info", html:LOC_DEF, collapsed:"Definition of the levels of care"},
+  {t:"textarea", id:"p1_loc_more", label:"More information", hint:"Short explanation of deviations or specialties of the chosen level, if needed.", opt:1}
+ ]},
+{id:"q11", part:"p1", no:11, title:"Isolation opportunities",
+ fields:[{t:"textarea", id:"p1_isol", label:"Isolation opportunities for patients", hint:"Describe briefly the isolation opportunities of the facility."}]},
+{id:"q12", part:"p1", no:12, req:1, sec:"Working environment", title:"Daily operating hours",
+ fields:[
+  {t:"check", id:"p1_24h", label:"Open 24 hours a day", live:1},
+  {t:"row", when:a=>!a.p1_24h, fields:[{t:"time", id:"p1_open", label:"From"},{t:"time", id:"p1_close", label:"Until"}]}
+ ]},
+{id:"q13", part:"p1", no:13, req:1, title:"Water",
+ fields:[
+  {t:"yn", id:"p1_water", label:"Access to running water"},
+  {t:"text", id:"p1_wsrc", label:"Water source of the facility", hint:"e.g. river, well, municipal supply"},
+  {t:"textarea", id:"p1_wqual", label:"Water quality", hint:"Is there any pollution? If yes, what kind?", opt:1}
+ ]},
+{id:"q14", part:"p1", no:14, title:"Sterilisation",
+ fields:[
+  {t:"text", id:"p1_steri", label:"Sterilisation technique", hint:"e.g. autoclave, boiling, chemical"},
+  {t:"multi", id:"p1_steri_en", label:"Energy source", options:[{v:"el", l:"Powered by electricity"},{v:"fuel", l:"Powered by fuel", spec:"Which fuel? e.g. gas, wood"}]}
+ ]},
+{id:"q15", part:"p1", no:15, title:"Laundry process",
+ fields:[{t:"multi", id:"p1_laun_en", label:"Energy source", options:[{v:"el", l:"Powered by electricity"},{v:"fuel", l:"Powered by fuel", spec:"Which fuel? e.g. gas, wood"},{v:"manual", l:"Manual (no energy source)", added:1}]}]},
+{id:"q16", part:"p1", no:16, req:1, title:"Temperature control",
+ fields:[
+  {t:"multi", id:"p1_temp", label:"Temperature controlling devices", options:[{v:"none", l:"No special temperature control devices", excl:1},{v:"vent", l:"Air ventilators"},{v:"ac", l:"Air conditioning system"}]},
+  {t:"number", id:"p1_tmax", label:"Maximum tolerable room temperature", unit:"°C", step:"any", narrow:1},
+  {t:"textarea", id:"p1_temp_more", label:"More information", hint:"Short description of the temperature control.", opt:1}
+ ]},
+{id:"q17", part:"p1", no:17, title:"Staffing",
+ fields:[
+  {t:"grid", id:"p1_staff_c", label:"Clinical staff", rows:opts([["nurse","Nurses"],["hca","Health care assistants"],["doc","Doctors"],["co","Clinical officers"]]), cols:[{k:"n", l:"Number of"}]},
+  {t:"grid", id:"p1_staff_n", label:"Non-clinical staff", rows:[{k:"bio", l:"Logisticians, biomedical technicians"},{k:"wash", l:"WASH (water, sanitation, hygiene)"},{k:"pharm", l:"Pharmacy"},{k:"lab", l:"Laboratory"},{k:"adm", l:"Administration"},{k:"oth", l:"Others", s:"e.g. students, in training"}], cols:[{k:"n", l:"Number of"}]},
+  {t:"multi", id:"p1_staff_need", label:"Assessment of the current staff situation", options:[{v:"none", l:"No need for additional staff and training", excl:1},{v:"staff", l:"Need for additional staff"},{v:"train", l:"Need for additional training"}]},
+  {t:"textarea", id:"p1_staff_need_s", label:"What kind of staff? How many?", when:a=>has(a,"p1_staff_need","staff"), depNote:"Shown because additional staff is needed"},
+  {t:"textarea", id:"p1_staff_need_t", label:"What kind of training?", when:a=>has(a,"p1_staff_need","train"), depNote:"Shown because additional training is needed"},
+  {t:"yn", id:"p1_staff_equip", label:"Staff responsible for management and maintenance of medical equipment?"}
+ ]},
+
+/* ---- Part 2 ---- */
+{id:"q18", part:"p2", no:18, req:1, sec:"Electricity supply", title:"Main source(s) of electricity", help:"Multiple selection possible. Detail questions are shown later only for the sources selected here or in question 19.",
+ fields:[{t:"multi", id:"p2_main", label:"Main sources", options:[{v:"none", l:"No electricity available", excl:1}, ...opts(ELEC_TECH)]}]},
+{id:"q19", part:"p2", no:19, req:1, title:"Electrical bridging system for power cuts", when:a=>!elecNone(a), skipWhy:"No electricity available (Q18)",
+ help:"Bridging system: if the main electricity source fails, this system supplies electricity until the main source is available again (e.g. generator, battery storage).",
+ fields:[
+  {t:"multi", id:"p2_br_type", label:"Type of bridging system", options:[{v:"none", l:"No bridging system", excl:1}, ...opts(ELEC_TECH)]},
+  {t:"number", id:"p2_br_h", label:"Possible bridging time period", unit:"hours", step:"any", narrow:1, when:a=>any(a,"p2_br_type") && !elecBridgeNone(a)},
+  {t:"single", id:"p2_br_dep", label:"Departments with connection to the bridging system", when:a=>any(a,"p2_br_type") && !elecBridgeNone(a), options:[{v:"all", l:"All departments / whole facility"},{v:"some", l:"Just some"}]},
+  {t:"deptpick", id:"p2_br_depts", label:"Which departments are connected?", when:a=>a.p2_br_dep==="some" && !elecBridgeNone(a), depNote:"Departments from question 9"}
+ ],
+ warn:a=>{const w=[]; const m=a.p2_main||[], b=a.p2_br_type||[]; if(m.length===1 && b.length===1 && m[0]===b[0] && m[0]!=="none") w.push("The bridging system is the same as the only main source. A bridging system usually has to be a different source."); return w;}},
+{id:"q20", part:"p2", no:20, req:1, title:"Maintenance of electricity supply", when:a=>!elecNone(a), skipWhy:"No electricity available (Q18)",
+ fields:[
+  {t:"text", id:"p2_mt_staff", label:"Responsible staff (name)"},
+  {t:"text", id:"p2_mt_int", label:"Maintenance interval", hint:"e.g. once a year, only when needed"},
+  {t:"yn", id:"p2_mt_ext", label:"Need for external technical / professional support"},
+  {t:"yn", id:"p2_mt_train", label:"Need for on-site maintenance training"},
+  {t:"text", id:"p2_mt_fix", label:"Average time until problems are fixed", hint:"e.g. hours / days"}
+ ]},
+{id:"q21", part:"p2", no:21, sec:"Details – Grid", title:"Departments with connection to the grid", when:eT("grid"), skipWhy:"Grid not selected (Q18/19)",
+ fields:[
+  {t:"single", id:"p2_grid_dep", label:"Connected to the grid", options:[{v:"all", l:"All departments / whole facility"},{v:"some", l:"Just some"}]},
+  {t:"deptpick", id:"p2_grid_depts", label:"Which departments are connected?", when:a=>a.p2_grid_dep==="some", depNote:"Departments from question 9"}
+ ]},
+{id:"q22", part:"p2", no:22, req:1, title:"Costs for electricity supply", when:eT("grid"), skipWhy:"Grid not selected (Q18/19)",
+ fields:[
+  {t:"number", id:"p2_grid_kwh", label:"Amount of purchased electricity per year", unit:"kWh", hint:"Found on the electricity bill", narrow:1},
+  costField("p2_grid_cost"),
+  {t:"check", id:"p2_grid_photo", label:"Photo of the last electricity bill taken", opt:1}
+ ]},
+{id:"q23", part:"p2", no:23, req:1, sec:"Details – Fuel-based generator", title:"Generator as bridging system?", when:eT("gen"), skipWhy:"Generator not selected (Q18/19)",
+ fields:[{t:"derived", id:"p2_gen_br", label:"Used as bridging system for power interruptions?", fn:bridgeTag("gen","The generator")}]},
+{id:"q24", part:"p2", no:24, req:1, title:"Generators – technical details", when:eT("gen"), skipWhy:"Generator not selected (Q18/19)", help:"Fill in one row per generator, or send photos of the technical type plates (normally found on the generator itself).",
+ fields:[
+  {t:"repeat", id:"p2_gens", label:"Generators", min:1, cols:[{k:"man", l:"Manufacturer", t:"text"},{k:"mod", l:"Model name", t:"text"},{k:"rated", l:"Rated power", t:"number"},{k:"standby", l:"Standby power", t:"number"},{k:"unit", l:"Unit", t:"select", o:["kW","kVA"]},{k:"age", l:"Age (years)", t:"number"}], addLabel:"Add generator", live:1},
+  {t:"computed", fn:a=>{const g=(a.p2_gens||[]); let kw=0, kva=0; g.forEach(r=>{const v=num(r.rated); if(v!=null){ if((r.unit||"kW")==="kVA") kva+=v; else kw+=v; }}); return g.length?`Installed rated power: <b>${fmt(kw,1)} kW</b>${kva?` + <b>${fmt(kva,1)} kVA</b>`:""} across ${g.length} generator(s).`:"";}},
+  {t:"check", id:"p2_gen_photo", label:"Photos of the generators and type plates taken", opt:1}
+ ]},
+{id:"q25", part:"p2", no:25, req:1, title:"Fuel for generators", when:eT("gen"), skipWhy:"Generator not selected (Q18/19)",
+ fields:[
+  {t:"text", id:"p2_fuel_type", label:"Type of fuel", list:["Diesel","Petrol","LPG","Biogas"]},
+  {t:"number", id:"p2_fuel_l", label:"Amount of fuel per year", unit:"litres", narrow:1},
+  costField("p2_fuel_cost","Costs for fuel per year"),
+  costField("p2_gen_mcost","Maintenance costs per year"),
+  {t:"row", fields:[{t:"number", id:"p2_tank1", label:"Tank 1", unit:"litres", opt:1},{t:"number", id:"p2_tank2", label:"Tank 2", unit:"litres", opt:1},{t:"number", id:"p2_tank3", label:"Tank 3", unit:"litres", opt:1}], label:"Size of fuel tanks"}
+ ]},
+{id:"q26", part:"p2", no:26, title:"Generators – problems in the last 6 months", when:eT("gen"), skipWhy:"Generator not selected (Q18/19)",
+ fields:[{t:"multi", id:"p2_gen_prob", label:"Problems", hint:"Multiple selection possible", options:problems([["fuel","No reliable fuel supply"]])}]},
+{id:"q27", part:"p2", no:27, req:1, sec:"Details – Solar (PV)", title:"Solar as bridging system?", when:eT("solar"), skipWhy:"Solar not selected (Q18/19)",
+ fields:[{t:"derived", id:"p2_sol_br", label:"Used as bridging system for power interruptions?", fn:bridgeTag("solar","Solar (PV)")}]},
+{id:"q28", part:"p2", no:28, title:"Solar modules – technical details", when:eT("solar"), skipWhy:"Solar not selected (Q18/19)", help:"The technical type plate is probably on the back of a module.",
+ fields:[
+  {t:"row", fields:[{t:"text", id:"p2_sol_man", label:"Manufacturer"},{t:"text", id:"p2_sol_mod", label:"Model name of solar modules"}]},
+  {t:"row", label:"Dimensions of one module", fields:[{t:"number", id:"p2_sol_w", label:"Width", unit:"m", step:"any"},{t:"number", id:"p2_sol_len", label:"Length", unit:"m", step:"any"}]},
+  {t:"row", fields:[{t:"number", id:"p2_sol_wp", label:"Rated power of one module", unit:"W", hint:"On the technical type plate"},{t:"number", id:"p2_sol_n", label:"Number of modules"},{t:"number", id:"p2_sol_age", label:"Age of the system", unit:"years", step:"any"}]},
+  {t:"row", fields:[{t:"number", id:"p2_sol_tilt", label:"Angle of attack to the ground (tilt)", unit:"°", step:"any"},{t:"select", id:"p2_sol_or", label:"Orientation", o:["North","North-east","East","South-east","South","South-west","West","North-west","Mixed / several"]}]},
+  {t:"computed", fn:a=>{const w=num(a.p2_sol_wp), n=num(a.p2_sol_n), wi=num(a.p2_sol_w), l=num(a.p2_sol_len); const parts=[]; if(w!=null&&n!=null) parts.push(`Installed peak power: <b>${fmt(w*n/1000,2)} kWp</b>`); if(wi!=null&&l!=null&&n!=null) parts.push(`module area: <b>${fmt(wi*l*n,1)} m²</b>`); return parts.join(" · ");}}
+ ]},
+{id:"q29", part:"p2", no:29, req:1, title:"Solar – running costs per year", when:eT("solar"), skipWhy:"Solar not selected (Q18/19)",
+ fields:[costField("p2_sol_cost"),{t:"check", id:"p2_sol_photo", label:"Photos of the solar modules and the type plate taken", opt:1}]},
+{id:"q30", part:"p2", no:30, title:"Solar – problems in the last 6 months", when:eT("solar"), skipWhy:"Solar not selected (Q18/19)",
+ fields:[{t:"multi", id:"p2_sol_prob", label:"Problems", hint:"Multiple selection possible", options:problems()}]},
+{id:"q31", part:"p2", no:31, req:1, sec:"Details – Battery storage", title:"Battery as bridging system?", when:eT("batt"), skipWhy:"Battery not selected (Q18/19)",
+ fields:[{t:"derived", id:"p2_bat_br", label:"Used as bridging system for power interruptions?", fn:bridgeTag("batt","Battery storage")}]},
+{id:"q32", part:"p2", no:32, req:1, title:"Battery – technical details", when:eT("batt"), skipWhy:"Battery not selected (Q18/19)",
+ fields:[
+  {t:"row", fields:[{t:"text", id:"p2_bat_man", label:"Manufacturer"},{t:"text", id:"p2_bat_mod", label:"Model name"},{t:"number", id:"p2_bat_age", label:"Age of the battery", unit:"years", step:"any"}]},
+  {t:"row", fields:[{t:"number", id:"p2_bat_ah", label:"Capacity", unit:"Ah", step:"any"},{t:"number", id:"p2_bat_v", label:"Nominal voltage", unit:"V", step:"any", opt:1, hint:"Added: needed to convert Ah to kWh"},{t:"number", id:"p2_bat_kw", label:"Nominal power", unit:"kW", step:"any"}]},
+  {t:"single", id:"p2_bat_type", label:"Battery type", options:[{v:"pb", l:"Lead acid"},{v:"li", l:"Lithium-ion"},{v:"oth", l:"Other", spec:"Specify"}]},
+  {t:"number", id:"p2_bat_h", label:"Possible bridging time period", unit:"hours", step:"any", narrow:1},
+  {t:"computed", fn:a=>{const ah=num(a.p2_bat_ah), v=num(a.p2_bat_v); return (ah!=null&&v!=null)?`Nominal energy: <b>${fmt(ah*v/1000,1)} kWh</b>`:"";}}
+ ]},
+{id:"q33", part:"p2", no:33, title:"Battery replacement", when:eT("batt"), skipWhy:"Battery not selected (Q18/19)",
+ fields:[
+  {t:"number", id:"p2_bat_since", label:"Since when are batteries used?", unit:"year", hint:"e.g. first system installed in 2015", narrow:1},
+  {t:"single", id:"p2_bat_count", label:"How many batteries have been used since then?", options:[{v:"1", l:"Still the first one"},{v:"2", l:"Two"},{v:"more", l:"More", spec:"How many?"}]},
+  {t:"multi", id:"p2_bat_why", label:"Reasons for battery exchanges", when:a=>a.p2_bat_count==="2"||a.p2_bat_count==="more", depNote:"Shown because batteries have been exchanged", options:[{v:"eol", l:"End of lifetime"},{v:"leak", l:"Leakage of chemicals"},{v:"oth", l:"Other", spec:"Specify"}]}
+ ]},
+{id:"q34", part:"p2", no:34, title:"Battery – running costs per year", when:eT("batt"), skipWhy:"Battery not selected (Q18/19)",
+ fields:[costField("p2_bat_cost"),{t:"check", id:"p2_bat_photo", label:"Photos of the energy storage and the technical datasheets taken", opt:1}]},
+{id:"q35", part:"p2", no:35, title:"Battery – problems in the last 6 months", when:eT("batt"), skipWhy:"Battery not selected (Q18/19)",
+ fields:[{t:"multi", id:"p2_bat_prob", label:"Problems", hint:"Multiple selection possible", options:[{v:"noprob", l:"No problems in the last 6 months", excl:1},{v:"leak", l:"Leakage of chemicals"}, ...opts([["spare","No spare parts"],["funds","No funds for maintenance"],["train","No training to use or to repair"],["other","Others",{spec:"Specify"}]])]}]},
+{id:"q36", part:"p2", no:36, req:1, sec:"Details – Wind turbine", title:"Wind turbine – technical details", when:eT("wind"), skipWhy:"Wind turbine not selected (Q18/19)", help:"The technical datasheet is probably in the documents delivered with the wind turbine.",
+ fields:[
+  {t:"row", fields:[{t:"text", id:"p2_wi_man", label:"Manufacturer"},{t:"text", id:"p2_wi_mod", label:"Model name of wind turbine"}]},
+  {t:"row", fields:[{t:"number", id:"p2_wi_age", label:"Age of the system", unit:"years", step:"any"},{t:"number", id:"p2_wi_kw", label:"Rated power", unit:"kW", step:"any"}]},
+  {t:"row", fields:[{t:"text", id:"p2_wi_or", label:"Orientation (cardinal direction)", hint:"e.g. east, south-east"},{t:"select", id:"p2_wi_axis", label:"Rotational axis", o:["Horizontal","Vertical"]}]},
+  {t:"row", label:"Dimensions", fields:[{t:"number", id:"p2_wi_hub", label:"Hub height", unit:"m", step:"any"},{t:"number", id:"p2_wi_blade", label:"Blade length", unit:"m", step:"any"}]},
+  {t:"check", id:"p2_wi_photo", label:"Photos of the wind turbine and the datasheet taken", opt:1}
+ ]},
+{id:"q37", part:"p2", no:37, req:1, title:"Wind turbine – running costs per year", when:eT("wind"), skipWhy:"Wind turbine not selected (Q18/19)", fields:[costField("p2_wi_cost")]},
+{id:"q38", part:"p2", no:38, title:"Wind turbine – problems in the last 6 months", when:eT("wind"), skipWhy:"Wind turbine not selected (Q18/19)",
+ fields:[{t:"multi", id:"p2_wi_prob", label:"Problems", hint:"Multiple selection possible", options:problems()}]},
+{id:"q39", part:"p2", no:39, req:1, sec:"Details – Water turbine", title:"River details", when:eT("water"), skipWhy:"Water turbine not selected (Q18/19)",
+ fields:[
+  {t:"text", id:"p2_wa_river", label:"Name of the river"},
+  {t:"row", label:"Coordinates of the water turbine", fields:[{t:"number", id:"p2_wa_lat", label:"Latitude", unit:"°", step:"any"},{t:"number", id:"p2_wa_lon", label:"Longitude", unit:"°", step:"any"}]}
+ ]},
+{id:"q40", part:"p2", no:40, req:1, title:"Water turbine – technical details", when:eT("water"), skipWhy:"Water turbine not selected (Q18/19)",
+ fields:[
+  {t:"row", fields:[{t:"text", id:"p2_wa_man", label:"Manufacturer"},{t:"text", id:"p2_wa_mod", label:"Model name of water turbine"}]},
+  {t:"row", fields:[{t:"number", id:"p2_wa_age", label:"Age of the system", unit:"years", step:"any"},{t:"number", id:"p2_wa_kw", label:"Installed capacity", unit:"kW", step:"any"}]},
+  {t:"check", id:"p2_wa_photo", label:"Photos of the water turbine and the datasheets taken", opt:1}
+ ]},
+{id:"q41", part:"p2", no:41, req:1, title:"Water turbine – running costs per year", when:eT("water"), skipWhy:"Water turbine not selected (Q18/19)", fields:[costField("p2_wa_cost")]},
+{id:"q42", part:"p2", no:42, title:"Water turbine – problems in the last 6 months", when:eT("water"), skipWhy:"Water turbine not selected (Q18/19)",
+ fields:[{t:"multi", id:"p2_wa_prob", label:"Problems", hint:"Multiple selection possible", options:problems()}]},
+
+/* ---- Part 3 ---- */
+{id:"q43", part:"p3", no:43, req:1, sec:"Oxygen equipment", title:"Oxygen distribution",
+ fields:[{t:"multi", id:"p3_dist", label:"Distribution options", hint:"Multiple selection possible", options:[{v:"tub", l:"Tubing"},{v:"central", l:"Central piping"},{v:"sub", l:"Sub-central piping"}]}]},
+{id:"q44", part:"p3", no:44, req:1, title:"Regulation & conditioning devices", help:"Count devices as electrical or mechanical (no electricity needed), independent of functionality. Then give the total number of non-functional devices, independent of electrical/mechanical. Enter 0 where none.",
+ fields:[
+  {t:"grid", id:"p3_reg", label:"Total number of devices", rows:[{k:"fm", l:"Flowmeter"},{k:"fms", l:"Flowmeter stand (flow splitter)"},{k:"fmw", l:"Flowmeter (wall-mounted)"},{k:"humn", l:"Humidifier (non-heated)"},{k:"humh", l:"Humidifier (heated)"},{k:"blend", l:"Blender"},{k:"cpap", l:"CPAP"},{k:"vport", l:"Ventilator (portable)"},{k:"vicua", l:"Ventilator (intensive care – adult)"},{k:"vicup", l:"Ventilator (intensive care – paediatric)"}], cols:[{k:"el", l:"Electrical"},{k:"me", l:"Mechanical"},{k:"nf", l:"Non-functional"}], live:1},
+  nfReasonsField("p3_reg_why","p3_reg","nf")
+ ],
+ warn:a=>{const w=[]; const g=a.p3_reg||{}; for(const r in g){const t=(num(g[r].el)||0)+(num(g[r].me)||0), nf=num(g[r].nf); if(nf!=null&&nf>t) w.push(`${({fm:"Flowmeter",fms:"Flowmeter stand",fmw:"Wall-mounted flowmeter",humn:"Humidifier (non-heated)",humh:"Humidifier (heated)",blend:"Blender",cpap:"CPAP",vport:"Portable ventilator",vicua:"ICU ventilator (adult)",vicup:"ICU ventilator (paediatric)"})[r]}: non-functional (${nf}) exceeds total (${t}).`);} if(elecNone(a) && (gridSum(a,"p3_reg","el")>0)) w.push("Electrical devices are counted, but question 18 says no electricity is available."); return w;}},
+{id:"q45", part:"p3", no:45, title:"Flowmeters & flow splitters – more information", when:a=>["fm","fmw","fms"].some(r=>((cell(a,"p3_reg",r,"el")||0)+(cell(a,"p3_reg",r,"me")||0))>0), skipWhy:"No flowmeters counted in Q44",
+ fields:[
+  {t:"grid", id:"p3_fm_rate", label:"Functional flowmeters by maximum flow rate", when:a=>["fm","fmw"].some(r=>((cell(a,"p3_reg",r,"el")||0)+(cell(a,"p3_reg",r,"me")||0))>0), rows:[{k:"2",l:"Up to 2 L/min"},{k:"5",l:"Up to 5 L/min"},{k:"10",l:"Up to 10 L/min"},{k:"15",l:"Up to 15 L/min"},{k:"gt15",l:"Greater than 15 L/min"}], cols:[{k:"n", l:"Total number"}]},
+  {t:"grid", id:"p3_fs", label:"Functional flow splitters by number of outlets and maximum flow rate", when:a=>((cell(a,"p3_reg","fms","el")||0)+(cell(a,"p3_reg","fms","me")||0))>0, depNote:"Shown because flowmeter stands were counted", rows:[{k:"2",l:"2 outlets"},{k:"3",l:"3 outlets"},{k:"4",l:"4 outlets"},{k:"5",l:"5 outlets"}], cols:[{k:"1",l:"Up to 1 L/min"},{k:"2",l:"Up to 2 L/min"}]},
+  {t:"repeat", id:"p3_fs_oth", label:"Other flow splitters not listed above", opt:1, when:a=>((cell(a,"p3_reg","fms","el")||0)+(cell(a,"p3_reg","fms","me")||0))>0, cols:[{k:"out", l:"Number of outlets", t:"number"},{k:"rate", l:"Maximum flow rate (L/min)", t:"number"},{k:"n", l:"Total number", t:"number"}], addLabel:"Add flow-splitter type"}
+ ]},
+{id:"q46", part:"p3", no:46, req:1, sec:"Delivery devices", title:"Oxygen delivery devices",
+ fields:[{t:"grid", id:"p3_deliv", label:"Number of devices", rows:[{k:"nc",l:"Nasal cannula"},{k:"mask",l:"Oxygen masks"},{k:"venturi",l:"Venturi masks"},{k:"tub",l:"Tubing"},{k:"cath",l:"Nasal catheter"},{k:"hfnc",l:"High-flow nasal cannula (HFNC)"}], cols:APN.map(c=>({k:c[0], l:c[1]}))}]},
+{id:"q47", part:"p3", no:47, title:"Airway equipment – more information",
+ fields:[
+  {t:"grid", id:"p3_laryn", label:"Laryngoscopes", rows:[{k:"mac",l:"Macintosh (curved blade)"},{k:"mil",l:"Miller (straight blade)"}], cols:[{k:"n", l:"Total number"}]},
+  {t:"grid", id:"p3_intub", label:"Intubation sets", rows:[{k:"ett",l:"Endotracheal tube set"},{k:"tube",l:"Tube"},{k:"guide",l:"Guide (stylet or bougie)"},{k:"lma",l:"Laryngeal mask"},{k:"etco2",l:"Colorimetric end-tidal CO₂ detector"}], cols:APN.map(c=>({k:c[0], l:c[1]}))},
+  {t:"grid", id:"p3_airw", label:"Airways", rows:[{k:"opa",l:"Oropharyngeal (Guedel) airway"},{k:"npa",l:"Nasopharyngeal airway"}], cols:[{k:"su",l:"Single-use"},{k:"re",l:"Reusable"}]}
+ ]},
+{id:"q48", part:"p3", no:48, req:1, sec:"Pulse oximeters & monitoring", title:"Pulse oximeters and patient monitors", help:"Note the total number of devices independent of functionality, then the number of non-functional devices.",
+ fields:[
+  {t:"grid", id:"p3_mon", label:"Devices", rows:[{k:"fing",l:"Pulse oximeter – self-contained fingertip"},{k:"hand",l:"Pulse oximeter – portable handheld"},{k:"stat",l:"Pulse oximeter – stationary device"},{k:"ecg",l:"Vital sign monitor with integrated ECG"},{k:"noecg",l:"Vital sign monitor without integrated ECG"}], cols:[{k:"tot",l:"Total number"},{k:"nf",l:"Non-functional"}], live:1},
+  nfReasonsField("p3_mon_why","p3_mon","nf")
+ ],
+ warn:a=>{const w=[]; const g=a.p3_mon||{}; for(const r in g){const t=num(g[r].tot), nf=num(g[r].nf); if(t!=null&&nf!=null&&nf>t) w.push(`Non-functional devices (${nf}) exceed total (${t}) in one row.`);} return w;}},
+{id:"q49", part:"p3", no:49, req:1, sec:"Other equipment", title:"Resuscitation bags and masks", help:"Count complete bag-and-mask units by size.",
+ fields:[{t:"grid", id:"p3_bvm", label:"Resuscitation bag + mask units", rows:[{k:"ad",l:"Adult"},{k:"pa",l:"Paediatric"},{k:"ne",l:"Neonatal"}], cols:[{k:"n", l:"Total number"}]}]},
+{id:"q50", part:"p3", no:50, req:1, title:"Suction devices", help:"Count complete suction devices by type.",
+ fields:[
+  {t:"grid", id:"p3_suc", label:"Suction devices", rows:[{k:"man",l:"Manual"},{k:"el",l:"Electric"},{k:"vac",l:"Central vacuum"}], cols:FUNC.map(c=>({k:c[0], l:c[1]})), live:1},
+  nfReasonsField("p3_suc_why","p3_suc","nf")
+ ]},
+{id:"q51", part:"p3", no:51, req:1, title:"Autoclave / sterilizer",
+ fields:[
+  {t:"grid", id:"p3_auto", label:"Autoclaves and sterilizers by capacity", rows:[{k:"40",l:"40–60 L"},{k:"90",l:"> 90 L"}], cols:FUNC.map(c=>({k:c[0], l:c[1]}))},
+  {t:"repeat", id:"p3_auto_oth", label:"Other autoclave / sterilizer types not listed above", opt:1, cols:[{k:"cap", l:"Capacity (L)", t:"number"},{k:"type", l:"Type (e.g. ethylene oxide)", t:"text"},{k:"f", l:"Functional", t:"number"},{k:"nf", l:"Non-functional", t:"number"}], addLabel:"Add type"}
+ ]},
+{id:"q52", part:"p3", no:52, req:1, title:"BiPAP & CPAP machines",
+ fields:[{t:"grid", id:"p3_bipap", label:"BiPAP & CPAP machines by size", rows:[{k:"ad",l:"Adult"},{k:"pa",l:"Paediatric"},{k:"ne",l:"Neonatal"}], cols:FUNC.map(c=>({k:c[0], l:c[1]}))}]},
+{id:"q53", part:"p3", no:53, req:1, sec:"Oxygen sources", title:"Main source(s) of oxygen", help:"Multiple selection possible. Detail questions are shown later only for the sources selected here or in question 54.",
+ fields:[{t:"multi", id:"p3_main", label:"Main sources", options:[{v:"none", l:"No oxygen available", excl:1}, ...opts(O2_TECH)]}],
+ warn:a=>{const w=[]; if(elecNone(a) && (has(a,"p3_main","conc")||has(a,"p3_main","psa"))) w.push("Concentrators and oxygen plants need electricity, but question 18 says no electricity is available."); return w;}},
+{id:"q54", part:"p3", no:54, req:1, title:"Oxygen bridging system", when:a=>!o2None(a), skipWhy:"No oxygen available (Q53)",
+ help:"Bridging system: if the main oxygen source fails, this system supplies oxygen until the main source is available again.",
+ fields:[
+  {t:"multi", id:"p3_br_type", label:"Type of bridging system", options:[{v:"none", l:"No bridging system", excl:1}, ...opts(O2_TECH)]},
+  {t:"number", id:"p3_br_h", label:"Possible bridging time period", unit:"hours", step:"any", narrow:1, when:a=>any(a,"p3_br_type") && !o2BridgeNone(a)},
+  {t:"textarea", id:"p3_br_desc", label:"Description of the oxygen bridging system", opt:1, when:a=>any(a,"p3_br_type") && !o2BridgeNone(a)}
+ ]},
+{id:"q55", part:"p3", no:55, req:1, title:"Maintenance of oxygen supply", when:a=>!o2None(a), skipWhy:"No oxygen available (Q53)",
+ fields:[
+  {t:"text", id:"p3_mt_staff", label:"Responsible staff (name)"},
+  {t:"text", id:"p3_mt_int", label:"Maintenance interval", hint:"e.g. once a year, only when needed"},
+  {t:"yn", id:"p3_mt_ext", label:"Need for external technical / professional support"},
+  {t:"text", id:"p3_mt_fix", label:"Average time until problems are fixed", hint:"e.g. hours / days"}
+ ]},
+{id:"q56", part:"p3", no:56, req:1, title:"Staff experience with ventilation / intubation",
+ fields:[
+  {t:"yn", id:"p3_exp_inv", label:"Clinical staff with experience in invasive mechanical ventilation / intubation"},
+  {t:"yn", id:"p3_exp_niv", label:"Clinical staff with experience in non-invasive ventilation"}
+ ]},
+{id:"q57", part:"p3", no:57, req:1, sec:"Details – Cylinders", title:"Cylinders per week", when:oT("cyl"), skipWhy:"Cylinders not selected (Q53/54)", help:"For each cylinder size, count the number of cylinders needed in the facility in one week.",
+ fields:[
+  {t:"grid", id:"p3_cyl", label:"Cylinders needed per week", rows:[...CYL.map(c=>({k:c[0], l:`Type ${c[0]}`, s:`${fmt(c[1])} L O₂`})),{k:"oth", l:"Other"}], cols:[{k:"n", l:"Number per week"}], live:1},
+  {t:"number", id:"p3_cyl_othcap", label:"O₂ capacity of “Other” cylinders", unit:"L", opt:1, narrow:1, when:a=>cell(a,"p3_cyl","oth","n")>0},
+  {t:"computed", fn:a=>{let L=0,n=0; CYL.forEach(([k,c])=>{const v=cell(a,"p3_cyl",k,"n"); if(v){L+=v*c;n+=v;}}); const o=cell(a,"p3_cyl","oth","n"), oc=num(a.p3_cyl_othcap); if(o){n+=o; if(oc) L+=o*oc;} return n?`≈ <b>${fmt(L)} L O₂ per week</b> from ${fmt(n)} cylinders (≈ ${fmt(L/7/1440,1)} L/min continuous average).`:"";}}
+ ]},
+{id:"q58", part:"p3", no:58, req:1, title:"Cylinder costs", when:oT("cyl"), skipWhy:"Cylinders not selected (Q53/54)",
+ fields:[costField("p3_cyl_wcost","Costs for cylinders per week"), costField("p3_cyl_ycost")]},
+{id:"q59", part:"p3", no:59, title:"Cylinder manifolds & assembly units", when:oT("cyl"), skipWhy:"Cylinders not selected (Q53/54)",
+ fields:[
+  {t:"grid", id:"p3_manif", label:"Oxygen cylinder manifolds", hint:"By number of cylinders that fit, and switching mechanism.", rows:[2,3,4,5,6,7,8].map(n=>({k:String(n), l:`${n} cylinders`})), cols:[{k:"man",l:"Manual switch"},{k:"el",l:"Electrical switch"}]},
+  {t:"grid", id:"p3_asm", label:"Cylinder assembly units (pressure regulator and gauge)", rows:[{k:"pin",l:"Pin-index"},{k:"bull",l:"Bull-nose"}], cols:FUNC.map(c=>({k:c[0], l:c[1]}))}
+ ]},
+{id:"q60", part:"p3", no:60, title:"Cylinders – problems in the last 6 months", when:oT("cyl"), skipWhy:"Cylinders not selected (Q53/54)",
+ fields:[{t:"textarea", id:"p3_cyl_prob", label:"Problems", hint:"e.g. reliability of power supply, no qualified maintenance staff, long waiting period for spare parts and/or restocking"}]},
+{id:"q61", part:"p3", no:61, req:1, sec:"Details – Concentrators", title:"Concentrators – function", when:oT("conc"), skipWhy:"Concentrators not selected (Q53/54)",
+ help:"For each maximum capacity, count functioning and non-functioning concentrators. If possible, test the purity after running the device for more than 5 minutes: count a concentrator as functional only if output purity is ≥ 85 %.",
+ fields:[
+  {t:"grid", id:"p3_conc", label:"Concentrators by maximum capacity", rows:[{k:"3",l:"Up to 3 L/min"},{k:"5",l:"Up to 5 L/min"},{k:"8",l:"Up to 8 L/min"},{k:"10",l:"Up to 10 L/min"},{k:"gt10",l:"Greater than 10 L/min"}], cols:FUNC.map(c=>({k:c[0], l:c[1]})), live:1},
+  nfReasonsField("p3_conc_why","p3_conc","nf")
+ ]},
+{id:"q62", part:"p3", no:62, req:1, title:"Concentrators – more information", when:oT("conc"), skipWhy:"Concentrators not selected (Q53/54)",
+ fields:[
+  {t:"row", fields:[{t:"number", id:"p3_conc_age", label:"Average age of devices", unit:"years", step:"any"},{t:"number", id:"p3_conc_l", label:"Amount of produced O₂ per week", unit:"L"}]},
+  costField("p3_conc_cost")
+ ]},
+{id:"q63", part:"p3", no:63, title:"Concentrators – problems in the last 6 months", when:oT("conc"), skipWhy:"Concentrators not selected (Q53/54)",
+ fields:[{t:"textarea", id:"p3_conc_prob", label:"Problems", hint:"e.g. no qualified maintenance staff, waiting period for spare parts and/or restocking"}]},
+{id:"q64", part:"p3", no:64, req:1, sec:"Details – On-site oxygen plant (PSA)", title:"Oxygen plant – technical details", when:oT("psa"), skipWhy:"Oxygen plant not selected (Q53/54)", help:"Found on the technical type plate.",
+ fields:[
+  {t:"row", fields:[{t:"text", id:"p3_psa_man", label:"Manufacturer"},{t:"text", id:"p3_psa_mod", label:"Model name"}]},
+  {t:"row", fields:[{t:"number", id:"p3_psa_w", label:"Rated power", unit:"W"},{t:"number", id:"p3_psa_age", label:"Age of the system", unit:"years", step:"any"}]},
+  {t:"row", label:"Maximum production capacity", fields:[{t:"number", id:"p3_psa_cap", label:"Capacity", step:"any"},{t:"text", id:"p3_psa_capu", label:"Unit", list:["L/hr","L/min","m³/hr","Nm³/hr"], ph:"L/hr"}]}
+ ]},
+{id:"q65", part:"p3", no:65, req:1, title:"Oxygen plant – more information", when:oT("psa"), skipWhy:"Oxygen plant not selected (Q53/54)",
+ fields:[
+  {t:"number", id:"p3_psa_pct", label:"Concentration of produced oxygen", unit:"%", step:"any", narrow:1},
+  {t:"yn", id:"p3_psa_ramp", label:"Existence of a filling ramp / manifold for cylinders"},
+  {t:"grid", id:"p3_psa_conn", label:"Number of cylinder connections on the ramp / manifold", when:a=>a.p3_psa_ramp==="yes", depNote:"Shown because a filling ramp exists", rows:[{k:"bull",l:"Bull-nose"},{k:"pin",l:"Pin-index"}], cols:[{k:"n",l:"Number of"}]},
+  {t:"row", label:"Pressure in filled cylinders", when:a=>a.p3_psa_ramp==="yes", fields:[{t:"number", id:"p3_psa_bar", label:"Pressure", step:"any"},{t:"text", id:"p3_psa_baru", label:"Unit", list:["bar","psi","kPa"], ph:"bar"}]},
+  {t:"grid", id:"p3_psa_cyl", label:"Cylinders filled and used on-site per week", when:a=>a.p3_psa_ramp==="yes", rows:[...CYL.map(c=>({k:c[0], l:`Type ${c[0]}`, s:`${fmt(c[1])} L O₂`})),{k:"oth", l:"Other"}], cols:[{k:"tot",l:"Total filled"},{k:"ons",l:"Used on-site"}], live:1},
+  {t:"textarea", id:"p3_psa_dest", label:"Where are cylinders that are not used on-site transported to?", when:a=>a.p3_psa_ramp==="yes" && gridSum(a,"p3_psa_cyl","tot")>gridSum(a,"p3_psa_cyl","ons"), depNote:"Shown because more cylinders are filled than used on-site"},
+  {t:"yn", id:"p3_psa_pipe", label:"Direct O₂ piping system from plant to departments"},
+  {t:"number", id:"p3_psa_pipe_l", label:"Oxygen delivered through piping per week", unit:"L", narrow:1, when:a=>a.p3_psa_pipe==="yes"},
+  costField("p3_psa_cost")
+ ],
+ warn:a=>{const w=[]; const p=num(a.p3_psa_pct); if(p!=null&&p<90) w.push(`Oxygen concentration of ${p} % is below the 90–96 % range expected for Oxygen 93 % from PSA plants.`); const g=a.p3_psa_cyl||{}; for(const r in g){const t=num(g[r].tot), o=num(g[r].ons); if(t!=null&&o!=null&&o>t) w.push(`Type ${r}: used on-site (${o}) exceeds total filled (${t}).`);} return w;}},
+{id:"q66", part:"p3", no:66, req:1, title:"Oxygen plant – function", when:oT("psa"), skipWhy:"Oxygen plant not selected (Q53/54)",
+ fields:[
+  {t:"yn", id:"p3_psa_24", label:"Is the oxygen plant operating 24 hours a day?"},
+  {t:"yn", id:"p3_psa_backup", label:"Is the oxygen plant connected to a back-up source of electricity?"},
+  {t:"yn", id:"p3_psa_surge", label:"Is there a surge suppressor for the oxygen plant?"},
+  {t:"yn", id:"p3_psa_stab", label:"Is there a voltage stabilizer for the oxygen plant?"}
+ ],
+ warn:a=>(a.p3_psa_backup==="yes" && elecBridgeNone(a)) ? ["The plant is said to have back-up electricity, but question 19 says there is no electrical bridging system."] : []},
+{id:"q67", part:"p3", no:67, title:"Oxygen plant – problems in the last 6 months", when:oT("psa"), skipWhy:"Oxygen plant not selected (Q53/54)",
+ fields:[{t:"textarea", id:"p3_psa_prob", label:"Problems", hint:"e.g. reliability of power supply, no qualified maintenance staff, waiting period for spare parts or restocking empty cylinders"}]},
+{id:"q68", part:"p3", no:68, req:1, sec:"Details – Liquid oxygen", title:"Bulk liquid oxygen tank", when:oT("lox"), skipWhy:"Liquid oxygen not selected (Q53/54)",
+ fields:[
+  {t:"yn", id:"p3_lox_tank", label:"Existence of a bulk liquid oxygen tank"},
+  {t:"number", id:"p3_lox_cap", label:"Tank capacity", unit:"L liquid O₂", narrow:1, when:a=>a.p3_lox_tank==="yes"},
+  {t:"number", id:"p3_lox_week", label:"Amount of liquid O₂ used per week", unit:"L liquid O₂", narrow:1},
+  {t:"single", id:"p3_lox_refill", label:"Refill frequency", options:[{v:"d", l:"Daily"},{v:"w", l:"Weekly"},{v:"o", l:"Other", spec:"Specify"}]},
+  costField("p3_lox_cost")
+ ]},
+{id:"q69", part:"p3", no:69, title:"Liquid oxygen – problems in the last 6 months", when:oT("lox"), skipWhy:"Liquid oxygen not selected (Q53/54)",
+ fields:[{t:"textarea", id:"p3_lox_prob", label:"Problems", hint:"e.g. reliability of supply, no qualified maintenance staff, waiting period for restocking"}]},
+{id:"q70", part:"p3", no:70, title:"Description of the process", when:oT("lox"), skipWhy:"Liquid oxygen not selected (Q53/54)",
+ fields:[{t:"textarea", id:"p3_lox_desc", label:"Description of the liquid oxygen supply process"}]},
+
+/* ---- Part 4 ---- */
+{id:"diary", part:"p4", title:"Interruption diary", custom:"diary", when:a=>channels(a).length>0, skipWhy:"No electricity and no oxygen supply to monitor",
+ help:"Record all interruptions of the main and bridging supply of electricity and oxygen, with their reasons. The recording period should be at least 2 weeks, optimally 3 weeks. Estimates are acceptable."},
+
+/* ---- Part 5 ---- */
+{id:"cons", part:"p5", title:"Essential power consumers", help:"Note all electrical consumers by category. Type: short description (ideally manufacturer and model). Power per device: from the datasheet or the type plate. Operates reliably: “No” if the device has frequent technical problems (apart from power cuts).",
+ fields:[
+  ...[["light","Light","e.g. Light bulbs"],["o2","Equipment for oxygen supply","e.g. O₂ concentrator up to 5 L/min (DeVilbiss Compact 525)"],["med","Other medical equipment","e.g. Heating mattress (Dräger Babyleo TN500)"],["cold","Cold chain","e.g. Fridge 6 °C, 140 L"],["oth","Others","e.g. Notebook / computer, water pump"]].map(([k,l,ph])=>(
+   {t:"repeat", id:"p5_"+k, label:l, opt:1, cols:[{k:"type", l:"Type", t:"text", ph},{k:"n", l:"Number of devices", t:"number"},{k:"w", l:"Power per device (W)", t:"number"},{k:"rel", l:"Operates reliably", t:"select", o:["Yes","No"]},{k:"age", l:"Oldest device (years)", t:"number"}], addLabel:"Add device", live:1, sum:1})),
+  {t:"computed", fn:a=>{const cats=[["light","Light"],["o2","Oxygen supply"],["med","Other medical"],["cold","Cold chain"],["oth","Others"]]; let tot=0; const rows=cats.map(([k,l])=>{let s=0; (a["p5_"+k]||[]).forEach(r=>{const n=num(r.n), w=num(r.w); if(n!=null&&w!=null) s+=n*w;}); tot+=s; return `<tr><td>${l}</td><td class="mono" style="text-align:right">${fmt(s/1000,2)}</td></tr>`;}).join(""); return `<b style="font-family:var(--f-display);font-size:1.05rem">Installed power by category (kW)</b><table class="g" style="margin-top:6px;max-width:360px"><tbody>${rows}</tbody><tfoot><tr><td>Total installed</td><td class="mono" style="text-align:right">${fmt(tot/1000,2)}</td></tr></tfoot></table><div class="small muted" style="margin-top:6px">Number × power per device; not all devices run at the same time.</div>`;}}
+ ]},
+
+/* ---- Finish ---- */
+{id:"docs", part:"p6", title:"Photos & documents", help:"Please send the requested photos to the survey team (see the contact on the last page), quoting your survey ID.",
+ fields:[
+  {t:"check", id:"doc_aerial", label:"Aerial photo or land development plan of the health facility", opt:1},
+  {t:"check", id:"doc_surr", label:"Photos of the health facility with the nearest surroundings", opt:1},
+  {t:"computed", fn:a=>{const L=[]; const t=elecTech(a); const ck=(id,l)=>L.push(`<div>${a[id]?"✓":"○"} ${esc(l)} <span class="muted small">${a[id]?"":"(not yet ticked)"}</span></div>`); if(t.has("grid")) ck("p2_grid_photo","Last electricity bill (Q22)"); if(t.has("gen")) ck("p2_gen_photo","Generators and type plates (Q24)"); if(t.has("solar")) ck("p2_sol_photo","Solar modules and type plate (Q29)"); if(t.has("batt")) ck("p2_bat_photo","Battery storage and datasheets (Q34)"); if(t.has("wind")) ck("p2_wi_photo","Wind turbine and datasheet (Q36)"); if(t.has("water")) ck("p2_wa_photo","Water turbine and datasheets (Q40)"); return L.length?`<b>Photos requested in Part 2</b>${L.join("")}`:"";}}
+ ]},
+{id:"review", part:"p6", title:"Review & submit", custom:"review"}
+];
+
+/* ---------- diary config ---------- */
+const CH = {
+  me:{l:"Main electricity", short:"Main elec.", lane:"--lane-me", reasons:["Unknown","Unstable grid","Power line damage","Lack of fuel","Discharged battery","Technical problem"]},
+  eb:{l:"Electrical bridging", short:"Elec. bridging", lane:"--lane-eb", reasons:["Unknown","Unstable grid","Power line damage","Lack of fuel","Discharged battery","Technical problem"]},
+  mo:{l:"Main oxygen", short:"Main O₂", lane:"--lane-mo", reasons:["Unknown","Electrical power cut","Lack of oxygen cylinders","Technical problem"]},
+  ob:{l:"Oxygen bridging", short:"O₂ bridging", lane:"--lane-ob", reasons:["Unknown","Electrical power cut","Lack of oxygen cylinders","Technical problem"]}};
+function channels(a){ const c=[]; if(!elecNone(a)) c.push("me"); if(!elecNone(a) && any(a,"p2_br_type") && !elecBridgeNone(a)) c.push("eb"); if(!o2None(a)) c.push("mo"); if(!o2None(a) && any(a,"p3_br_type") && !o2BridgeNone(a)) c.push("ob"); return c; }
+const TIMES = Array.from({length:49}, (_,i)=>`${String(Math.floor(i/2)).padStart(2,"0")}:${i%2?"30":"00"}`);
+const tmin = t => { const [h,m]=t.split(":").map(Number); return h*60+m; };
+
+/* ---------- state & storage ---------- */
+const APP_VERSION = "2.0";
+const KEY = "o2e-survey-v2";
+let storageOK = true;
+let S = {list:{}, cur:null, view:"home", step:"about", railOpen:false, lastSaved:null, showSkipped:false, consent:false, submit:null, demo:false, test:false};
+function load(){ try { const raw = localStorage.getItem(KEY); if (raw) S.list = JSON.parse(raw) || {}; } catch(e){ storageOK = false; } }
+let saveT = null;
+function save(){ clearTimeout(saveT); saveT = setTimeout(saveNow, 300); }
+function saveNow(){ const c = cur(); if (c) c.updated = new Date().toISOString(); try { localStorage.setItem(KEY, JSON.stringify(S.list)); S.lastSaved = new Date(); storageOK = true; } catch(e){ storageOK = false; } const el = document.getElementById("saveState"); if (el) el.innerHTML = saveLabel(); }
+const saveLabel = () => storageOK ? (S.lastSaved ? `Saved on this device ${S.lastSaved.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}` : "Answers are saved on this device") : `<span style="color:var(--bad)">This browser cannot save. Do not close the page before submitting.</span>`;
+const cur = () => S.list[S.cur];
+const A = () => cur().answers;
+const ID_ALPHA = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+function makeCode(){
+  const b = new Uint8Array(8);
+  try { crypto.getRandomValues(b); } catch(e){ for (let i=0;i<8;i++) b[i]=Math.floor(Math.random()*256); }
+  const ch = [...b].map(x => ID_ALPHA[x % ID_ALPHA.length]).join("");
+  return ch.slice(0,4) + "-" + ch.slice(4);
+}
+function newAssessment(data){
+  let code; do { code = makeCode(); } while (Object.values(S.list).some(x => x.code === code));
+  const id = code;
+  S.list[id] = Object.assign({id, code:"O2E-"+code, created:new Date().toISOString(), updated:new Date().toISOString(), answers:{}, na:{}, diary:{from:"",to:"",events:[]}, submissions:[], consent:new Date().toISOString()}, data||{});
+  S.list[id].id = id; S.list[id].code = "O2E-"+code;
+  return id;
+}
+const countryName = c => (COUNTRIES.find(x => x[0]===c) || [c, c])[1];
+/* ---------- status ---------- */
+const activeSteps = a => STEPS.filter(s => !s.when || s.when(a));
+function flatFields(fields, a){ const out=[]; (fields||[]).forEach(f=>{ if (f.when && !f.when(a)) return; if (f.t==="row") flatFields(f.fields, a).forEach(x=>out.push(x)); else out.push(f); }); return out; }
+function fieldAnswered(f, a){
+  const v = a[f.id];
+  switch(f.t){
+    case "multi": case "deptpick": return Array.isArray(v) && v.length>0 || (f.t==="deptpick" && filled(a[f.id+"__free"]));
+    case "grid": { if (!v) return false; for (const r in v) for (const c in v[r]) if (filled(v[r][c])) return true; return false; }
+    case "repeat": return Array.isArray(v) && v.some(r => Object.values(r).some(filled));
+    case "check": return !!v;
+    case "money": return filled(v);
+    case "derived": return f.fn(a).v != null;
+    default: return filled(v);
+  }
+}
+const inputTypes = new Set(["country","text","email","tel","date","time","number","textarea","single","multi","yn","grid","repeat","money","check","select","deptpick","derived"]);
+function stepStatus(s, a){
+  const c = cur();
+  if (c.na && c.na[s.id]) return "na";
+  if (s.custom==="diary"){ const d=c.diary; if(!d.from||!d.to) return d.events.length?"partial":"empty"; return "done"; }
+  if (s.custom==="review") return "";
+  const fs = flatFields(s.fields, a).filter(f => inputTypes.has(f.t));
+  const reqF = fs.filter(f => !f.opt);
+  const ansReq = reqF.filter(f => fieldAnswered(f, a)).length;
+  const ansAll = fs.filter(f => fieldAnswered(f, a)).length;
+  if (reqF.length===0) return ansAll ? "done" : "empty";
+  if (ansReq===reqF.length) return "done";
+  return ansAll ? "partial" : "empty";
+}
+function progress(a){ const st = activeSteps(a).filter(s => s.custom!=="review"); const done = st.filter(s => ["done","na"].includes(stepStatus(s,a))).length; const req = st.filter(s => s.req); const reqMissing = req.filter(s => !["done","na"].includes(stepStatus(s,a))); return {done, total:st.length, pct: st.length? Math.round(done/st.length*100):0, reqMissing}; }
+
+/* ---------- rendering: fields ---------- */
+function lbl(f, forId){ return f.label ? `<label ${forId?`for="${forId}"`:""}>${esc(f.label)}${f.opt?`<span class="opt-tag">optional</span>`:""}</label>` : ""; }
+const hint = f => f.hint ? `<div class="hint">${esc(f.hint)}</div>` : "";
+const dep = f => f.depNote ? `<span class="chip dep">↳ ${esc(f.depNote)}</span>` : "";
+function inputHTML(f, a){
+  const v = a[f.id] ?? "";
+  const id = "f_"+f.id;
+  if (f.t==="textarea") return `<textarea id="${id}" data-k="${f.id}">${esc(v)}</textarea>`;
+  if (f.t==="select") return `<select id="${id}" data-k="${f.id}" data-live="1"><option value="">– select –</option>${f.o.map(o=>`<option ${v===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`;
+  const type = f.t==="number" ? "number" : f.t;
+  const list = f.list ? `list="dl_${f.id}"` : "";
+  const dl = f.list ? `<datalist id="dl_${f.id}">${f.list.map(o=>`<option value="${esc(o)}">`).join("")}</datalist>` : "";
+  const inp = `<input type="${type}" id="${id}" data-k="${f.id}" value="${esc(v)}" ${f.t==="number"?`inputmode="decimal" step="${f.step||"1"}" min="${f.min??(f.step==="any"&&/lat|lon/.test(f.id)?"":0)}"`:""} ${f.ph?`placeholder="${esc(f.ph)}"`:""} ${list} ${f.live?'data-live="1"':""}>${dl}`;
+  return f.unit ? `<div class="unit ${f.narrow?"narrow":""}">${inp}<span>${esc(f.unit)}</span></div>` : inp;
+}
+function choiceList(f, a, multi, options){
+  const v = a[f.id]; const sel = multi ? (Array.isArray(v)?v:[]) : v;
+  let grp = null; let h = `<div class="choices" role="${multi?"group":"radiogroup"}" aria-label="${esc(f.label||"")}" ${f.cols2?'style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:6px"':""}>`;
+  options.forEach(o=>{
+    if (o.grp && o.grp!==grp){ grp=o.grp; h += `<div class="grp-l" style="grid-column:1/-1">${esc(o.grp)}</div>`; }
+    const on = multi ? sel.includes(o.v) : sel===o.v;
+    const oid = `f_${f.id}_${String(o.v).replace(/[^\w-]/g,"_")}`;
+    h += `<label class="choice ${on?"on":""} ${o.excl?"excl":""}" for="${oid}"><input type="${multi?"checkbox":"radio"}" name="${f.id}" id="${oid}" value="${esc(o.v)}" ${on?"checked":""} data-k="${f.id}" data-kind="${multi?"multi":"single"}" ${o.excl?'data-excl="1"':""}><span>${esc(o.l)}${o.d?`<span class="def">${esc(o.d)}</span>`:""}</span></label>`;
+    if (on && o.spec){ const sk = f.id+"__"+o.v; h += `<div class="spec" style="grid-column:1/-1"><input type="text" id="f_${sk}" data-k="${sk}" placeholder="${esc(o.spec)}" value="${esc(a[sk]??"")}" aria-label="${esc(o.spec)}"></div>`; }
+  });
+  h += `</div>`;
+  if (!multi && filled(sel)) h += `<button type="button" class="linkbtn clear" data-act="clear" data-k="${f.id}">Clear answer</button>`;
+  return h;
+}
+function gridHTML(f, a){
+  const rows = f.rowsFn ? f.rowsFn(a) : f.rows; const g = a[f.id] || {};
+  let h = `<div class="tbl-wrap"><table class="g"><thead><tr><th></th>${f.cols.map(c=>`<th scope="col">${esc(c.l)}</th>`).join("")}</tr></thead><tbody>`;
+  rows.forEach(r=>{ h += `<tr><th scope="row">${esc(r.l)}${r.s?`<span class="rs">${esc(r.s)}</span>`:""}</th>${f.cols.map(c=>`<td><input type="number" inputmode="numeric" min="0" step="any" id="g_${f.id}_${r.k}_${c.k}" data-k="${f.id}" data-r="${r.k}" data-c="${c.k}" value="${esc((g[r.k]||{})[c.k]??"")}" aria-label="${esc(r.l+" – "+c.l)}" ${f.live?'data-live="1"':""}></td>`).join("")}</tr>`; });
+  h += `</tbody>`;
+  if (f.total){ h += `<tfoot><tr><th>Total</th>${f.cols.map(c=>{let s=0; rows.forEach(r=>{const v=num((g[r.k]||{})[c.k]); if(v!=null) s+=v;}); return `<td class="mono">${fmt(s)}</td>`;}).join("")}</tr></tfoot>`; }
+  return h + `</table></div>`;
+}
+function repeatHTML(f, a){
+  let rows = a[f.id]; if (!Array.isArray(rows)) rows = [];
+  if (rows.length < (f.min||0)) { while (rows.length < f.min) rows.push({}); a[f.id] = rows; }
+  let h = `<div class="tbl-wrap"><table class="g"><thead><tr><th scope="col">#</th>${f.cols.map(c=>`<th scope="col">${esc(c.l)}</th>`).join("")}${f.sum?`<th scope="col">kW</th>`:""}<th></th></tr></thead><tbody>`;
+  if (!rows.length) h += `<tr><td colspan="${f.cols.length+2+(f.sum?1:0)}" class="muted small" style="padding:12px">No entries yet.</td></tr>`;
+  rows.forEach((r,i)=>{
+    h += `<tr><td class="mono muted">${i+1}</td>${f.cols.map(c=>{const val=r[c.k]??""; const id=`r_${f.id}_${i}_${c.k}`; const at=`id="${id}" data-k="${f.id}" data-i="${i}" data-c="${c.k}" aria-label="${esc(c.l)} ${i+1}" ${f.live?'data-live="1"':""}`;
+      if(c.t==="select") return `<td><select ${at}><option value=""></option>${c.o.map(o=>`<option ${val===o?"selected":""}>${esc(o)}</option>`).join("")}</select></td>`;
+      if(c.t==="number") return `<td><input type="number" inputmode="decimal" min="0" step="any" ${at} value="${esc(val)}"></td>`;
+      return `<td><input type="text" ${at} value="${esc(val)}" ${c.ph&&i===0?`placeholder="${esc(c.ph)}"`:""} style="min-width:160px"></td>`;}).join("")}${f.sum?`<td class="mono">${(()=>{const n=num(r.n),w=num(r.w);return n!=null&&w!=null?fmt(n*w/1000,2):"–";})()}</td>`:""}<td><button type="button" class="btn sm ghost" data-act="rmrow" data-k="${f.id}" data-i="${i}" aria-label="Remove row ${i+1}">✕</button></td></tr>`;
+  });
+  h += `</tbody></table></div><div class="rep-actions"><button type="button" class="btn sm" data-act="addrow" data-k="${f.id}">+ ${esc(f.addLabel||"Add row")}</button></div>`;
+  return h;
+}
+function fieldHTML(f, a){
+  if (f.when && !f.when(a)) return "";
+  const wrapOpen = `<div class="fld" data-f="${f.id||""}">`;
+  switch(f.t){
+    case "idbox": return `<div class="idbox"><div class="small muted">Your survey ID</div><div class="idcode mono">${esc(cur().code)}</div><div class="small muted">Started ${esc(new Date(cur().created).toLocaleDateString("en-GB",{dateStyle:"long"}))}</div></div>`;
+    case "country": { const v=a[f.id]||""; return `${wrapOpen}${lbl(f,"f_"+f.id)}<select id="f_${f.id}" data-k="${f.id}" data-live="1"><option value="">– select your country –</option>${COUNTRIES.map(([c,n])=>`<option value="${c}" ${v===c?"selected":""}>${esc(n)}</option>`).join("")}</select></div>`; }
+    case "h": return `<div><div class="sub-h">${esc(f.label)}</div>${f.hint?`<div class="hint small muted" style="margin-top:10px">${esc(f.hint)}</div>`:""}</div>`;
+    case "info": return f.collapsed ? `<details class="info"><summary style="cursor:pointer;font-weight:600">${esc(f.collapsed)}</summary><div style="margin-top:8px">${f.html}</div></details>` : `<div class="info">${f.html}</div>`;
+    case "computed": { const h = f.fn(a); return h ? `<div class="computed">${h}</div>` : ""; }
+    case "row": return `<div class="fld">${f.label?`<div class="lbl">${esc(f.label)}</div>`:""}<div class="row2">${f.fields.map(x=>fieldHTML(x,a)).join("")}</div></div>`;
+    case "derived": { const d = f.fn(a); return `${wrapOpen}<div class="lbl">${esc(f.label)}</div><div class="derived"><span class="val">${d.v ? esc(d.v) : "–"}</span><span class="small muted">${esc(d.txt)}</span><button type="button" class="linkbtn small" data-act="goto" data-step="q19">Change in question 19</button></div></div>`; }
+    case "single": return `${wrapOpen}<div class="lbl">${esc(f.label)}${f.opt?`<span class="opt-tag">optional</span>`:""}</div>${dep(f)}${hint(f)}${choiceList(f,a,false,f.options)}</div>`;
+    case "multi": return `${wrapOpen}<div class="lbl">${esc(f.label)}${f.opt?`<span class="opt-tag">optional</span>`:""}</div>${dep(f)}${hint(f)}${choiceList(f,a,true,f.options)}</div>`;
+    case "deptpick": { const o = deptOptions(a); const free = a[f.id+"__free"]??""; return `${wrapOpen}<div class="lbl">${esc(f.label)}</div>${dep(f)}${o.length?choiceList(f,a,true,o):`<div class="hint">No departments were selected in question 9. Describe them below, or <button type="button" class="linkbtn" data-act="goto" data-step="q9">add them in question 9</button>.</div>`}<input type="text" id="f_${f.id}__free" data-k="${f.id}__free" value="${esc(free)}" placeholder="${o.length?"Other / details (optional)":"e.g. emergency, adult ICU, operating theatre, maternity"}" aria-label="Other departments"></div>`; }
+    case "yn": { const v=a[f.id]; return `${wrapOpen}<div class="lbl">${esc(f.label)}</div>${dep(f)}${hint(f)}<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><div class="yn" role="radiogroup" aria-label="${esc(f.label)}">${[["yes","Yes"],["no","No"]].map(([k,l])=>`<label class="${v===k?"on":""}"><input type="radio" name="${f.id}" value="${k}" ${v===k?"checked":""} data-k="${f.id}" data-kind="single">${l}</label>`).join("")}</div>${filled(v)?`<button type="button" class="linkbtn clear" data-act="clear" data-k="${f.id}">Clear</button>`:""}</div></div>`; }
+    case "grid": return `${wrapOpen}<div class="lbl">${esc(f.label)}${f.opt?`<span class="opt-tag">optional</span>`:""}</div>${dep(f)}${hint(f)}${gridHTML(f,a)}</div>`;
+    case "repeat": return `${wrapOpen}<div class="lbl">${esc(f.label)}${f.opt?`<span class="opt-tag">optional</span>`:""}</div>${dep(f)}${hint(f)}${repeatHTML(f,a)}</div>`;
+    case "check": return `${wrapOpen}<label class="check" for="f_${f.id}"><input type="checkbox" id="f_${f.id}" data-k="${f.id}" data-kind="check" ${a[f.id]?"checked":""} ${f.live?'data-live="1"':""}><span>${esc(f.label)}</span></label></div>`;
+    case "money": { const c=a[f.id+"_cur"]??""; return `${wrapOpen}${lbl(f,"f_"+f.id)}${hint(f)}<div class="money"><input type="number" inputmode="decimal" min="0" step="any" id="f_${f.id}" data-k="${f.id}" data-money="1" value="${esc(a[f.id]??"")}" aria-label="${esc(f.label)} amount"><input type="text" id="f_${f.id}_cur" data-k="${f.id}_cur" value="${esc(c)}" placeholder="Currency" list="dl_cur" aria-label="Currency"></div></div>`; }
+    default: return `${wrapOpen}${lbl(f,"f_"+f.id)}${dep(f)}${hint(f)}${inputHTML(f,a)}</div>`;
+  }
+}
+
+/* ---------- views ---------- */
+const app = document.getElementById("app");
+function header(){
+  const c = cur(); const inSurvey = S.view==="step" && c;
+  return `<header class="top">
+    ${inSurvey?`<button type="button" class="btn sm" data-act="rail" aria-label="Open the list of all questions">☰ <span class="hide-narrow">Overview</span></button>`:""}
+    <div class="brand"><div class="mark" aria-hidden="true">O₂</div><div style="min-width:0"><h1>Power & Oxygen Supply Survey</h1>${inSurvey?`<div class="fac"><span class="mono">${esc(c.code)}</span>${c.answers.meta_name?` · ${esc(c.answers.meta_name)}`:""}${c.example?" · example":""}</div>`:""}</div></div>
+    <div class="sp"></div>
+    ${inSurvey?`<span class="save" id="saveState">${saveLabel()}</span><button type="button" class="btn sm ghost" data-act="home">Pause</button>`:""}
+  </header>`;
+}
+function posInfo(a){ const act = activeSteps(a); const i = act.findIndex(s=>s.id===S.step); return {i, n:act.length, pct: act.length>1 ? Math.round(i/(act.length-1)*100) : 0}; }
+function render(){
+  if (S.view==="test") { app.innerHTML = header() + testHTML(); return; }
+  if (S.view==="home" || !cur()) { S.view="home"; app.innerHTML = header() + welcomeHTML(); return; }
+  const a = A();
+  let st = STEPS.find(s=>s.id===S.step);
+  if (!st || (st.when && !st.when(a))) { st = nextActive(S.step, 1) || activeSteps(a)[0]; S.step = st.id; }
+  const pi = posInfo(a);
+  app.innerHTML = header() + `<div class="pbar-wrap"><div class="pbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pi.pct}" aria-label="Survey progress"><i style="width:${pi.pct}%"></i></div><span class="pbar-pct mono">${pi.pct}%</span></div><div class="shell">${railHTML(a)}${S.railOpen?`<div class="scrim" data-act="rail"></div>`:""}<main class="main" id="main"><div class="wrap">${stepHTML(st,a)}</div></main></div>${footHTML(st,a)}<datalist id="dl_cur">${currencies().map(c=>`<option value="${esc(c)}">`).join("")}</datalist>`;
+}
+function currencies(){ const set = new Set(["MGA","XOF","XAF","ZMW","KES","TZS","UGX","MWK","NGN","GHS","ETB","USD","EUR"]); const a=A(); Object.keys(a).forEach(k=>{ if(k.endsWith("_cur") && filled(a[k])) set.add(a[k]); }); return [...set]; }
+function railHTML(a){
+  const p = progress(a);
+  let h = `<nav class="rail ${S.railOpen?"open":""}" aria-label="Question outline"><div class="prog"><div class="small"><b>${p.pct}%</b> of applicable questions answered · <span style="color:${p.reqMissing.length?"var(--req)":"var(--ok)"}">${p.reqMissing.length} required open</span></div><div class="bar"><i style="width:${p.pct}%"></i></div></div>`;
+  PARTS.forEach(pt=>{
+    const all = STEPS.filter(s=>s.part===pt.k); const act = all.filter(s=>!s.when||s.when(a)); const skipped = all.length-act.length;
+    h += `<div class="part ${pt.k}"><div class="part-h">${esc(pt.l)}${skipped?`<span class="sk">${skipped} not applicable</span>`:""}</div>`;
+    let sec=null;
+    all.forEach(s=>{
+      const on = !s.when || s.when(a);
+      if (!on && !S.showSkipped) return;
+      if (s.sec && s.sec!==sec){ sec=s.sec; h += `<div class="sec-h">${esc(s.sec)}</div>`; }
+      const stt = on ? stepStatus(s,a) : "";
+      const cls = stt==="done"?"done":stt==="partial"?"partial":stt==="na"?"na":(s.req?"missing":"");
+      h += on ? `<button type="button" class="nav-i ${s.id===S.step?"cur":""}" data-act="goto" data-step="${s.id}" ${s.id===S.step?'aria-current="step"':""}><span class="qn ${s.req?"req":""} ${s.no?"":"blank"}">${s.no||"·"}</span><span>${esc(s.title)}</span>${s.custom==="review"?"":`<span class="st ${cls}" title="${esc(stt||"open")}"></span>`}</button>`
+              : `<div class="nav-i" style="opacity:.5;cursor:default"><span class="qn ${s.no?"":"blank"}">${s.no||"·"}</span><span><s>${esc(s.title)}</s><span class="small muted" style="display:block">${esc(s.skipWhy||"")}</span></span></div>`;
+    });
+    h += `</div>`;
+  });
+  h += `<div style="padding:14px 8px"><label class="na-tog"><input type="checkbox" data-act="toggleSkipped" ${S.showSkipped?"checked":""}> Show skipped questions</label></div></nav>`;
+  return h;
+}
+function stepHTML(s, a){
+  const pt = PARTS.find(p=>p.k===s.part);
+  const c = cur(); const na = c.na && c.na[s.id];
+  const pi = posInfo(a);
+  let h = `<div class="eyebrow"><span class="chip ${s.part}">${esc(pt.l)}</span><span class="mono" style="text-transform:none;letter-spacing:0">Page ${pi.i+1} of ${pi.n}</span>${s.sec?`<span>${esc(s.sec)}</span>`:""}${s.req?`<span class="chip req">Required</span>`:""}</div>
+  <div class="step-h">${s.no?`<div class="bignum ${s.req?"req":""}" aria-label="Question ${s.no}">${s.no}</div>`:""}<div><h2>${esc(s.title)}</h2>${s.help?`<p class="help">${esc(s.help)}</p>`:""}</div></div>`;
+  if (s.custom==="diary") return h + diaryHTML(a);
+  if (s.custom==="review") return h + reviewHTML(a);
+  if (na) { h += `<div class="card"><div class="na-box"><b>Marked as “information not available”.</b><div class="small muted" style="margin:4px 0 8px">Reason / note:</div><textarea id="na_note" data-na="${s.id}">${esc(typeof na==="string"?na:"")}</textarea><div style="margin-top:8px"><button type="button" class="btn sm" data-act="unna" data-step="${s.id}">Answer this question after all</button></div></div></div>`; return h; }
+  h += `<div class="card" id="stepCard">${s.fields.map(f=>fieldHTML(f,a)).join("")}</div>`;
+  const w = s.warn ? s.warn(a) : [];
+  if (w.length) h += `<div class="warns" style="margin-top:14px" role="status">${w.map(x=>`<div class="warn"><b>Check:</b> ${esc(x)}</div>`).join("")}</div>`;
+  return h;
+}
+function nextActive(fromId, dir){ const a=A(); const i=STEPS.findIndex(s=>s.id===fromId); for(let j=i+dir; j>=0 && j<STEPS.length; j+=dir){ const s=STEPS[j]; if(!s.when||s.when(a)) return s; } return null; }
+function footHTML(s, a){
+  const prev = nextActive(s.id,-1), next = nextActive(s.id,1);
+  const skippedAhead = (()=>{ if(!next) return 0; const i=STEPS.findIndex(x=>x.id===s.id), j=STEPS.findIndex(x=>x.id===next.id); return j-i-1; })();
+  const canNA = !s.custom && s.part!=="p0" && s.part!=="p6" && !s.block;
+  const na = cur().na && cur().na[s.id];
+  const block = s.block ? s.block(a) : "";
+  const ret = S.returnTo && S.returnTo!==s.id ? STEPS.find(x=>x.id===S.returnTo) : null;
+  return `<div class="foot"><div class="in">
+    <button type="button" class="btn" data-act="prev" ${prev?"":"disabled"}>← Back</button>
+    ${canNA && !na?`<label class="na-tog"><input type="checkbox" data-act="na" data-step="${s.id}"> Information not available</label>`:""}
+    <div class="sp"></div>
+    ${skippedAhead>0?`<span class="small muted">skips ${skippedAhead} not applicable</span>`:""}
+    ${block?`<span class="small" style="color:var(--req)">${esc(block)}</span>`:""}
+    ${ret?`<button type="button" class="btn pri" data-act="return" ${block?"disabled":""}>↩ Back to ${ret.no?`Q${ret.no}`:esc(ret.title)}</button>`:""}
+    ${next?`<button type="button" class="btn ${ret?"":"pri"}" data-act="next" ${block?"disabled":""}>${next.no?`Next: Q${next.no}`:`Next: ${esc(next.title)}`} →</button>`:""}
+  </div></div>`;
+}
+
+/* ---------- diary ---------- */
+function diaryHTML(a){
+  const c = cur(); const d = c.diary; const chs = channels(a);
+  const evs = d.events.slice().sort((x,y)=> (x.date+x.start).localeCompare(y.date+y.start));
+  const days = dayRange(d.from, d.to);
+  let h = `<div class="card">
+   <div class="fld"><div class="lbl">Recorded time period</div><div class="row2"><div class="fld"><label for="d_from">From</label><input type="date" id="d_from" data-d="from" value="${esc(d.from)}"></div><div class="fld"><label for="d_to">To</label><input type="date" id="d_to" data-d="to" value="${esc(d.to)}"></div></div>
+   ${days.length? `<div class="hint">${days.length} day(s) recorded${days.length<14?` · <span style="color:var(--warn)">at least 14 days recommended</span>`:""}</div>`:""}</div>
+   <div class="fld"><div class="lbl">Supplies monitored</div><div class="hint">Derived from Parts 2 and 3: only systems that exist at this facility are listed.</div><div class="lanes-key">${Object.keys(CH).map(k=>`<span style="${chs.includes(k)?"":"opacity:.45;text-decoration:line-through"}"><i style="background:var(${CH[k].lane})"></i>${CH[k].l}</span>`).join("")}</div></div>
+   <div class="fld" style="border-top:1px solid var(--line);padding-top:16px"><div class="lbl">Add an interruption</div>
+    <div class="form-grid">
+     <div class="fld"><label for="ev_date">Date</label><input type="date" id="ev_date" value="${esc(S.evDraft?.date||d.from||"")}" ${d.from?`min="${d.from}"`:""} ${d.to?`max="${d.to}"`:""}></div>
+     <div class="fld"><label for="ev_ch">Supply</label><select id="ev_ch" data-evch="1">${chs.map(k=>`<option value="${k}" ${S.evDraft?.ch===k?"selected":""}>${CH[k].l}</option>`).join("")}</select></div>
+     <div class="fld"><label for="ev_s">Failure from</label><select id="ev_s">${TIMES.slice(0,48).map(t=>`<option ${S.evDraft?.start===t?"selected":""}>${t}</option>`).join("")}</select></div>
+     <div class="fld"><label for="ev_e">until</label><select id="ev_e">${TIMES.slice(1).map(t=>`<option ${(S.evDraft?.end||"00:30")===t?"selected":""}>${t}</option>`).join("")}</select></div>
+     <div class="fld"><label for="ev_r">Reason</label><select id="ev_r">${CH[S.evDraft?.ch||chs[0]||"me"].reasons.map(r=>`<option ${S.evDraft?.reason===r?"selected":""}>${r}</option>`).join("")}</select></div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px"><input type="text" id="ev_note" placeholder="Note (optional)" style="flex:1;min-width:180px" value="${esc(S.evDraft?.note||"")}"><label class="check small"><input type="checkbox" id="ev_est" ${S.evDraft?.est?"checked":""}> Times estimated</label><button type="button" class="btn pri" data-act="addev">Add interruption</button></div>
+    <div id="ev_msg" class="small" role="status"></div>
+    <div class="hint">Outages past midnight are split into two entries automatically (choose an end time earlier than the start time).</div>
+   </div>
+  </div>`;
+  // timeline
+  if (days.length) {
+    const show = days.slice(0, 42);
+    h += `<div class="card"><div class="lbl" style="font-weight:600">Timeline</div><div class="dstrip"><div></div>${axisSVG()}${show.map(day=>`<div class="dl">${day.slice(5)} ${weekday(day)}</div>${daySVG(day, evs.filter(e=>e.date===day), chs)}`).join("")}</div>${days.length>42?`<div class="small muted">Showing the first 42 days.</div>`:""}</div>`;
+  }
+  // summary
+  if (evs.length) {
+    const total = days.length*24;
+    h += `<div class="card"><div class="lbl" style="font-weight:600">Summary</div><div class="tbl-wrap"><table class="g sumtbl"><thead><tr><th>Supply</th><th>Interruptions</th><th>Total hours</th><th>% of recorded time</th><th>Longest (h)</th><th>Most frequent reason</th></tr></thead><tbody>${chs.map(k=>{const es=evs.filter(e=>e.ch===k); const hrs=es.reduce((s,e)=>s+dur(e),0)/60; const lg=es.reduce((m,e)=>Math.max(m,dur(e)),0)/60; const rc={}; es.forEach(e=>rc[e.reason]=(rc[e.reason]||0)+1); const top=Object.entries(rc).sort((x,y)=>y[1]-x[1])[0]; return `<tr><th>${CH[k].l}</th><td class="mono">${es.length}</td><td class="mono">${fmt(hrs,1)}</td><td class="mono">${total?fmt(hrs/total*100,1)+" %":"–"}</td><td class="mono">${fmt(lg,1)}</td><td>${top?esc(top[0])+` (${top[1]})`:"–"}</td></tr>`;}).join("")}</tbody></table></div></div>`;
+    h += `<div class="card"><div class="lbl" style="font-weight:600">Recorded interruptions (${evs.length})</div><div class="ev-list">${evs.map(e=>`<div class="ev"><span class="sw" style="background:var(${CH[e.ch].lane})"></span><div><div><b>${CH[e.ch].l}</b> · ${esc(e.reason)}${e.est?` <span class="small muted">(estimated)</span>`:""}</div><div class="t">${e.date} ${weekday(e.date)} · ${e.start}–${e.end} · ${fmt(dur(e)/60,1)} h${e.note?` · <span style="font-family:var(--f-body)">${esc(e.note)}</span>`:""}</div></div><button type="button" class="btn sm ghost" data-act="rmev" data-id="${e.id}" aria-label="Delete interruption">✕</button></div>`).join("")}</div></div>`;
+  } else {
+    h += `<div class="card"><div class="muted">No interruptions recorded yet. If a supply failed, add it above; days without entries are counted as uninterrupted.</div></div>`;
+  }
+  return h;
+}
+const dur = e => tmin(e.end) - tmin(e.start);
+const weekday = d => { try { return new Date(d+"T12:00:00").toLocaleDateString("en-GB",{weekday:"short"}); } catch(e){ return ""; } };
+function dayRange(from, to){ if(!from||!to) return []; const out=[]; let d=new Date(from+"T12:00:00"), e=new Date(to+"T12:00:00"); if(isNaN(d)||isNaN(e)||e<d) return []; while(d<=e && out.length<366){ out.push(d.toISOString().slice(0,10)); d.setDate(d.getDate()+1);} return out; }
+function axisSVG(){ return `<svg viewBox="0 0 480 14" preserveAspectRatio="none" aria-hidden="true">${[0,6,12,18,24].map(hh=>`<text x="${hh===24?478:hh*20+(hh?0:2)}" y="11" font-size="10" fill="var(--muted)" text-anchor="${hh===24?"end":hh?"middle":"start"}" font-family="IBM Plex Mono, monospace">${String(hh).padStart(2,"0")}:00</text>`).join("")}</svg>`; }
+function daySVG(day, evs, chs){
+  const lh=6, gap=1, H = Math.max(1,chs.length)*(lh+gap)+1;
+  let s = `<svg viewBox="0 0 480 ${H}" preserveAspectRatio="none" role="img" aria-label="${day}: ${evs.length} interruption(s)"><rect x="0" y="0" width="480" height="${H}" fill="var(--sunk)"/>`;
+  [6,12,18].forEach(hh=>s+=`<line x1="${hh*20}" x2="${hh*20}" y1="0" y2="${H}" stroke="var(--line)" stroke-width="1"/>`);
+  chs.forEach((k,i)=>{ evs.filter(e=>e.ch===k).forEach(e=>{ s+=`<rect x="${tmin(e.start)/3}" y="${1+i*(lh+gap)}" width="${Math.max(2,dur(e)/3)}" height="${lh}" fill="var(${CH[k].lane})"/>`; }); });
+  return s + `</svg>`;
+}
+
+/* ---------- review ---------- */
+function reviewHTML(a){
+  const p = progress(a); const c = cur();
+  let h = `<div class="card"><div class="row2">
+    <div><div class="small muted">Applicable questions answered</div><div style="font-family:var(--f-display);font-size:2rem;font-weight:600">${p.done} / ${p.total}</div></div>
+    <div><div class="small muted">Required questions still open</div><div style="font-family:var(--f-display);font-size:2rem;font-weight:600;color:${p.reqMissing.length?"var(--req)":"var(--ok)"}">${p.reqMissing.length}</div></div>
+    <div><div class="small muted">Interruptions recorded</div><div style="font-family:var(--f-display);font-size:2rem;font-weight:600">${c.diary.events.length}</div></div></div>
+    ${p.reqMissing.length?`<div><div class="lbl" style="font-weight:600;margin-bottom:6px">Open required questions</div><div style="display:flex;flex-wrap:wrap;gap:6px">${p.reqMissing.map(s=>`<button type="button" class="btn sm" data-act="goto" data-step="${s.id}"><span class="qn req">${s.no||"·"}</span> ${esc(s.title)}</button>`).join("")}</div></div>`:`<div class="note-ok">All required questions are answered or marked as not available.</div>`}
+    ${(()=>{const W=[]; activeSteps(a).forEach(s=>{ if(s.warn) s.warn(a).forEach(x=>W.push([s,x])); }); return W.length?`<div><div class="lbl" style="font-weight:600;margin-bottom:6px">Plausibility checks</div><div class="warns">${W.map(([s,x])=>`<div class="warn"><button type="button" class="linkbtn" data-act="goto" data-step="${s.id}">Q${s.no}</button> ${esc(x)}</div>`).join("")}</div></div>`:"";})()}
+  </div>
+  ${submitCardHTML(a)}
+  <div class="card"><div class="lbl" style="font-weight:600">Answers overview</div>${overviewHTML(a)}</div>`;
+  return h;
+}
+function overviewHTML(a){
+  const rows = flatten(a); let h=""; let lastPart=null, lastQ=null;
+  rows.forEach(r=>{
+    if (r.part!==lastPart){ if(lastQ!==null) h+=`</div></div>`; lastQ=null; h += `<div class="rv-part"><div class="sub-h">${esc(r.part)}</div></div>`; lastPart=r.part; }
+    if (r.q!==lastQ){ if(lastQ!==null) h+=`</div></div>`; h += `<div class="rv-q"><span class="qn ${r.req?"req":""} ${r.no?"":"blank"}">${r.no||"·"}</span><div class="ans"><b>${esc(r.q)}</b>`; lastQ=r.q; }
+    h += `<div><span class="k">${esc(r.field)}${r.item?` · ${esc(r.item)}`:""}:</span> ${esc(r.value)}</div>`;
+  });
+  if (lastQ!==null) h+=`</div></div>`;
+  return h || `<div class="muted">Nothing answered yet.</div>`;
+}
+
+
+function submitCardHTML(a){
+  const c = cur(); const p = progress(a); const okSubs = (c.submissions||[]).filter(x=>x.ok);
+  const missing = [!filled(a.meta_name)||!filled(a.meta_country) ? ["about","your name and country"] : null, !filled(a.p1_type) ? ["q2","the facility type (question 2)"] : null].filter(Boolean);
+  const st = S.submit || {};
+  let h = `<div class="card" id="submitCard"><div><div class="lbl" style="font-weight:600;font-size:1.15rem;font-family:var(--f-display)">${okSubs.length?"Submit an update":"Submit the survey"}</div>
+    <div class="small muted" style="margin-top:4px;max-width:65ch">${okSubs.length
+      ? `You already submitted this survey (ID <b class="mono">${esc(c.code)}</b>). If you add information later, for example more days of the interruption diary, submit again: the newest submission replaces the earlier one.`
+      : `Your answers are encrypted on this device and sent to the workshop organisers with your survey ID <b class="mono">${esc(c.code)}</b>. You can submit now and send an update later with the same ID, for example after finishing the interruption diary.`}</div></div>`;
+  if (missing.length) h += `<div class="warn">Please enter ${missing.map(m=>`<button type="button" class="linkbtn" data-act="goto" data-step="${m[0]}">${esc(m[1])}</button>`).join(" and ")} first.</div>`;
+  else if (p.reqMissing.length) h += `<div class="warn">${p.reqMissing.length} required question(s) are still open. You can submit anyway, but complete answers are much more useful.</div>`;
+  if (st.state==="sending") h += `<div class="note-ok" role="status">Encrypting and sending your answers…</div>`;
+  if (st.state==="ok") h += `<div class="note-ok" role="status"><b>Thank you, your answers have been submitted.</b><br>Survey ID <b class="mono">${esc(c.code)}</b> · ${esc(new Date(st.at).toLocaleString("en-GB",{dateStyle:"medium",timeStyle:"short"}))}</div>`;
+  if (st.state==="fail") h += `<div class="warn" role="alert"><b>Your answers could not be sent automatically.</b> (${esc(st.err)})<br>Nothing is lost: your answers stay saved on this device. Please try again later${st.url?`, or download the encrypted file below and send it by e-mail to ${CONFIG.CONTACT?esc(CONFIG.CONTACT):"the workshop organisers"}. Only the organisers can open it.`:"."}
+     ${st.url?`<div style="margin-top:8px"><a class="btn sm" href="${st.url}" download="${esc(st.name)}">Download ${esc(st.name)}</a></div>`:""}</div>`;
+  h += `<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button type="button" class="btn pri" data-act="submit" ${missing.length||st.state==="sending"?"disabled":""}>${okSubs.length?"Submit update":"Submit survey"}</button>
+     <button type="button" class="btn" data-act="backup">Save a backup copy (.json)</button></div>`;
+  if ((c.submissions||[]).length) h += `<div class="small muted">Submission history: ${(c.submissions||[]).map(x=>`${new Date(x.at).toLocaleString("en-GB",{dateStyle:"short",timeStyle:"short"})} ${x.ok?"✓ sent":"✕ not sent"}`).join(" · ")}</div>`;
+  if (CONFIG.CONTACT) h += `<div class="small muted">Questions about the survey: ${esc(CONFIG.CONTACT)}</div>`;
+  return h + `</div>`;
+}
+/* ---------- flatten for export ---------- */
+function optLabel(f, a, v){ const o = (f.t==="deptpick" ? deptOptions(a) : f.options||[]).find(x=>x.v===v); let l = o ? o.l : v; const sp = a[f.id+"__"+v]; if (filled(sp)) l += ` (${sp})`; return l; }
+function flatten(a){
+  const out=[]; const c = cur();
+  activeSteps(a).forEach(s=>{
+    const part = PARTS.find(p=>p.k===s.part).l; const base = {part, no:s.no||"", q:s.title, req:!!s.req};
+    if (c.na && c.na[s.id]) { out.push({...base, field:"Status", item:"", value:"Information not available"+(typeof c.na[s.id]==="string"&&c.na[s.id]?` – ${c.na[s.id]}`:"")}); return; }
+    if (s.custom==="diary"){ const d=c.diary; out.push({...base, field:"Recorded period", item:"", value:`${d.from||"?"} – ${d.to||"?"}`}); out.push({...base, field:"Interruptions recorded", item:"", value:String(d.events.length)}); return; }
+    if (s.custom) return;
+    flatFields(s.fields, a).forEach(f=>{
+      if (!inputTypes.has(f.t)) return; const v=a[f.id]; const L=f.ex||f.label||"";
+      switch(f.t){
+        case "single": if(filled(v)) out.push({...base, field:L, item:"", value:optLabel(f,a,v)}); break;
+        case "yn": if(filled(v)) out.push({...base, field:L, item:"", value:v==="yes"?"Yes":"No"}); break;
+        case "multi": case "deptpick": { const arr=Array.isArray(v)?v:[]; const parts=arr.map(x=>optLabel(f,a,x)); if(f.t==="deptpick"&&filled(a[f.id+"__free"])) parts.push(a[f.id+"__free"]); if(parts.length) out.push({...base, field:L, item:"", value:parts.join("; ")}); break; }
+        case "grid": { const rows=f.rowsFn?f.rowsFn(a):f.rows; rows.forEach(r=>f.cols.forEach(cc=>{ const x=((v||{})[r.k]||{})[cc.k]; if(filled(x)) out.push({...base, field:L, item:f.cols.length>1?`${r.l} – ${cc.l}`:r.l, value:String(x)}); })); break; }
+        case "repeat": (Array.isArray(v)?v:[]).forEach((r,i)=>{ const txt=f.cols.filter(cc=>filled(r[cc.k])).map(cc=>`${cc.l}: ${r[cc.k]}`).join("; "); if(txt) out.push({...base, field:L, item:`Row ${i+1}`, value:txt}); }); break;
+        case "check": if(v) out.push({...base, field:L, item:"", value:"Yes"}); break;
+        case "money": if(filled(v)) out.push({...base, field:L, item:"", value:`${v} ${a[f.id+"_cur"]||""}`.trim()}); break;
+        case "derived": { const d=f.fn(a); if(d.v) out.push({...base, field:L, item:"", value:d.v+" (from Q19)"}); break; }
+        case "country": if(filled(v)) out.push({...base, field:f.ex||L, item:"", value:countryName(v)}); break;
+        default: if(filled(v)) out.push({...base, field:L, item:"", value:String(v)+(f.unit?` ${f.unit}`:"")});
+      }
+    });
+  });
+  return out;
+}
+
+/* ---------- data record (one row per survey ID) ---------- */
+const DEPT_ROWS = DEPTS.filter(d => d[0]!=="none" && !(d[2]||{}).nobeds).map(d => ({k:d[0], l:d[1]}));
+const META_COLS = [
+  ["id","Survey ID"],["submitted_at","Submitted at (UTC)"],["started_at","Started at (UTC)"],["submission_no","Submission number for this ID"],["app_version","App version"],
+  ["respondent_name","Respondent name"],["respondent_country","Respondent country"],["respondent_country_code","Respondent country (ISO code)"],["consent_at","Consent given at (UTC)"],
+  ["status","Status (complete = no required question open)"],["required_open","Number of required questions open"],["required_open_list","Required questions open (numbers)"],["pct_answered","% of applicable questions answered"],["na_questions","Questions marked 'information not available'"]];
+function allFields(fields){ const out=[]; (fields||[]).forEach(f => { if (f.t==="row") allFields(f.fields).forEach(x => out.push(x)); else out.push(f); }); return out; }
+const hasSpec = f => (f.options||[]).some(o => o.spec);
+let _cols = null;
+function columns(){
+  if (_cols) return _cols;
+  const cols = []; const seen = new Set();
+  const add = (key, label, s, type) => { if (seen.has(key)) return; seen.add(key); cols.push({key, label, q: s && s.no ? "Q"+s.no : "", title: s ? s.title : "", part: s ? PARTS.find(p=>p.k===s.part).l : "Meta", type}); };
+  META_COLS.forEach(([k,l]) => add(k, l, null, ["submission_no","required_open","pct_answered"].includes(k) ? "number" : "text"));
+  STEPS.forEach(s => {
+    if (s.custom==="review") return;
+    if (s.custom==="diary"){
+      [["diary_from","Recorded from","text"],["diary_to","Recorded until","text"],["diary_days","Days recorded","number"],["diary_events","Interruptions recorded (all supplies)","number"]].forEach(([k,l,t]) => add(k,l,s,t));
+      Object.keys(CH).forEach(c => { add(`diary_${c}_n`, `${CH[c].l}: number of interruptions`, s, "number"); add(`diary_${c}_h`, `${CH[c].l}: hours interrupted`, s, "number"); add(`diary_${c}_pct`, `${CH[c].l}: % of recorded time interrupted`, s, "number"); add(`diary_${c}_maxh`, `${CH[c].l}: longest interruption (h)`, s, "number"); add(`diary_${c}_reasons`, `${CH[c].l}: reasons (count)`, s, "text"); });
+      add("diary_log", "Interruption log (date from–to supply: reason)", s, "text");
+      return;
+    }
+    allFields(s.fields).forEach(f => {
+      if (f.id==="meta_name") return; // exported as respondent_name
+      const L = f.ex || f.label || "";
+      switch (f.t) {
+        case "info": case "h": case "computed": case "idbox": return;
+        case "country": return;
+        case "money": add(f.id, L+" (amount)", s, "number"); add(f.id+"_cur", L+" (currency)", s, "text"); return;
+        case "single": add(f.id, L, s, "text"); if (hasSpec(f)) add(f.id+"_spec", L+" – specification", s, "text"); return;
+        case "multi": f.options.forEach(o => add(`${f.id}__${o.v}`, `${L}: ${o.l}`, s, "0/1")); if (hasSpec(f)) add(f.id+"_spec", L+" – specification", s, "text"); return;
+        case "deptpick": add(f.id, L, s, "text"); return;
+        case "grid": { const rows = f.rowsFn ? DEPT_ROWS : f.rows; rows.forEach(r => f.cols.forEach(c => add(`${f.id}__${r.k}__${c.k}`, `${L}: ${r.l}${f.cols.length>1?" – "+c.l:""}`, s, "number"))); return; }
+        case "repeat": add(f.id+"__rows", L+": number of entries", s, "number"); if (f.sum) add(f.id+"__kw", L+": installed power (kW)", s, "number"); if (f.id==="p2_gens") add("p2_gens__kw", "Generators: total rated power in kW (rows given in kW)", s, "number"); add(f.id+"__list", L+": entries", s, "text"); return;
+        default: if (f.id) add(f.id, L+(f.unit?` (${f.unit})`:""), s, f.t==="number"?"number":"text");
+      }
+    });
+  });
+  return (_cols = cols);
+}
+const clean = v => v==null ? "" : String(v).replace(/[\t\r\n]+/g, " ").trim();
+function record(c, submittedAt, subNo){
+  const a = c.answers; const v = {}; const p = progress(a);
+  Object.assign(v, {id:c.code, submitted_at:submittedAt, started_at:c.created, submission_no:subNo, app_version:APP_VERSION,
+    respondent_name:a.meta_name, respondent_country: a.meta_country ? countryName(a.meta_country) : "", respondent_country_code:a.meta_country, consent_at:c.consent,
+    status: p.reqMissing.length ? "incomplete" : "complete", required_open:p.reqMissing.length, required_open_list:p.reqMissing.map(s=>s.no).join(" "), pct_answered:p.pct,
+    na_questions: Object.keys(c.na||{}).map(id => (STEPS.find(s=>s.id===id)||{}).no).filter(Boolean).join(" ")});
+  const active = new Set(activeSteps(a).map(s => s.id));
+  STEPS.forEach(s => {
+    if (!active.has(s.id) || (c.na && c.na[s.id]) || s.custom==="review") return;
+    if (s.custom==="diary"){
+      const d = c.diary; const days = dayRange(d.from, d.to); const chs = channels(a);
+      Object.assign(v, {diary_from:d.from, diary_to:d.to, diary_days:days.length, diary_events:d.events.length});
+      chs.forEach(k => { const es = d.events.filter(e => e.ch===k); const mins = es.reduce((t,e)=>t+dur(e),0); const rc = {}; es.forEach(e => rc[e.reason]=(rc[e.reason]||0)+1);
+        v[`diary_${k}_n`] = es.length; v[`diary_${k}_h`] = +(mins/60).toFixed(2); v[`diary_${k}_pct`] = days.length ? +(mins/(days.length*1440)*100).toFixed(2) : "";
+        v[`diary_${k}_maxh`] = +(es.reduce((m,e)=>Math.max(m,dur(e)),0)/60).toFixed(2); v[`diary_${k}_reasons`] = Object.entries(rc).map(([r,n])=>`${r} ${n}`).join("; "); });
+      v.diary_log = d.events.slice().sort((x,y)=>(x.date+x.start).localeCompare(y.date+y.start)).map(e => `${e.date} ${e.start}-${e.end} ${CH[e.ch].short}: ${e.reason}${e.est?" (est.)":""}`).join(" | ");
+      return;
+    }
+    const visible = new Set(flatFields(s.fields, a).map(f => f.id).filter(Boolean));
+    allFields(s.fields).forEach(f => {
+      if (!f.id || !visible.has(f.id) || f.id==="meta_name") return;
+      const x = a[f.id];
+      switch (f.t) {
+        case "country": return;
+        case "money": v[f.id] = x; v[f.id+"_cur"] = a[f.id+"_cur"]; return;
+        case "single": if (filled(x)) { const o = f.options.find(o => o.v===x); v[f.id] = o ? o.l : x; if (hasSpec(f)) v[f.id+"_spec"] = a[f.id+"__"+x] || ""; } return;
+        case "yn": v[f.id] = x==="yes" ? "Yes" : x==="no" ? "No" : ""; return;
+        case "check": v[f.id] = x ? "Yes" : "No"; return;
+        case "derived": v[f.id] = f.fn(a).v || ""; return;
+        case "multi": { const arr = Array.isArray(x) ? x : []; if (arr.length) f.options.forEach(o => v[`${f.id}__${o.v}`] = arr.includes(o.v) ? 1 : 0);
+          if (hasSpec(f)) v[f.id+"_spec"] = f.options.filter(o => o.spec && arr.includes(o.v)).map(o => a[f.id+"__"+o.v]).filter(filled).join("; "); return; }
+        case "deptpick": { const arr = Array.isArray(x) ? x : []; const ls = arr.map(k => k.startsWith("o:") ? k.slice(2) : (DEPT_L[k]||k)); if (filled(a[f.id+"__free"])) ls.push(a[f.id+"__free"]); v[f.id] = ls.join("; "); return; }
+        case "grid": { const rows = f.rowsFn ? f.rowsFn(a) : f.rows; const g = x || {}; rows.forEach(r => f.cols.forEach(c => { const y = (g[r.k]||{})[c.k]; if (filled(y)) v[`${f.id}__${r.k}__${c.k}`] = y; })); return; }
+        case "repeat": { const rows = (Array.isArray(x)?x:[]).filter(r => Object.values(r).some(filled)); v[f.id+"__rows"] = rows.length;
+          if (f.sum) v[f.id+"__kw"] = +(rows.reduce((t,r)=>{ const n=num(r.n), w=num(r.w); return t + (n!=null&&w!=null ? n*w : 0); },0)/1000).toFixed(3);
+          if (f.id==="p2_gens") v.p2_gens__kw = rows.reduce((t,r)=>{ const k=num(r.rated); return t + (k!=null && (r.unit||"kW")==="kW" ? k : 0); },0);
+          v[f.id+"__list"] = rows.map(r => f.cols.filter(c => filled(r[c.k])).map(c => `${c.l}: ${r[c.k]}`).join(", ")).join(" | "); return; }
+        default: v[f.id] = x;
+      }
+    });
+  });
+  return v;
+}
+function buildTSV(c, submittedAt, subNo){ const cols = columns(); const v = record(c, submittedAt, subNo); return cols.map(x=>x.key).join("\t") + "\r\n" + cols.map(x => clean(v[x.key])).join("\t") + "\r\n"; }
+function buildJSON(c, submittedAt){ return JSON.stringify({format:"o2e-assessment", version:2, app_version:APP_VERSION, submitted_at:submittedAt, assessment:c}, null, 1); }
+const stamp = d => d.toISOString().replace(/[-:]/g,"").replace("T","-").slice(0,15);
+
+/* ---------- encryption (RSA-OAEP 3072 + AES-256-GCM, Web Crypto) ---------- */
+const b64 = buf => { const u = new Uint8Array(buf); let s = ""; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
+const unb64 = str => Uint8Array.from(atob(str), c => c.charCodeAt(0));
+function pemBody(pem){ return String(pem||"").replace(/-----[^-]+-----/g, "").replace(/\s+/g, ""); }
+async function encryptPayload(obj){
+  if (!window.crypto || !crypto.subtle) throw new Error("this browser cannot encrypt (Web Crypto missing); please use a current Chrome, Edge, Firefox or Safari");
+  const keyB64 = pemBody(CONFIG.PUBLIC_KEY);
+  if (!keyB64) throw new Error("the survey has no encryption key yet (PUBLIC_KEY in the settings)");
+  const pub = await crypto.subtle.importKey("spki", unb64(keyB64), {name:"RSA-OAEP", hash:"SHA-256"}, false, ["encrypt"]);
+  const aes = await crypto.subtle.generateKey({name:"AES-GCM", length:256}, true, ["encrypt"]);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({name:"AES-GCM", iv}, aes, new TextEncoder().encode(JSON.stringify(obj)));
+  const ek = await crypto.subtle.encrypt({name:"RSA-OAEP"}, pub, await crypto.subtle.exportKey("raw", aes));
+  return {format:"o2e-encrypted", v:1, alg:"RSA-OAEP-SHA256+A256GCM", ek:b64(ek), iv:b64(iv), ct:b64(ct)};
+}
+
+/* ---------- storing in the private GitHub repository ---------- */
+function ghToken(){ const t = String(CONFIG.GITHUB_TOKEN||"").trim(); return t.startsWith("enc:") ? atob(t.slice(4)).split("").reverse().join("") : t; }
+function ghReady(){ return !!(CONFIG.GITHUB_OWNER && CONFIG.GITHUB_REPO && ghToken() && pemBody(CONFIG.PUBLIC_KEY)); }
+async function ghPut(path, text, message){
+  const url = `https://api.github.com/repos/${encodeURIComponent(CONFIG.GITHUB_OWNER)}/${encodeURIComponent(CONFIG.GITHUB_REPO)}/contents/${path.split("/").map(encodeURIComponent).join("/")}`;
+  let r;
+  try {
+    r = await fetch(url, {method:"PUT", headers:{Authorization:"Bearer " + ghToken(), Accept:"application/vnd.github+json", "Content-Type":"application/json"},
+      body: JSON.stringify({message, content: btoa(text), branch: CONFIG.GITHUB_BRANCH || "main"})});
+  } catch(e){ throw new Error("no connection to GitHub (offline or blocked network)"); }
+  if (!r.ok) {
+    let m = ""; try { m = (await r.json()).message || ""; } catch(e){}
+    if (r.status === 401) throw new Error("GitHub rejected the access token (expired or revoked)");
+    if (r.status === 403 || r.status === 404) throw new Error(`GitHub refused the upload (HTTP ${r.status}${m?": "+m:""}); check token permission “Contents: read and write” for this repository`);
+    throw new Error(`GitHub answered HTTP ${r.status}${m?": "+m:""}`);
+  }
+}
+function payloadFor(c, at, subNo){
+  return {format:"o2e-response", version:3, app_version:APP_VERSION, id:c.code, submitted_at:at, submission_no:subNo,
+          record: record(c, at, subNo), overview: flatten(c.answers), columns: columns().map(x => [x.key, x.label, x.q, x.type]), assessment: c};
+}
+async function submitSurvey(){
+  const c = cur(); if (!c) return;
+  const now = new Date(); const at = now.toISOString(); const subNo = (c.submissions||[]).filter(x=>x.ok).length + 1;
+  const name = `${c.code}_${stamp(now)}.json`;
+  S.submit = {state:"sending"}; rerenderKeepFocus();
+  c.submissions = c.submissions || [];
+  let fileText = "";
+  try {
+    const enc = await encryptPayload(payloadFor(c, at, subNo));
+    fileText = JSON.stringify(Object.assign({id:c.code, submitted_at:at}, enc));
+    if (!ghReady()) throw new Error("the survey is not connected to the storage yet");
+    await ghPut(`${CONFIG.GITHUB_PATH || "responses"}/${c.code}/${stamp(now)}.json`, fileText, `Response ${c.code} (${subNo})`);
+    c.submissions.push({at, ok:true}); S.submit = {state:"ok", at};
+  } catch(e){
+    c.submissions.push({at, ok:false, err:e.message});
+    S.submit = {state:"fail", err:e.message, name, url: fileText ? URL.createObjectURL(new Blob([fileText], {type:"application/json"})) : ""};
+  }
+  saveNow(); rerenderKeepFocus();
+  const card = document.getElementById("submitCard"); if (card) card.scrollIntoView({block:"center"});
+}
+function downloadBackup(){
+  const c = cur(); const name = `O2E_${c.id}_backup_${stamp(new Date())}.json`;
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([buildJSON(c, "")], {type:"application/json"})); a.download = name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+function toast(t){ const el=document.createElement("div"); el.className="toast"; el.textContent=t; document.body.appendChild(el); setTimeout(()=>el.remove(),1800); }
+
+/* ---------- connection test (start page link or ?test=1) ---------- */
+function testHTML(){
+  const t = S.testResult; const tok = ghToken();
+  const okRow = (l, ok, v) => `<tr><th>${l}</th><td>${ok?"✓":"<b style=\"color:var(--bad)\">missing</b>"} ${v||""}</td></tr>`;
+  return `<div class="home"><h2 style="font-size:2rem">Connection test</h2><p class="muted" style="max-width:65ch">For the workshop team: sends a small encrypted test file to the GitHub repository with the current settings. It is stored under <span class="mono">${esc((CONFIG.GITHUB_PATH||"responses")+"/_test/")}</span> and ignored by the dashboard.</p>
+   <div class="card"><div class="info"><table>
+     ${okRow("Repository", CONFIG.GITHUB_OWNER && CONFIG.GITHUB_REPO, `<span class="mono">${esc(CONFIG.GITHUB_OWNER+"/"+CONFIG.GITHUB_REPO)}</span> · branch <span class="mono">${esc(CONFIG.GITHUB_BRANCH||"main")}</span>`)}
+     ${okRow("Access token", !!tok, tok?`<span class="mono">${esc(tok.slice(0,11))}…</span>`:"")}
+     ${okRow("Encryption key", !!pemBody(CONFIG.PUBLIC_KEY), "")}
+   </table></div>
+   <div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" class="btn pri" data-act="runtest">Send test file</button><button type="button" class="btn" data-act="leavetest">Back to the survey start</button></div>
+   ${t?`<div class="${t.ok?"note-ok":"warn"}" role="status">${t.ok?`<b>Success.</b> <span class="mono">${esc(t.path)}</span> was stored in the repository. The dashboard can decrypt it in its “Test files” check.`:`<b>Failed:</b> ${esc(t.err)}.`}</div>`:""}
+   </div></div>`;
+}
+async function runTest(){
+  const now = new Date(); const path = `${CONFIG.GITHUB_PATH || "responses"}/_test/TEST_${stamp(now)}.json`;
+  try {
+    if (!ghReady()) throw new Error("settings incomplete (see table)");
+    const enc = await encryptPayload({format:"o2e-test", sent_at: now.toISOString(), note:"connection test"});
+    await ghPut(path, JSON.stringify(Object.assign({id:"TEST", submitted_at: now.toISOString()}, enc)), "Connection test");
+    S.testResult = {ok:true, path};
+  } catch(e){ S.testResult = {ok:false, err:e.message}; }
+  render();
+}
+window.O2E = {columns: () => columns().map(c => ({...c}))};
+/* ---------- welcome ---------- */
+function welcomeHTML(){
+  const drafts = Object.values(S.list).sort((x,y)=>(y.updated||"").localeCompare(x.updated||""));
+  return `<div class="home">
+   ${storageOK?"":`<div class="banner">This browser does not allow saving answers on this device (for example in a private window). You can still fill in the survey, but please submit before closing the page.</div>`}
+   <div class="welcome">
+    <div class="eyebrow"><span class="chip p1">Pre-workshop survey</span><span>${esc(CONFIG.PROJECT)}</span></div>
+    <h2>Power and oxygen supply of your health facility</h2>
+    <p class="lead">This survey looks at how your facility is supplied with electricity and medical oxygen, where interruptions happen, and which devices depend on them. The results help to develop suggestions for a more reliable supply.</p>
+    <div class="facts">
+     <div><b>One question per page</b><span>Questions that do not apply to your facility are skipped automatically.</span></div>
+     <div><b>Several sessions</b><span>Some questions need records (bills, device counts), and supply interruptions are noted daily over 2–3 weeks.</span></div>
+     <div><b>Continue any time</b><span>Answers are saved on this device. You can submit now and send an update later.</span></div>
+    </div>
+    ${drafts.length?`<div class="drafts"><div class="lbl" style="font-weight:600">Continue on this device</div>${drafts.map(draftHTML).join("")}</div>`:""}
+    <div class="card privacy">
+     <div class="lbl" style="font-weight:600;font-family:var(--f-display);font-size:1.15rem">Data protection</div>
+     <ul>
+      <li>We collect your <b>name and country</b>, and information about your facility: its supply, equipment and staffing. We do not ask for phone numbers or e-mail addresses.</li>
+      <li>Each survey gets a random <b>survey ID</b>. When you submit, your answers are <b>encrypted on your device</b> and stored in a private repository; only the workshop organisers hold the key to read them.</li>
+      <li>Participation is voluntary; you can stop at any time.${CONFIG.CONTACT?` To have your data corrected or deleted, contact ${esc(CONFIG.CONTACT)} and quote your survey ID.`:""}</li>
+     </ul>
+     <label class="check"><input type="checkbox" id="consent" ${S.consent?"checked":""} data-act="consent"><span>I have read this information and agree to take part.</span></label>
+     <div><button type="button" class="btn pri" data-act="new" ${S.consent?"":"disabled"}>Start a new survey →</button></div>
+    </div>
+    <div class="small muted" style="display:flex;gap:14px;flex-wrap:wrap"><button type="button" class="linkbtn" data-act="import">Restore from a backup file</button><button type="button" class="linkbtn" data-act="testview">Connection test (for the survey team)</button>${S.demo?`<button type="button" class="linkbtn" data-act="example">Load example (fictitious data)</button>`:""}</div>
+    <div id="homeMsg" class="small" role="status"></div>
+    <p class="small muted">Survey tool developed by Sabrina Krähmer (Ulm University of Applied Sciences) with Dr. Hans-Jörg Lang (ALIMA) and Dr. Diavolana Koecher Andrianarimanana (CHU PZaGa Mahajanga).</p>
+   </div></div>`;
+}
+function draftHTML(it){
+  const a = it.answers; const save = S.cur; S.cur = it.id; const p = progress(a); S.cur = save;
+  const sent = (it.submissions||[]).filter(x=>x.ok).length;
+  return `<div class="draft"><div style="min-width:0"><div><b class="mono">${esc(it.code)}</b>${it.example?` <span class="tag-ex">example</span>`:""}</div>
+   <div class="small muted">${esc([a.meta_name, a.p1_town, a.meta_country?countryName(a.meta_country):""].filter(Boolean).join(" · ")||"No answers yet")} · ${p.pct}% answered · ${sent?`submitted ${sent}×`:"not yet submitted"}</div></div>
+   <button type="button" class="btn sm pri" data-act="open" data-id="${it.id}">Continue</button></div>`;
+}
+/* ---------- events ---------- */
+function setVal(k, v){ A()[k] = v; save(); }
+function rerenderKeepFocus(){ const ae=document.activeElement; const id=ae&&ae.id; const sel = ae && typeof ae.selectionStart==="number" ? ae.selectionStart : null; const y = window.scrollY; render(); window.scrollTo(0,y); if(id){ const el=document.getElementById(id); if(el){ el.focus({preventScroll:true}); try{ if(sel!=null) el.setSelectionRange(sel,sel);}catch(e){} } } }
+function refreshRailAndFoot(){ if(!cur()||S.view!=="step") return; const a=A(); const st=STEPS.find(s=>s.id===S.step); const rail=document.querySelector(".rail"); if(rail){ const t=rail.scrollTop; rail.outerHTML=railHTML(a); document.querySelector(".rail").scrollTop=t; } const foot=document.querySelector(".foot"); if(foot&&st) foot.outerHTML=footHTML(st,a); }
+
+app.addEventListener("input", e=>{
+  const t=e.target; if(!S.cur || S.view!=="step") return;
+  if (t.dataset.na){ cur().na[t.dataset.na] = t.value || true; save(); return; }
+  if (t.dataset.d){ cur().diary[t.dataset.d] = t.value; save(); return; }
+  const k=t.dataset.k; if(!k) return;
+  if (t.dataset.kind) return; // handled on change
+  const a=A();
+  if (t.dataset.r!==undefined){ a[k]=a[k]||{}; a[k][t.dataset.r]=a[k][t.dataset.r]||{}; a[k][t.dataset.r][t.dataset.c]=t.value; }
+  else if (t.dataset.i!==undefined){ a[k]=a[k]||[]; a[k][+t.dataset.i]=a[k][+t.dataset.i]||{}; a[k][+t.dataset.i][t.dataset.c]=t.value; }
+  else { a[k]=t.value; if (t.dataset.money && filled(t.value) && !filled(a[k+"_cur"])) { const last = lastCurrency(); if (last){ a[k+"_cur"]=last; const ci=document.getElementById("f_"+k+"_cur"); if(ci) ci.value=last; } } }
+  if (k.endsWith("_cur")) cur().lastCur = t.value;
+  save(); clearTimeout(railT); railT=setTimeout(refreshRailAndFoot, k==="meta_name"?0:400);
+});
+let railT=null;
+function lastCurrency(){ const c=cur(); if (c.lastCur) return c.lastCur; const a=A(); const k=Object.keys(a).find(k=>k.endsWith("_cur")&&filled(a[k])); return k?a[k]:""; }
+let ptrDown=false, pendingRender=false;
+document.addEventListener("pointerdown", ()=>{ ptrDown=true; }, true);
+document.addEventListener("pointerup", ()=>{ setTimeout(()=>{ ptrDown=false; if(pendingRender){ pendingRender=false; rerenderKeepFocus(); } },0); }, true);
+document.addEventListener("pointercancel", ()=>{ ptrDown=false; }, true);
+function scheduleRender(){ if (ptrDown) pendingRender=true; else setTimeout(rerenderKeepFocus,0); }
+app.addEventListener("change", e=>{
+  const t=e.target;
+  if (t.dataset.act==="consent"){ S.consent=t.checked; render(); const c=document.getElementById("consent"); c&&c.focus(); return; }
+  if(!S.cur || S.view!=="step") return;
+  if (t.dataset.act==="na"){ cur().na[t.dataset.step]=true; save(); scheduleRender(); return; }
+  if (t.dataset.act==="toggleSkipped"){ S.showSkipped=t.checked; scheduleRender(); return; }
+  if (t.dataset.d){ cur().diary[t.dataset.d]=t.value; save(); scheduleRender(); return; }
+  if (t.dataset.evch){ S.evDraft = readDraft(); scheduleRender(); return; }
+  const k=t.dataset.k; if(!k) return; const a=A();
+  if (t.dataset.kind==="single"){ a[k]=t.value; save(); scheduleRender(); return; }
+  if (t.dataset.kind==="check"){ a[k]=t.checked; save(); scheduleRender(); return; }
+  if (t.dataset.kind==="multi"){
+    let arr = Array.isArray(a[k]) ? a[k].slice() : [];
+    if (t.checked){ if (t.dataset.excl) arr=[t.value]; else { arr = arr.filter(v=>{ const box=document.querySelector(`input[name="${k}"][value="${CSS.escape(v)}"]`); return !(box && box.dataset.excl); }); arr.push(t.value); } }
+    else arr = arr.filter(v=>v!==t.value);
+    a[k]=arr; save(); scheduleRender(); return;
+  }
+  if (t.tagName==="SELECT" || t.dataset.live){ // value already set by input event for text/number; selects need setting
+    if (t.tagName==="SELECT"){ if (t.dataset.r!==undefined){} else if (t.dataset.i!==undefined){ a[k]=a[k]||[]; a[k][+t.dataset.i]=a[k][+t.dataset.i]||{}; a[k][+t.dataset.i][t.dataset.c]=t.value; } else a[k]=t.value; save(); }
+    scheduleRender(); return;
+  }
+  // other text/number change: refresh warnings/computed only where the step has them
+  const st=STEPS.find(x=>x.id===S.step); if (st && (st.warn || (st.fields||[]).some(f=>f.t==="computed"||(f.t==="row"&&f.fields.some(x=>x.t==="computed"))))) scheduleRender(); else refreshRailAndFoot();
+});
+function readDraft(){ const g=id=>document.getElementById(id); return g("ev_date")?{date:g("ev_date").value, ch:g("ev_ch").value, start:g("ev_s").value, end:g("ev_e").value, reason:g("ev_r").value, note:g("ev_note").value, est:g("ev_est").checked}:{}; }
+app.addEventListener("click", e=>{
+  const b=e.target.closest("[data-act]"); if(!b || b.tagName==="INPUT") return; const act=b.dataset.act;
+  switch(act){
+    case "home": saveNow(); S.view="home"; S.submit=null; render(); window.scrollTo(0,0); break;
+    case "new": { if(!S.consent) break; const id=newAssessment(); S.cur=id; S.view="step"; S.step="about"; S.submit=null; saveNow(); render(); window.scrollTo(0,0); break; }
+    case "example": { const id=newAssessment(exampleData()); S.list[id].example=true; saveNow(); render(); break; }
+    case "import": document.getElementById("importFile").click(); break;
+    case "open": S.cur=b.dataset.id; S.view="step"; S.submit=null; S.step = S.list[S.cur].lastStep || "about"; render(); window.scrollTo(0,0); break;
+    case "submit": submitSurvey(); break;
+    case "backup": downloadBackup(); break;
+    case "runtest": runTest(); break;
+    case "testview": S.view="test"; S.testResult=null; render(); window.scrollTo(0,0); break;
+    case "leavetest": S.view="home"; render(); break;
+    case "rail": S.railOpen=!S.railOpen; render(); break;
+    case "goto": { const inRail = !!b.closest(".rail"); if (!inRail && S.view==="step" && b.dataset.step!==S.step) S.returnTo = S.step; else if (inRail) S.returnTo = null; go(b.dataset.step); break; }
+    case "return": { const r = S.returnTo; S.returnTo = null; if (r) go(r); break; }
+    case "next": { const n=nextActive(S.step,1); if(n) go(n.id); break; }
+    case "prev": { const n=nextActive(S.step,-1); if(n) go(n.id); break; }
+    case "clear": delete A()[b.dataset.k]; save(); rerenderKeepFocus(); break;
+    case "unna": delete cur().na[b.dataset.step]; save(); render(); break;
+    case "addrow": { const a=A(); a[b.dataset.k]=Array.isArray(a[b.dataset.k])?a[b.dataset.k]:[]; a[b.dataset.k].push({}); save(); render(); const i=a[b.dataset.k].length-1; const first=document.querySelector(`[data-k="${b.dataset.k}"][data-i="${i}"]`); first&&first.focus(); break; }
+    case "rmrow": { const a=A(); a[b.dataset.k].splice(+b.dataset.i,1); save(); rerenderKeepFocus(); break; }
+    case "addev": addEvent(); break;
+    case "rmev": { const d=cur().diary; d.events=d.events.filter(x=>x.id!==b.dataset.id); save(); rerenderKeepFocus(); break; }
+  }
+});
+function go(id){ if (id===S.returnTo) S.returnTo=null; S.step=id; S.railOpen=false; cur().lastStep=id; save(); render(); window.scrollTo(0,0); const h=document.querySelector(".step-h h2"); if(h){ h.setAttribute("tabindex","-1"); h.focus({preventScroll:true}); } }
+function addEvent(){
+  const d=readDraft(); const msg=document.getElementById("ev_msg"); const bad=t=>{ msg.textContent=t; msg.style.color="var(--bad)"; };
+  if(!d.date) return bad("Choose the date of the interruption.");
+  if(!d.ch) return bad("There is no supply to record. Check questions 18 and 53.");
+  const diary=cur().diary;
+  if(diary.from && d.date<diary.from || diary.to && d.date>diary.to) return bad("The date lies outside the recorded time period.");
+  const base={ch:d.ch, reason:d.reason, note:d.note, est:d.est};
+  const list=[];
+  if (tmin(d.end) > tmin(d.start)) list.push({...base, id:uid(), date:d.date, start:d.start, end:d.end});
+  else { const nd=new Date(d.date+"T12:00:00"); nd.setDate(nd.getDate()+1); const next=nd.toISOString().slice(0,10); list.push({...base, id:uid(), date:d.date, start:d.start, end:"24:00"}); if (d.end!=="00:00") list.push({...base, id:uid(), date:next, start:"00:00", end:d.end}); }
+  const overlap = list.some(n=>diary.events.some(x=>x.ch===n.ch && x.date===n.date && tmin(n.start)<tmin(x.end) && tmin(x.start)<tmin(n.end)));
+  if (overlap) return bad(`This overlaps an interruption already recorded for ${CH[d.ch].l} on that day.`);
+  diary.events.push(...list); S.evDraft={date:d.date, ch:d.ch, start:d.start, end:d.end, reason:d.reason}; save(); rerenderKeepFocus();
+  const m=document.getElementById("ev_msg"); if(m){ m.textContent = list.length>1?"Added (split at midnight into two entries).":"Interruption added."; m.style.color="var(--ok)"; }
+}
+document.getElementById("importFile").addEventListener("change", e=>{
+  const f=e.target.files[0]; if(!f) return; const r=new FileReader();
+  r.onload=()=>{ const msg=document.getElementById("homeMsg"); try { const j=JSON.parse(r.result); const as=j.assessment||j; if(!as||typeof as.answers!=="object") throw new Error("not an assessment file"); let id; if (as.id && /^[2-9A-Z]{4}-[2-9A-Z]{4}$/.test(as.id)) { id=as.id; S.list[id]=Object.assign({na:{}, diary:{from:"",to:"",events:[]}, submissions:[]}, as, {id, code:"O2E-"+id}); } else id=newAssessment({answers:as.answers, na:as.na||{}, diary:as.diary||{from:"",to:"",events:[]}, created:as.created, lastCur:as.lastCur}); saveNow(); render(); const m2=document.getElementById("homeMsg"); if(m2){m2.textContent=`Restored survey ${S.list[id].code}.`; m2.style.color="var(--ok)";} } catch(err){ if(msg){ msg.textContent="This file could not be imported: "+err.message+". Choose a .json backup exported from this app."; msg.style.color="var(--bad)"; } } e.target.value=""; };
+  r.readAsText(f);
+});
+document.addEventListener("keydown", e=>{ if(e.key==="Escape" && S.railOpen){ S.railOpen=false; render(); } });
+
+/* ---------- example (fictitious) ---------- */
+function exampleData(){
+  const d0 = new Date(); d0.setDate(d0.getDate()-16); const iso = x => { const d=new Date(d0); d.setDate(d.getDate()+x); return d.toISOString().slice(0,10); };
+  return {answers:{
+    meta_name:"B. Example", meta_country:"MG",
+    p1_region:"North region", p1_town:"Riverside", p1_type:"dh", p1_auth:"gov",
+    p1_pop:"250000", p1_pop_u5:"42000", p1_pop_514:"68000", p1_deliv_y:"9000",
+    p1_pat:{adm:{ad:"2100",c514:"640",u5:"1150",nb:"420"},o2:{ad:"180",c514:"70",u5:"260",nb:"95"}}, p1_icu:{adm:{ad:"60",c514:"15",u5:"40",nb:"0"}}, p1_los:"5.5",
+    p1_bb:"yes", p1_transf:"720", p1_bb_stored:["wb","prbc"],
+    p1_beds:"120", p1_bedocc:"85", p1_depts:["triage","ed","icu_g","gw_p","gw_a","mat","ot","lab","pharm"],
+    p1_deptbeds:{triage:{ad:"4",c514:"2",u5:"2"},ed:{ad:"6",c514:"2",u5:"2"},icu_g:{ad:"4",c514:"2",u5:"2"},gw_p:{ad:"0",c514:"14",u5:"20"},gw_a:{ad:"40",c514:"0",u5:"0"},mat:{ad:"16",c514:"0",u5:"0"},ot:{ad:"2",c514:"1",u5:"1"}},
+    p1_loc:"1", p1_24h:true, p1_water:"yes", p1_wsrc:"Borehole", p1_temp:["vent"], p1_tmax:"35",
+    p2_main:["grid"], p2_br_type:["gen"], p2_br_h:"8", p2_br_dep:"some", p2_br_depts:["icu_g","ot","mat"],
+    p2_mt_staff:"C. Technician", p2_mt_int:"Every 3 months", p2_mt_ext:"yes", p2_mt_train:"yes", p2_mt_fix:"1–3 days",
+    p2_grid_dep:"all", p2_grid_kwh:"48000", p2_grid_cost:"9600000", p2_grid_cost_cur:"MGA",
+    p2_gens:[{man:"Example Power", mod:"EP-40", rated:"40", standby:"44", unit:"kVA", age:"9"}], p2_fuel_type:"Diesel", p2_fuel_l:"6500",
+    p3_dist:["tub"], p3_reg:{fm:{el:"0",me:"14",nf:"3"},fms:{el:"0",me:"2",nf:"0"},cpap:{el:"2",me:"0",nf:"1"}}, p3_reg_why:["spare"],
+    p3_main:["cyl","conc"], p3_br_type:["cyl"], p3_br_h:"12",
+    p3_cyl:{J:{n:"10"},E:{n:"6"}}, p3_conc:{"5":{f:"6",nf:"2"},"10":{f:"2",nf:"1"}}, p3_conc_why:["spare","funds"],
+    p3_exp_inv:"no", p3_exp_niv:"yes",
+    p5_o2:[{type:"O₂ concentrator up to 5 L/min", n:"8", w:"300", rel:"Yes", age:"7"}], p5_cold:[{type:"Fridge 6 °C, 140 L", n:"2", w:"150", rel:"No", age:"15"}], p5_light:[{type:"LED tubes", n:"140", w:"18", rel:"Yes", age:"3"}]
+  }, na:{}, lastCur:"MGA",
+  diary:{from:iso(0), to:iso(14), events:[
+    {id:uid(), date:iso(1), ch:"me", start:"01:00", end:"04:30", reason:"Unstable grid", est:false},
+    {id:uid(), date:iso(2), ch:"me", start:"01:00", end:"04:30", reason:"Power line damage", est:false},
+    {id:uid(), date:iso(2), ch:"eb", start:"03:00", end:"04:30", reason:"Lack of fuel", est:false},
+    {id:uid(), date:iso(2), ch:"mo", start:"03:00", end:"04:30", reason:"Electrical power cut", est:false},
+    {id:uid(), date:iso(3), ch:"mo", start:"01:30", end:"03:00", reason:"Lack of oxygen cylinders", est:true},
+    {id:uid(), date:iso(3), ch:"ob", start:"02:30", end:"03:00", reason:"Lack of oxygen cylinders", est:true},
+    {id:uid(), date:iso(7), ch:"me", start:"13:00", end:"18:00", reason:"Unstable grid", est:false},
+    {id:uid(), date:iso(11), ch:"me", start:"19:30", end:"23:00", reason:"Unknown", est:true}]}};
+}
+
+/* ---------- boot ---------- */
+(function(){ const q = new URLSearchParams(location.search); S.demo = q.has("demo"); if (q.has("test") || location.hash === "#test") S.view = "test"; })();
+load(); render();
+
+})();
+</script>
+</body>
+</html>
