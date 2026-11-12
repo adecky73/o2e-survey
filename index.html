@@ -105,6 +105,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 .chip{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;font-size:.75rem;letter-spacing:.03em;text-transform:none;font-weight:600}
 .chip.p1{background:var(--accent-soft);color:var(--accent)} .chip.p2,.chip.p5{background:var(--elec-soft);color:var(--elec)} .chip.p3{background:var(--oxy-soft);color:var(--oxy)} .chip.p4{background:var(--intr-soft);color:var(--intr)} .chip.p0,.chip.p6{background:var(--accent-soft);color:var(--accent)}
 .chip.req{background:transparent;border:1px solid var(--req);color:var(--req)}
+.chip.opt{background:transparent;border:1px solid var(--line-strong);color:var(--muted);font-weight:500}
+.ev.off{opacity:.7;border-style:dashed}
 .chip.dep{background:var(--sunk);border:1px dashed var(--line-strong);color:var(--muted)}
 .step-h{display:flex;gap:14px;align-items:flex-start;margin:10px 0 6px}
 .bignum{font-family:var(--f-mono);font-size:1.05rem;font-weight:500;min-width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--line-strong);color:var(--muted);flex:none}
@@ -233,6 +235,15 @@ table.g tfoot td,table.g tfoot th{background:var(--sunk);font-weight:600;border-
 .idbox{border:1px dashed var(--accent);background:var(--accent-soft);border-radius:var(--r);padding:12px 16px;width:max-content;max-width:100%}
 .idcode{font-size:1.6rem;font-weight:600;letter-spacing:.06em;color:var(--accent)}
 a.btn{text-decoration:none;color:inherit}
+
+.ferr{color:var(--bad);font-size:.85rem;font-weight:600}
+.fwarn{color:var(--warn);font-size:.85rem}
+input.bad{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad) inset}
+@keyframes reject{0%,100%{transform:none}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+input.reject{animation:reject .25s;border-color:var(--warn)}
+@media (prefers-reduced-motion:reduce){input.reject{animation:none}}
+.nav-i.locked{opacity:.45;cursor:not-allowed}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -241,32 +252,29 @@ a.btn{text-decoration:none;color:inherit}
 <noscript><p style="padding:16px">This survey needs JavaScript. Please open it in a current browser (Chrome, Firefox, Edge, Safari).</p></noscript>
 <script>
 /* =====================================================================
-   SETTINGS – fill in before sending the survey (see LIESMICH.txt)
-   Then open this file, click "Connection test" at the bottom of the start page.
+   SETTINGS (see LIESMICH.txt)
+   Either fill in the values here, or leave them empty and put the file
+   "o2e-config.js" next to this file: its values replace the ones below.
+   With o2e-config.js a new version of this file needs no editing.
+   Check with "Connection test" at the bottom of the start page.
    ===================================================================== */
 const CONFIG = {
   // Private GitHub repository that stores the encrypted answers
-  GITHUB_OWNER:  "adecky73",            // GitHub user or organisation, e.g. "andreas-example"
-  GITHUB_REPO:   "o2e-responses",            // private repository, e.g. "o2e-responses"
+  GITHUB_OWNER:  "",            // GitHub user or organisation, e.g. "andreas-example"
+  GITHUB_REPO:   "",            // private repository, e.g. "o2e-responses"
   GITHUB_BRANCH: "main",
   GITHUB_PATH:   "responses",   // folder inside the repository
-  GITHUB_TOKEN:  "enc:VEV0c2VxcVc3VlFGM0pYTW9vUmE5a0ZSblV0blJYQ1dMYllHUUVIaWJvejlzb3Bjd3FmTWhvam5YdVpfdHVpdzBPZ3ZNR1YyMElKM0xZUkExMV90YXBfYnVodGln",            // fine-grained token, only this repository, permission "Contents: Read and write".
+  GITHUB_TOKEN:  "",            // fine-grained token, only this repository, permission "Contents: Read and write".
                                 // Paste it as is, or encoded ("enc:…", made in the dashboard) if this file is published on GitHub Pages.
   // Public key from the dashboard (Setup → Create key pair). Only the matching private key can decrypt the answers.
-  PUBLIC_KEY: `-----BEGIN PUBLIC KEY-----
-MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAzglr98EMvYMB+5bvv96q
-Zx87ntDkbjtA+2cpKENLzVA/k3cJZITE5o+/359RfR9kctQK2FogVIb8+r3kudL6
-rqs4Jt7Cag8ztE5PLKwB0kOCgAicovX2KLCHI9H4odQGnYc7upPcqBF2ZkZT/siV
-/XTQuomdh0vmOICLPOQqhoC0fLP0YML73HAw2pbsIYafcMMFYNZHXwfuIce4WJUn
-fe7FJG63vSgNvQUhHqafetpHpv8hwgLnQatbWgKVqDh5cDK0cqzpu2eCEWCkPEg0
-Lw7NiPj9wZ45l8kWnIMrIeqzXOBmWqOwabNjxg3ukHdYZ6tjZYtDm2H/rrOlXNIF
-ZQD1Dk6TdAyeH+yUrFVH8WSXJgApW0QMieKYmW67eckIP/32S9L5ZpzIqpPQKuYI
-9Arj5/6fnSPJY1wpiooVd4d4BTuivb3wTUUGAzUlkWlgxljDc59t4EQPpx6J6X7f
-KB3uGgLl1zC/kDGX8FUQ4bpwrvjo8bZs1ZKcLVHS2DffAgMBAAE=
------END PUBLIC KEY-----`,
+  PUBLIC_KEY: ``,
   CONTACT: "",                  // shown to participants, e.g. "Dr. A. Example, Heidelberg Institute of Global Health"
   PROJECT: "Heidelberg Institute of Global Health (HIGH), Heidelberg University"
 };
+</script>
+<script src="o2e-config.js"></script>
+<script>
+if (window.O2E_CONFIG) { Object.keys(window.O2E_CONFIG).forEach(function(k){ var v = window.O2E_CONFIG[k]; if (typeof v === "string" && v.trim() !== "") CONFIG[k] = v; }); CONFIG._file = true; }
 </script>
 <script>
 (function(){
@@ -274,7 +282,41 @@ KB3uGgLl1zC/kDGX8FUQ4bpwrvjo8bZs1ZKcLVHS2DffAgMBAAE=
 const COUNTRIES = [["AF","Afghanistan"],["AL","Albania"],["DZ","Algeria"],["AS","American Samoa"],["AD","Andorra"],["AO","Angola"],["AI","Anguilla"],["AQ","Antarctica"],["AG","Antigua and Barbuda"],["AR","Argentina"],["AM","Armenia"],["AW","Aruba"],["AU","Australia"],["AT","Austria"],["AZ","Azerbaijan"],["BS","Bahamas"],["BH","Bahrain"],["BD","Bangladesh"],["BB","Barbados"],["BY","Belarus"],["BE","Belgium"],["BZ","Belize"],["BJ","Benin"],["BM","Bermuda"],["BT","Bhutan"],["BO","Bolivia"],["BQ","Bonaire, Sint Eustatius and Saba"],["BA","Bosnia and Herzegovina"],["BW","Botswana"],["BV","Bouvet Island"],["BR","Brazil"],["IO","British Indian Ocean Territory"],["BN","Brunei Darussalam"],["BG","Bulgaria"],["BF","Burkina Faso"],["BI","Burundi"],["CV","Cabo Verde"],["KH","Cambodia"],["CM","Cameroon"],["CA","Canada"],["KY","Cayman Islands"],["CF","Central African Republic"],["TD","Chad"],["CL","Chile"],["CN","China"],["CX","Christmas Island"],["CC","Cocos (Keeling) Islands"],["CO","Colombia"],["KM","Comoros"],["CG","Congo (Republic)"],["CD","Congo (Democratic Republic)"],["CK","Cook Islands"],["CR","Costa Rica"],["HR","Croatia"],["CU","Cuba"],["CW","Curaçao"],["CY","Cyprus"],["CZ","Czechia"],["CI","Côte d'Ivoire"],["DK","Denmark"],["DJ","Djibouti"],["DM","Dominica"],["DO","Dominican Republic"],["EC","Ecuador"],["EG","Egypt"],["SV","El Salvador"],["GQ","Equatorial Guinea"],["ER","Eritrea"],["EE","Estonia"],["SZ","Eswatini"],["ET","Ethiopia"],["FK","Falkland Islands (Malvinas)"],["FO","Faroe Islands"],["FJ","Fiji"],["FI","Finland"],["FR","France"],["GF","French Guiana"],["PF","French Polynesia"],["TF","French Southern Territories"],["GA","Gabon"],["GM","Gambia"],["GE","Georgia"],["DE","Germany"],["GH","Ghana"],["GI","Gibraltar"],["GR","Greece"],["GL","Greenland"],["GD","Grenada"],["GP","Guadeloupe"],["GU","Guam"],["GT","Guatemala"],["GG","Guernsey"],["GN","Guinea"],["GW","Guinea-Bissau"],["GY","Guyana"],["HT","Haiti"],["HM","Heard Island and McDonald Islands"],["VA","Holy See (Vatican City State)"],["HN","Honduras"],["HK","Hong Kong"],["HU","Hungary"],["IS","Iceland"],["IN","India"],["ID","Indonesia"],["IR","Iran"],["IQ","Iraq"],["IE","Ireland"],["IM","Isle of Man"],["IL","Israel"],["IT","Italy"],["JM","Jamaica"],["JP","Japan"],["JE","Jersey"],["JO","Jordan"],["KZ","Kazakhstan"],["KE","Kenya"],["KI","Kiribati"],["KW","Kuwait"],["KG","Kyrgyzstan"],["LA","Laos"],["LV","Latvia"],["LB","Lebanon"],["LS","Lesotho"],["LR","Liberia"],["LY","Libya"],["LI","Liechtenstein"],["LT","Lithuania"],["LU","Luxembourg"],["MO","Macao"],["MG","Madagascar"],["MW","Malawi"],["MY","Malaysia"],["MV","Maldives"],["ML","Mali"],["MT","Malta"],["MH","Marshall Islands"],["MQ","Martinique"],["MR","Mauritania"],["MU","Mauritius"],["YT","Mayotte"],["MX","Mexico"],["FM","Micronesia, Federated States of"],["MD","Moldova"],["MC","Monaco"],["MN","Mongolia"],["ME","Montenegro"],["MS","Montserrat"],["MA","Morocco"],["MZ","Mozambique"],["MM","Myanmar"],["NA","Namibia"],["NR","Nauru"],["NP","Nepal"],["NL","Netherlands"],["NC","New Caledonia"],["NZ","New Zealand"],["NI","Nicaragua"],["NE","Niger"],["NG","Nigeria"],["NU","Niue"],["NF","Norfolk Island"],["KP","North Korea"],["MK","North Macedonia"],["MP","Northern Mariana Islands"],["NO","Norway"],["OM","Oman"],["PK","Pakistan"],["PW","Palau"],["PS","Palestine, State of"],["PA","Panama"],["PG","Papua New Guinea"],["PY","Paraguay"],["PE","Peru"],["PH","Philippines"],["PN","Pitcairn"],["PL","Poland"],["PT","Portugal"],["PR","Puerto Rico"],["QA","Qatar"],["RO","Romania"],["RU","Russian Federation"],["RW","Rwanda"],["RE","Réunion"],["BL","Saint Barthélemy"],["SH","Saint Helena, Ascension and Tristan da Cunha"],["KN","Saint Kitts and Nevis"],["LC","Saint Lucia"],["MF","Saint Martin (French part)"],["PM","Saint Pierre and Miquelon"],["VC","Saint Vincent and the Grenadines"],["WS","Samoa"],["SM","San Marino"],["ST","Sao Tome and Principe"],["SA","Saudi Arabia"],["SN","Senegal"],["RS","Serbia"],["SC","Seychelles"],["SL","Sierra Leone"],["SG","Singapore"],["SX","Sint Maarten (Dutch part)"],["SK","Slovakia"],["SI","Slovenia"],["SB","Solomon Islands"],["SO","Somalia"],["ZA","South Africa"],["GS","South Georgia and the South Sandwich Islands"],["KR","South Korea"],["SS","South Sudan"],["ES","Spain"],["LK","Sri Lanka"],["SD","Sudan"],["SR","Suriname"],["SJ","Svalbard and Jan Mayen"],["SE","Sweden"],["CH","Switzerland"],["SY","Syria"],["TW","Taiwan"],["TJ","Tajikistan"],["TZ","Tanzania"],["TH","Thailand"],["TL","Timor-Leste"],["TG","Togo"],["TK","Tokelau"],["TO","Tonga"],["TT","Trinidad and Tobago"],["TN","Tunisia"],["TM","Turkmenistan"],["TC","Turks and Caicos Islands"],["TV","Tuvalu"],["TR","Türkiye"],["UG","Uganda"],["UA","Ukraine"],["AE","United Arab Emirates"],["GB","United Kingdom"],["US","United States"],["UM","United States Minor Outlying Islands"],["UY","Uruguay"],["UZ","Uzbekistan"],["VU","Vanuatu"],["VE","Venezuela"],["VN","Vietnam"],["VG","Virgin Islands, British"],["VI","Virgin Islands, U.S."],["WF","Wallis and Futuna"],["EH","Western Sahara"],["YE","Yemen"],["ZM","Zambia"],["ZW","Zimbabwe"],["AX","Åland Islands"]];
 /* ---------- helpers ---------- */
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const num = v => { if (v === undefined || v === null || v === "") return null; const n = Number(String(v).replace(",", ".")); return isFinite(n) ? n : null; };
+/* Turns what people type into a plain number string ("1234.5"), or null if it is not a number.
+   kind "int": separators in groups of three are thousands (3,000 / 3.000); any other separator is a decimal (rejected later).
+   kind "dec": dot = decimal; a single comma followed by exactly three digits = thousands (3,000), otherwise decimal (4,5).
+   kind "money": like dec, but a single dot followed by exactly three digits is also read as thousands (3.000).
+   max: if reading a separator as thousands would exceed max but reading it as decimal fits, it is a decimal (latitude -15,716). */
+function normNum(raw, kind, max){
+  let t = String(raw ?? "").replace(/[\s\u00A0\u202F'\u2019]/g, "").replace(/[\u2212\u2013\u2014]/g, "-");
+  if (t === "") return "";
+  let neg = false;
+  if (t[0] === "-") { neg = true; t = t.slice(1); } else if (t[0] === "+") t = t.slice(1);
+  if (!/^[0-9.,]+$/.test(t) || !/[0-9]/.test(t)) return null;
+  const nc = (t.match(/,/g)||[]).length, nd = (t.match(/\./g)||[]).length;
+  const grouped = (x, sep) => new RegExp("^\\d{1,3}(\\" + sep + "\\d{3})+$").test(x);
+  let out;
+  if (nc && nd) {
+    const dec = t.lastIndexOf(",") > t.lastIndexOf(".") ? "," : ".", th = dec === "," ? "." : ",";
+    const parts = t.split(dec); if (parts.length !== 2) return null;
+    if (!grouped(parts[0], th)) return null;
+    out = parts[0].split(th).join("") + "." + parts[1];
+  } else if (nc + nd === 0) out = t;
+  else {
+    const sep = nc ? "," : ".";
+    if (nc + nd > 1) { if (!grouped(t, sep)) return null; out = t.split(sep).join(""); }
+    else {
+      const [ip, fp] = t.split(sep);
+      let th = fp.length === 3 && /^[1-9]\d{0,2}$/.test(ip) && (kind === "int" || kind === "money" || sep === ",");
+      if (th && max != null && Number(ip + fp) > max && Number(ip + "." + fp) <= max) th = false;
+      out = th ? ip + fp : (ip || "0") + "." + fp;
+    }
+  }
+  if (out.endsWith(".")) out = out.slice(0, -1);
+  out = out.replace(/^0+(?=\d)/, "");
+  return (neg && Number(out) !== 0 ? "-" : "") + out;
+}
+const num = v => { if (v === undefined || v === null || v === "") return null; const s = normNum(v, "dec"); if (s === null || s === "") return null; const n = Number(s); return isFinite(n) ? n : null; };
 const filled = v => v !== undefined && v !== null && String(v).trim() !== "";
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
 const fmt = (n, d = 0) => n == null ? "–" : Number(n).toLocaleString("en-GB", {maximumFractionDigits: d, minimumFractionDigits: 0});
@@ -322,8 +364,13 @@ const oT = k => a => o2Tech(a).has(k);
 const gridSum = (a, id, col) => { const g = a[id]||{}; let s = 0, n = 0; for (const r in g) for (const c in g[r]) { if (col && c !== col) continue; const v = num(g[r][c]); if (v != null) { s += v; n++; } } return n ? s : 0; };
 const cell = (a,id,r,c) => num(((a[id]||{})[r]||{})[c]);
 const selDepts = a => (a.p1_depts||[]).filter(d => d!=="none");
-const otherDepts = a => (a.p1_depts_other||[]).map(r => (r.name||"").trim()).filter(Boolean);
+const otherDeptRows = a => has(a,"p1_depts","none") ? [] : (Array.isArray(a.p1_depts_other) ? a.p1_depts_other : []);
+const otherDepts = a => otherDeptRows(a).map(r => (r.name||"").trim()).filter(Boolean);
 const deptOptions = a => [...selDepts(a).map(d => ({v:d, l:DEPT_L[d]})), ...otherDepts(a).map(n => ({v:"o:"+n, l:n}))];
+/* department selections that still exist (departments can be removed again in the bed-capacity question) */
+const deptSel = (a, id) => { const ok = new Set(deptOptions(a).map(o => o.v)); return (Array.isArray(a[id]) ? a[id] : []).filter(v => ok.has(v)); };
+/* sum of a grid over the rows that are currently shown */
+const rowsSum = (a, f, col) => { const g = a[f.id]||{}; let s = 0; (f.rowsFn ? f.rowsFn(a) : f.rows).forEach(r => f.cols.forEach(c => { if (col && c.k!==col) return; const v = num((g[r.k]||{})[c.k]); if (v!=null) s += v; })); return s; };
 const bridgeTag = (k, label) => a => {
   if (!a.p2_br_type || !a.p2_br_type.length) return {v:null, txt:"Not yet answered in question 19"};
   const yes = (a.p2_br_type||[]).includes(k);
@@ -331,7 +378,7 @@ const bridgeTag = (k, label) => a => {
 };
 const problems = (extra=[]) => [{v:"noprob", l:"No problems in the last 6 months", excl:1}, ...opts([["spare","No spare parts"],["funds","No funds for maintenance"],["train","No training to use or to repair"],...extra,["other","Others",{spec:"Specify"}]])];
 const nfReasonsField = (id, gridId, col) => ({t:"multi", id, label:"Reasons for non-functionality", hint:"Multiple selection possible", options: opts(NF_REASONS), when: a => gridSum(a, gridId, col) > 0, depNote:"Shown because at least one device is non-functional"});
-const costField = (id, label="Running costs per year") => ({t:"money", id, label, hint:"In local currency, e.g. 3,000.00"});
+const costField = (id, label="Running costs per year") => ({t:"money", id, label, kind:"money", hint:"Amount in local currency, for example 3000 or 3000.50, and the currency"});
 
 /* ---------- static info blocks ---------- */
 const FAC_DEF = `<table><tr><th>Facility type</th><th>Definition</th></tr>${FAC_TYPES.map(f=>`<tr><td>${esc(f[1])}</td><td>${esc(f[2])}</td></tr>`).join("")}</table>`;
@@ -361,7 +408,7 @@ const STEPS = [
   {t:"idbox"},
   {t:"text", id:"meta_name", label:"Your name", ex:"Respondent name"},
   {t:"country", id:"meta_country", label:"Your country", ex:"Respondent country"},
-  {t:"info", html:`<p><b>Structure of the survey:</b> 1 General information · 2 Electricity · 3 Oxygen · 4 Interruption diary (2–3 weeks) · 5 Power consumers · Review & submit.</p><p>Questions with a <b style="color:var(--req)">red number</b> should be answered to ensure a useful evaluation. Questions that do not apply to your facility are skipped automatically. Your answers are saved on this device, so you can stop and continue later; at the end they are sent encrypted to the workshop organisers.</p>`}
+  {t:"info", html:`<p><b>Structure of the survey:</b> 1 General information · 2 Electricity · 3 Oxygen · 4 Interruption diary (2–3 weeks) · 5 Power consumers · Review & submit.</p><p>Only three answers are mandatory: your name and country, the facility type and the main electricity sources. Everything else is optional: answer what you know and leave the rest blank, or tick “Information not available”. Questions that do not apply to your facility are skipped automatically. Your answers are saved on this device, so you can stop and continue later; at the end they are sent encrypted to the workshop organisers.</p>`}
  ]},
 
 /* ---- Part 1 ---- */
@@ -369,9 +416,9 @@ const STEPS = [
  fields:[
   {t:"row", fields:[{t:"text", id:"p1_region", label:"Province / region", opt:1},{t:"text", id:"p1_town", label:"Town / city", opt:1}]},
   {t:"text", id:"p1_addr", label:"Facility address", opt:1},
-  {t:"row", fields:[{t:"number", id:"p1_lat", label:"GPS latitude", unit:"°", step:"any", opt:1, hint:"Decimal degrees, e.g. −15.7167"},{t:"number", id:"p1_lon", label:"GPS longitude", unit:"°", step:"any", opt:1, hint:"e.g. 46.3167"}]},
+  {t:"row", fields:[{t:"number", id:"p1_lat", label:"GPS latitude", unit:"°", step:"any", opt:1, hint:"Decimal degrees, e.g. -15.4167 (south of the equator: negative)"},{t:"number", id:"p1_lon", label:"GPS longitude", unit:"°", step:"any", opt:1, hint:"e.g. 28.2833 (west of Greenwich: negative)"}]},
  ],
- warn:a=>{const w=[]; const la=num(a.p1_lat), lo=num(a.p1_lon); if(la!=null&&(la<-90||la>90)) w.push("Latitude must be between −90 and 90."); if(lo!=null&&(lo<-180||lo>180)) w.push("Longitude must be between −180 and 180."); return w;}},
+ warn:a=>{const w=[]; if(filled(a.p1_lat)!==filled(a.p1_lon)) w.push("Only one of the two GPS coordinates is filled in. A position needs latitude and longitude."); const la=num(a.p1_lat), lo=num(a.p1_lon); if(la!=null&&lo!=null&&Number.isInteger(la)&&Number.isInteger(lo)) w.push("The coordinates have no decimals and are therefore only accurate to about 100 km. If possible, enter decimal degrees (e.g. -15.4167)."); return w;}},
 {id:"q2", part:"p1", no:2, req:1, title:"Facility type", block:a=>filled(a.p1_type)?"":"Please choose the facility type to continue.",
  fields:[
   {t:"single", id:"p1_type", label:"Type of facility", options:FAC_TYPES.map(f=>({v:f[0], l:f[1], d:f[2], spec: f[0]==="inf" ? "Which disease(s)?" : f[0]==="oth" ? "Specify facility type" : null}))},
@@ -383,9 +430,10 @@ const STEPS = [
  fields:[{t:"row", fields:[
   {t:"number", id:"p1_pop", label:"Total population"},{t:"number", id:"p1_pop_u5", label:"Population under 5 years"},
   {t:"number", id:"p1_pop_514", label:"Population 5–14 years"},{t:"number", id:"p1_deliv_y", label:"Estimated deliveries per year"}]}],
- warn:a=>{const t=num(a.p1_pop), u=num(a.p1_pop_u5)||0, c=num(a.p1_pop_514)||0; return (t!=null && u+c>t) ? ["Children under 15 exceed the total population. Please check."] : [];}},
+ warn:a=>{const t=num(a.p1_pop), u=num(a.p1_pop_u5)||0, c=num(a.p1_pop_514)||0; const w=[]; if(t!=null && u+c>t) w.push("Children under 15 exceed the total population. Please check."); const d=num(a.p1_deliv_y); if(t!=null&&t>0&&d!=null&&d>t*0.08) w.push(`${fmt(d)} deliveries per year for a population of ${fmt(t)} is unusually high (more than 80 per 1,000 inhabitants). Please check.`); return w;}},
 {id:"q5", part:"p1", no:5, title:"Number of hospitals in the health region",
- fields:[{t:"grid", id:"p1_hosp", label:"Number of facilities by type", rows:FAC_TYPES.map(f=>({k:f[0], l:f[1]})), cols:[{k:"n", l:"Number of"}]}]},
+ fields:[{t:"grid", id:"p1_hosp", label:"Number of facilities by type", rows:FAC_TYPES.map(f=>({k:f[0], l:f[1]})), cols:[{k:"n", l:"Number of"}]}],
+ warn:a=>{const n=cell(a,"p1_hosp",a.p1_type,"n"); return (filled(a.p1_type) && n===0) ? [`Your own facility type is counted as 0. If your facility lies in this health region, it should be included.`] : [];}},
 {id:"q6", part:"p1", no:6, title:"Recent outbreaks in the health region", help:"Number of reported cases in the last 6 months. Enter 0 where there were none.",
  fields:[
   {t:"grid", id:"p1_outb", label:"Reported cases (last 6 months)", rows:opts([["measles","Measles"],["cholera","Cholera"],["dengue","Dengue"],["plague","Plague"],["vhf","Lassa / Ebola"],["malaria","Malaria"],["covid","SARS-CoV-2"],["leish","Leishmaniasis"],["tryp","Trypanosomiasis"],["schisto","Schistosomiasis"]]), cols:[{k:"n", l:"Number of cases"}]},
@@ -399,14 +447,14 @@ const STEPS = [
   {t:"grid", id:"p1_surg", label:"Surgery", rows:[{k:"ga", l:"General anaesthesia"},{k:"sa", l:"Spinal anaesthesia"}], cols:AG4.map(c=>({k:c[0], l:c[1]})), opt:1},
   {t:"grid", id:"p1_deliv", label:"Deliveries", rows:[{k:"n", l:"Number of deliveries"}], cols:[{k:"norm", l:"Normal"},{k:"cs", l:"Caesarean section"},{k:"instr", l:"Instrumental"}], opt:1}
  ],
- warn:a=>{const w=[]; for(const [k,l] of AG4){const adm=cell(a,"p1_pat","adm",k); const o2=cell(a,"p1_pat","o2",k); const icu=cell(a,"p1_icu","adm",k); if(adm!=null&&o2!=null&&o2>adm) w.push(`${l}: patients needing oxygen (${o2}) exceed total admissions (${adm}).`); if(adm!=null&&icu!=null&&icu>adm) w.push(`${l}: ICU admissions (${icu}) exceed total admissions (${adm}).`);} return w;}},
-{id:"q8", part:"p1", no:8, req:1, title:"Blood bank",
+ warn:a=>{const w=[]; for(const [k,l] of AG4){const adm=cell(a,"p1_pat","adm",k); const o2=cell(a,"p1_pat","o2",k); const icu=cell(a,"p1_icu","adm",k); if(adm!=null&&o2!=null&&o2>adm) w.push(`${l}: patients needing oxygen (${o2}) exceed total admissions (${adm}).`); if(adm!=null&&icu!=null&&icu>adm) w.push(`${l}: ICU admissions (${icu}) exceed total admissions (${adm}).`);} const dl=["norm","cs","instr"].reduce((t,k)=>t+(cell(a,"p1_deliv","n",k)||0),0), dy=num(a.p1_deliv_y); if(dy!=null&&dl>0&&dl*2>dy) w.push(`${fmt(dl)} deliveries in 6 months in this facility is more than the ${fmt(dy)} deliveries per year estimated for the whole health region in question ${QN("q4")}.`); return w;}},
+{id:"q8", part:"p1", no:8, title:"Blood bank",
  fields:[
   {t:"yn", id:"p1_bb", label:"Existence of a blood bank"},
   {t:"number", id:"p1_transf", label:"Number of transfusions per year", narrow:1, hint:"Also relevant without an own blood bank (e.g. blood supplied by a regional centre)."},
   {t:"multi", id:"p1_bb_stored", label:"Stored blood products", hint:"Multiple selection possible", when:a=>a.p1_bb==="yes", depNote:"Shown because a blood bank exists", options:opts([["prbc","Packed red blood cells"],["wb","Whole blood"],["ffp","Fresh frozen plasma"],["oth","Others",{spec:"Specify"}]])}
  ]},
-{id:"q9", part:"p1", no:9, title:"Bed capacity & departments",
+{id:"q9", part:"p1", no:9, noNA:1, title:"Bed capacity & departments",
  fields:[
   {t:"row", fields:[{t:"number", id:"p1_beds", label:"Total bed capacity", unit:"beds"},{t:"number", id:"p1_bedocc", label:"Bed utilisation rate (estimate)", unit:"%", step:"any"}]},
   {t:"multi", id:"p1_depts", label:"Step 1 · Select all existing departments", hint:"Add departments that are not listed in the table below the list.", options:opts(DEPTS), cols2:1},
@@ -414,8 +462,8 @@ const STEPS = [
   {t:"grid", id:"p1_deptbeds", label:"Step 2 · Bed capacity per department and age group", hint:"Pharmacy and laboratory have no beds.", when:a=>selDepts(a).filter(d=>!DEPTS.find(x=>x[0]===d)[2]?.nobeds).length>0, depNote:"Rows follow the departments selected in step 1",
    rowsFn:a=>selDepts(a).filter(d=>!(DEPTS.find(x=>x[0]===d)[2]||{}).nobeds).map(d=>({k:d, l:DEPT_L[d]})), cols:AG3.map(c=>({k:c[0], l:c[1]})), total:1, live:1}
  ],
- warn:a=>{const w=[]; const t=num(a.p1_beds); let s=gridSum(a,"p1_deptbeds"); (a.p1_depts_other||[]).forEach(r=>["ad","c514","u5"].forEach(k=>{const v=num(r[k]); if(v!=null) s+=v;})); if(t!=null && s>0 && s!==t) w.push(`Beds per department add up to ${s}, total bed capacity is ${t}.`); const u=num(a.p1_bedocc); if(u!=null&&u>150) w.push("Bed utilisation above 150 % is unusual. Please check."); const icu=gridSum(a,"p1_icu"); if(icu>0 && any(a,"p1_depts") && !selDepts(a).some(d=>d.startsWith("icu"))) w.push("ICU admissions were reported in question 7, but no intensive care unit is selected."); return w;}},
-{id:"q10", part:"p1", no:10, req:1, title:"Level of care", help:"Define the level of care that can be provided.",
+ warn:a=>{const w=[]; const t=num(a.p1_beds); let s=rowsSum(a, BEDGRID(a)); otherDeptRows(a).forEach(r=>["ad","c514","u5"].forEach(k=>{const v=num(r[k]); if(v!=null) s+=v;})); if(t!=null && s>0 && s!==t) w.push(`Beds per department add up to ${fmt(s)}, total bed capacity is ${fmt(t)}.`); const icu=gridSum(a,"p1_icu"); if(icu>0 && any(a,"p1_depts") && !selDepts(a).some(d=>d.startsWith("icu"))) w.push(`ICU admissions were reported in question ${QN("q7")}, but no intensive care unit is selected.`); return w;}},
+{id:"q10", part:"p1", no:10, title:"Level of care", help:"Define the level of care that can be provided.",
  fields:[
   {t:"single", id:"p1_loc", label:"Level of care", options:[{v:"1", l:"Level of care 1 – essential level of care"},{v:"2", l:"Level of care 2 – intermediate"},{v:"3", l:"Level of care 3 – advanced level"}]},
   {t:"info", html:LOC_DEF, collapsed:"Definition of the levels of care"},
@@ -423,12 +471,13 @@ const STEPS = [
  ]},
 {id:"q11", part:"p1", no:11, title:"Isolation opportunities",
  fields:[{t:"textarea", id:"p1_isol", label:"Isolation opportunities for patients", hint:"Describe briefly the isolation opportunities of the facility."}]},
-{id:"q12", part:"p1", no:12, req:1, sec:"Working environment", title:"Daily operating hours",
+{id:"q12", part:"p1", no:12, sec:"Working environment", title:"Daily operating hours",
  fields:[
-  {t:"check", id:"p1_24h", label:"Open 24 hours a day", live:1},
+  {t:"check", id:"p1_24h", label:"Open 24 hours a day", live:1, opt:1},
   {t:"row", when:a=>!a.p1_24h, fields:[{t:"time", id:"p1_open", label:"From"},{t:"time", id:"p1_close", label:"Until"}]}
- ]},
-{id:"q13", part:"p1", no:13, req:1, title:"Water",
+ ],
+ warn:a=>{ if(a.p1_24h) return []; const w=[]; if(filled(a.p1_open)&&filled(a.p1_close)&&a.p1_open===a.p1_close) w.push("Opening and closing time are the same. If the facility is open around the clock, tick “Open 24 hours a day”."); if(filled(a.p1_open)!==filled(a.p1_close)) w.push("Only one of the two times is filled in."); return w; }},
+{id:"q13", part:"p1", no:13, title:"Water",
  fields:[
   {t:"yn", id:"p1_water", label:"Access to running water"},
   {t:"text", id:"p1_wsrc", label:"Water source of the facility", hint:"e.g. river, well, municipal supply"},
@@ -441,7 +490,7 @@ const STEPS = [
  ]},
 {id:"q15", part:"p1", no:15, title:"Laundry process",
  fields:[{t:"multi", id:"p1_laun_en", label:"Energy source", options:[{v:"el", l:"Powered by electricity"},{v:"fuel", l:"Powered by fuel", spec:"Which fuel? e.g. gas, wood"},{v:"manual", l:"Manual (no energy source)", added:1}]}]},
-{id:"q16", part:"p1", no:16, req:1, title:"Temperature control",
+{id:"q16", part:"p1", no:16, title:"Temperature control",
  fields:[
   {t:"multi", id:"p1_temp", label:"Temperature controlling devices", options:[{v:"none", l:"No special temperature control devices", excl:1},{v:"vent", l:"Air ventilators"},{v:"ac", l:"Air conditioning system"}]},
   {t:"number", id:"p1_tmax", label:"Maximum tolerable room temperature", unit:"°C", step:"any", narrow:1},
@@ -458,45 +507,44 @@ const STEPS = [
  ]},
 
 /* ---- Part 2 ---- */
-{id:"q18", part:"p2", no:18, req:1, sec:"Electricity supply", title:"Main source(s) of electricity", help:"Multiple selection possible. Detail questions are shown later only for the sources selected here or in question 19.",
- fields:[{t:"multi", id:"p2_main", label:"Main sources", options:[{v:"none", l:"No electricity available", excl:1}, ...opts(ELEC_TECH)]}]},
-{id:"q19", part:"p2", no:19, req:1, title:"Electrical bridging system for power cuts", when:a=>!elecNone(a), skipWhy:"No electricity available (Q18)",
+{id:"q18", part:"p2", no:18, req:1, sec:"Electricity supply", title:"Main source(s) of electricity", block:a=>any(a,"p2_main")?"":"Please select at least one option to continue (“No electricity available” is also an option).", help:"Multiple selection possible. Detail questions are shown later only for the sources selected here or in question {q19}.",
+ fields:[{t:"multi", id:"p2_main", label:"Main sources", options:[{v:"none", l:"No electricity available", excl:1}, ...opts(ELEC_TECH)]}],
+ warn:a=>{const m=a.p2_main||[]; return (m.length===1 && m[0]==="batt") ? ["Battery storage is the only main source selected. A battery has to be charged by another source (grid, solar, generator …): please select that source as well."] : [];}},
+{id:"q19", part:"p2", no:19, noNA:1, title:"Electrical bridging system for power cuts", when:a=>!elecNone(a), skipWhy:"No electricity available (Q{q18})",
  help:"Bridging system: if the main electricity source fails, this system supplies electricity until the main source is available again (e.g. generator, battery storage).",
  fields:[
   {t:"multi", id:"p2_br_type", label:"Type of bridging system", options:[{v:"none", l:"No bridging system", excl:1}, ...opts(ELEC_TECH)]},
   {t:"number", id:"p2_br_h", label:"Possible bridging time period", unit:"hours", step:"any", narrow:1, when:a=>any(a,"p2_br_type") && !elecBridgeNone(a)},
   {t:"single", id:"p2_br_dep", label:"Departments with connection to the bridging system", when:a=>any(a,"p2_br_type") && !elecBridgeNone(a), options:[{v:"all", l:"All departments / whole facility"},{v:"some", l:"Just some"}]},
-  {t:"deptpick", id:"p2_br_depts", label:"Which departments are connected?", when:a=>a.p2_br_dep==="some" && !elecBridgeNone(a), depNote:"Departments from question 9"}
+  {t:"deptpick", id:"p2_br_depts", label:"Which departments are connected?", when:a=>a.p2_br_dep==="some" && any(a,"p2_br_type") && !elecBridgeNone(a), depNote:"Departments from question {q9}"}
  ],
  warn:a=>{const w=[]; const m=a.p2_main||[], b=a.p2_br_type||[]; if(m.length===1 && b.length===1 && m[0]===b[0] && m[0]!=="none") w.push("The bridging system is the same as the only main source. A bridging system usually has to be a different source."); return w;}},
-{id:"q20", part:"p2", no:20, req:1, title:"Maintenance of electricity supply", when:a=>!elecNone(a), skipWhy:"No electricity available (Q18)",
+{id:"q20", part:"p2", no:20, title:"Maintenance of electricity supply", when:a=>!elecNone(a), skipWhy:"No electricity available (Q{q18})",
  fields:[
-  {t:"text", id:"p2_mt_staff", label:"Responsible staff (name)"},
+  {t:"yn", id:"p2_mt_staff", label:"Is there a designated person responsible for maintenance?"},
   {t:"text", id:"p2_mt_int", label:"Maintenance interval", hint:"e.g. once a year, only when needed"},
   {t:"yn", id:"p2_mt_ext", label:"Need for external technical / professional support"},
   {t:"yn", id:"p2_mt_train", label:"Need for on-site maintenance training"},
   {t:"text", id:"p2_mt_fix", label:"Average time until problems are fixed", hint:"e.g. hours / days"}
  ]},
-{id:"q21", part:"p2", no:21, sec:"Details – Grid", title:"Departments with connection to the grid", when:eT("grid"), skipWhy:"Grid not selected (Q18/19)",
+{id:"q21", part:"p2", no:21, sec:"Details – Grid", title:"Departments with connection to the grid", when:eT("grid"), skipWhy:"Grid not selected (Q{q18}/{q19})",
  fields:[
   {t:"single", id:"p2_grid_dep", label:"Connected to the grid", options:[{v:"all", l:"All departments / whole facility"},{v:"some", l:"Just some"}]},
-  {t:"deptpick", id:"p2_grid_depts", label:"Which departments are connected?", when:a=>a.p2_grid_dep==="some", depNote:"Departments from question 9"}
+  {t:"deptpick", id:"p2_grid_depts", label:"Which departments are connected?", when:a=>a.p2_grid_dep==="some", depNote:"Departments from question {q9}"}
  ]},
-{id:"q22", part:"p2", no:22, req:1, title:"Costs for electricity supply", when:eT("grid"), skipWhy:"Grid not selected (Q18/19)",
+{id:"q22", part:"p2", no:22, title:"Costs for electricity supply", when:eT("grid"), skipWhy:"Grid not selected (Q{q18}/{q19})",
  fields:[
   {t:"number", id:"p2_grid_kwh", label:"Amount of purchased electricity per year", unit:"kWh", hint:"Found on the electricity bill", narrow:1},
   costField("p2_grid_cost"),
   {t:"check", id:"p2_grid_photo", label:"Photo of the last electricity bill taken", opt:1}
  ]},
-{id:"q23", part:"p2", no:23, req:1, sec:"Details – Fuel-based generator", title:"Generator as bridging system?", when:eT("gen"), skipWhy:"Generator not selected (Q18/19)",
- fields:[{t:"derived", id:"p2_gen_br", label:"Used as bridging system for power interruptions?", fn:bridgeTag("gen","The generator")}]},
-{id:"q24", part:"p2", no:24, req:1, title:"Generators – technical details", when:eT("gen"), skipWhy:"Generator not selected (Q18/19)", help:"Fill in one row per generator, or send photos of the technical type plates (normally found on the generator itself).",
+{id:"q24", part:"p2", no:24, sec:"Details – Fuel-based generator", title:"Generators – technical details", when:eT("gen"), skipWhy:"Generator not selected (Q{q18}/{q19})", help:"Fill in one row per generator, or send photos of the technical type plates (normally found on the generator itself).",
  fields:[
-  {t:"repeat", id:"p2_gens", label:"Generators", min:1, cols:[{k:"man", l:"Manufacturer", t:"text"},{k:"mod", l:"Model name", t:"text"},{k:"rated", l:"Rated power", t:"number"},{k:"standby", l:"Standby power", t:"number"},{k:"unit", l:"Unit", t:"select", o:["kW","kVA"]},{k:"age", l:"Age (years)", t:"number"}], addLabel:"Add generator", live:1},
+  {t:"repeat", id:"p2_gens", label:"Generators", min:1, cols:[{k:"man", l:"Manufacturer", t:"text"},{k:"mod", l:"Model name", t:"text"},{k:"rated", l:"Rated power", t:"number", wmax:5000, wmsg:"More than 5,000 kW (kVA) is unusual for a facility generator. Please check the unit."},{k:"standby", l:"Standby power", t:"number", wmax:5000, wmsg:"More than 5,000 kW (kVA) is unusual for a facility generator. Please check the unit."},{k:"unit", l:"Unit", t:"select", o:["kW","kVA"]},{k:"age", l:"Age (years)", t:"number", max:100, wmax:40, wmsg:"An age above 40 years is unusual. Please check (age in years)."}], addLabel:"Add generator", live:1},
   {t:"computed", fn:a=>{const g=(a.p2_gens||[]); let kw=0, kva=0; g.forEach(r=>{const v=num(r.rated); if(v!=null){ if((r.unit||"kW")==="kVA") kva+=v; else kw+=v; }}); return g.length?`Installed rated power: <b>${fmt(kw,1)} kW</b>${kva?` + <b>${fmt(kva,1)} kVA</b>`:""} across ${g.length} generator(s).`:"";}},
   {t:"check", id:"p2_gen_photo", label:"Photos of the generators and type plates taken", opt:1}
  ]},
-{id:"q25", part:"p2", no:25, req:1, title:"Fuel for generators", when:eT("gen"), skipWhy:"Generator not selected (Q18/19)",
+{id:"q25", part:"p2", no:25, title:"Fuel for generators", when:eT("gen"), skipWhy:"Generator not selected (Q{q18}/{q19})",
  fields:[
   {t:"text", id:"p2_fuel_type", label:"Type of fuel", list:["Diesel","Petrol","LPG","Biogas"]},
   {t:"number", id:"p2_fuel_l", label:"Amount of fuel per year", unit:"litres", narrow:1},
@@ -504,11 +552,9 @@ const STEPS = [
   costField("p2_gen_mcost","Maintenance costs per year"),
   {t:"row", fields:[{t:"number", id:"p2_tank1", label:"Tank 1", unit:"litres", opt:1},{t:"number", id:"p2_tank2", label:"Tank 2", unit:"litres", opt:1},{t:"number", id:"p2_tank3", label:"Tank 3", unit:"litres", opt:1}], label:"Size of fuel tanks"}
  ]},
-{id:"q26", part:"p2", no:26, title:"Generators – problems in the last 6 months", when:eT("gen"), skipWhy:"Generator not selected (Q18/19)",
+{id:"q26", part:"p2", no:26, title:"Generators – problems in the last 6 months", when:eT("gen"), skipWhy:"Generator not selected (Q{q18}/{q19})",
  fields:[{t:"multi", id:"p2_gen_prob", label:"Problems", hint:"Multiple selection possible", options:problems([["fuel","No reliable fuel supply"]])}]},
-{id:"q27", part:"p2", no:27, req:1, sec:"Details – Solar (PV)", title:"Solar as bridging system?", when:eT("solar"), skipWhy:"Solar not selected (Q18/19)",
- fields:[{t:"derived", id:"p2_sol_br", label:"Used as bridging system for power interruptions?", fn:bridgeTag("solar","Solar (PV)")}]},
-{id:"q28", part:"p2", no:28, title:"Solar modules – technical details", when:eT("solar"), skipWhy:"Solar not selected (Q18/19)", help:"The technical type plate is probably on the back of a module.",
+{id:"q28", part:"p2", no:28, sec:"Details – Solar (PV)", title:"Solar modules – technical details", when:eT("solar"), skipWhy:"Solar not selected (Q{q18}/{q19})", help:"The technical type plate is probably on the back of a module.",
  fields:[
   {t:"row", fields:[{t:"text", id:"p2_sol_man", label:"Manufacturer"},{t:"text", id:"p2_sol_mod", label:"Model name of solar modules"}]},
   {t:"row", label:"Dimensions of one module", fields:[{t:"number", id:"p2_sol_w", label:"Width", unit:"m", step:"any"},{t:"number", id:"p2_sol_len", label:"Length", unit:"m", step:"any"}]},
@@ -516,13 +562,11 @@ const STEPS = [
   {t:"row", fields:[{t:"number", id:"p2_sol_tilt", label:"Angle of attack to the ground (tilt)", unit:"°", step:"any"},{t:"select", id:"p2_sol_or", label:"Orientation", o:["North","North-east","East","South-east","South","South-west","West","North-west","Mixed / several"]}]},
   {t:"computed", fn:a=>{const w=num(a.p2_sol_wp), n=num(a.p2_sol_n), wi=num(a.p2_sol_w), l=num(a.p2_sol_len); const parts=[]; if(w!=null&&n!=null) parts.push(`Installed peak power: <b>${fmt(w*n/1000,2)} kWp</b>`); if(wi!=null&&l!=null&&n!=null) parts.push(`module area: <b>${fmt(wi*l*n,1)} m²</b>`); return parts.join(" · ");}}
  ]},
-{id:"q29", part:"p2", no:29, req:1, title:"Solar – running costs per year", when:eT("solar"), skipWhy:"Solar not selected (Q18/19)",
+{id:"q29", part:"p2", no:29, title:"Solar – running costs per year", when:eT("solar"), skipWhy:"Solar not selected (Q{q18}/{q19})",
  fields:[costField("p2_sol_cost"),{t:"check", id:"p2_sol_photo", label:"Photos of the solar modules and the type plate taken", opt:1}]},
-{id:"q30", part:"p2", no:30, title:"Solar – problems in the last 6 months", when:eT("solar"), skipWhy:"Solar not selected (Q18/19)",
+{id:"q30", part:"p2", no:30, title:"Solar – problems in the last 6 months", when:eT("solar"), skipWhy:"Solar not selected (Q{q18}/{q19})",
  fields:[{t:"multi", id:"p2_sol_prob", label:"Problems", hint:"Multiple selection possible", options:problems()}]},
-{id:"q31", part:"p2", no:31, req:1, sec:"Details – Battery storage", title:"Battery as bridging system?", when:eT("batt"), skipWhy:"Battery not selected (Q18/19)",
- fields:[{t:"derived", id:"p2_bat_br", label:"Used as bridging system for power interruptions?", fn:bridgeTag("batt","Battery storage")}]},
-{id:"q32", part:"p2", no:32, req:1, title:"Battery – technical details", when:eT("batt"), skipWhy:"Battery not selected (Q18/19)",
+{id:"q32", part:"p2", no:32, sec:"Details – Battery storage", title:"Battery – technical details", when:eT("batt"), skipWhy:"Battery not selected (Q{q18}/{q19})",
  fields:[
   {t:"row", fields:[{t:"text", id:"p2_bat_man", label:"Manufacturer"},{t:"text", id:"p2_bat_mod", label:"Model name"},{t:"number", id:"p2_bat_age", label:"Age of the battery", unit:"years", step:"any"}]},
   {t:"row", fields:[{t:"number", id:"p2_bat_ah", label:"Capacity", unit:"Ah", step:"any"},{t:"number", id:"p2_bat_v", label:"Nominal voltage", unit:"V", step:"any", opt:1, hint:"Added: needed to convert Ah to kWh"},{t:"number", id:"p2_bat_kw", label:"Nominal power", unit:"kW", step:"any"}]},
@@ -530,17 +574,18 @@ const STEPS = [
   {t:"number", id:"p2_bat_h", label:"Possible bridging time period", unit:"hours", step:"any", narrow:1},
   {t:"computed", fn:a=>{const ah=num(a.p2_bat_ah), v=num(a.p2_bat_v); return (ah!=null&&v!=null)?`Nominal energy: <b>${fmt(ah*v/1000,1)} kWh</b>`:"";}}
  ]},
-{id:"q33", part:"p2", no:33, title:"Battery replacement", when:eT("batt"), skipWhy:"Battery not selected (Q18/19)",
+{id:"q33", part:"p2", no:33, title:"Battery replacement", when:eT("batt"), skipWhy:"Battery not selected (Q{q18}/{q19})",
  fields:[
   {t:"number", id:"p2_bat_since", label:"Since when are batteries used?", unit:"year", hint:"e.g. first system installed in 2015", narrow:1},
   {t:"single", id:"p2_bat_count", label:"How many batteries have been used since then?", options:[{v:"1", l:"Still the first one"},{v:"2", l:"Two"},{v:"more", l:"More", spec:"How many?"}]},
   {t:"multi", id:"p2_bat_why", label:"Reasons for battery exchanges", when:a=>a.p2_bat_count==="2"||a.p2_bat_count==="more", depNote:"Shown because batteries have been exchanged", options:[{v:"eol", l:"End of lifetime"},{v:"leak", l:"Leakage of chemicals"},{v:"oth", l:"Other", spec:"Specify"}]}
- ]},
-{id:"q34", part:"p2", no:34, title:"Battery – running costs per year", when:eT("batt"), skipWhy:"Battery not selected (Q18/19)",
+ ],
+ warn:a=>{const y=num(a.p2_bat_since), age=num(a.p2_bat_age); return (y!=null && age!=null && y>=1950 && age > YEAR-y+1) ? [`Batteries are used since ${y} (${YEAR-y} years), but the age of the current battery is given as ${fmt(age,1)} years in question ${QN("q32")}.`] : [];}},
+{id:"q34", part:"p2", no:34, title:"Battery – running costs per year", when:eT("batt"), skipWhy:"Battery not selected (Q{q18}/{q19})",
  fields:[costField("p2_bat_cost"),{t:"check", id:"p2_bat_photo", label:"Photos of the energy storage and the technical datasheets taken", opt:1}]},
-{id:"q35", part:"p2", no:35, title:"Battery – problems in the last 6 months", when:eT("batt"), skipWhy:"Battery not selected (Q18/19)",
+{id:"q35", part:"p2", no:35, title:"Battery – problems in the last 6 months", when:eT("batt"), skipWhy:"Battery not selected (Q{q18}/{q19})",
  fields:[{t:"multi", id:"p2_bat_prob", label:"Problems", hint:"Multiple selection possible", options:[{v:"noprob", l:"No problems in the last 6 months", excl:1},{v:"leak", l:"Leakage of chemicals"}, ...opts([["spare","No spare parts"],["funds","No funds for maintenance"],["train","No training to use or to repair"],["other","Others",{spec:"Specify"}]])]}]},
-{id:"q36", part:"p2", no:36, req:1, sec:"Details – Wind turbine", title:"Wind turbine – technical details", when:eT("wind"), skipWhy:"Wind turbine not selected (Q18/19)", help:"The technical datasheet is probably in the documents delivered with the wind turbine.",
+{id:"q36", part:"p2", no:36, sec:"Details – Wind turbine", title:"Wind turbine – technical details", when:eT("wind"), skipWhy:"Wind turbine not selected (Q{q18}/{q19})", help:"The technical datasheet is probably in the documents delivered with the wind turbine.",
  fields:[
   {t:"row", fields:[{t:"text", id:"p2_wi_man", label:"Manufacturer"},{t:"text", id:"p2_wi_mod", label:"Model name of wind turbine"}]},
   {t:"row", fields:[{t:"number", id:"p2_wi_age", label:"Age of the system", unit:"years", step:"any"},{t:"number", id:"p2_wi_kw", label:"Rated power", unit:"kW", step:"any"}]},
@@ -548,40 +593,41 @@ const STEPS = [
   {t:"row", label:"Dimensions", fields:[{t:"number", id:"p2_wi_hub", label:"Hub height", unit:"m", step:"any"},{t:"number", id:"p2_wi_blade", label:"Blade length", unit:"m", step:"any"}]},
   {t:"check", id:"p2_wi_photo", label:"Photos of the wind turbine and the datasheet taken", opt:1}
  ]},
-{id:"q37", part:"p2", no:37, req:1, title:"Wind turbine – running costs per year", when:eT("wind"), skipWhy:"Wind turbine not selected (Q18/19)", fields:[costField("p2_wi_cost")]},
-{id:"q38", part:"p2", no:38, title:"Wind turbine – problems in the last 6 months", when:eT("wind"), skipWhy:"Wind turbine not selected (Q18/19)",
+{id:"q37", part:"p2", no:37, title:"Wind turbine – running costs per year", when:eT("wind"), skipWhy:"Wind turbine not selected (Q{q18}/{q19})", fields:[costField("p2_wi_cost")]},
+{id:"q38", part:"p2", no:38, title:"Wind turbine – problems in the last 6 months", when:eT("wind"), skipWhy:"Wind turbine not selected (Q{q18}/{q19})",
  fields:[{t:"multi", id:"p2_wi_prob", label:"Problems", hint:"Multiple selection possible", options:problems()}]},
-{id:"q39", part:"p2", no:39, req:1, sec:"Details – Water turbine", title:"River details", when:eT("water"), skipWhy:"Water turbine not selected (Q18/19)",
+{id:"q39", part:"p2", no:39, sec:"Details – Water turbine", title:"River details", when:eT("water"), skipWhy:"Water turbine not selected (Q{q18}/{q19})",
  fields:[
   {t:"text", id:"p2_wa_river", label:"Name of the river"},
   {t:"row", label:"Coordinates of the water turbine", fields:[{t:"number", id:"p2_wa_lat", label:"Latitude", unit:"°", step:"any"},{t:"number", id:"p2_wa_lon", label:"Longitude", unit:"°", step:"any"}]}
  ]},
-{id:"q40", part:"p2", no:40, req:1, title:"Water turbine – technical details", when:eT("water"), skipWhy:"Water turbine not selected (Q18/19)",
+{id:"q40", part:"p2", no:40, title:"Water turbine – technical details", when:eT("water"), skipWhy:"Water turbine not selected (Q{q18}/{q19})",
  fields:[
   {t:"row", fields:[{t:"text", id:"p2_wa_man", label:"Manufacturer"},{t:"text", id:"p2_wa_mod", label:"Model name of water turbine"}]},
   {t:"row", fields:[{t:"number", id:"p2_wa_age", label:"Age of the system", unit:"years", step:"any"},{t:"number", id:"p2_wa_kw", label:"Installed capacity", unit:"kW", step:"any"}]},
   {t:"check", id:"p2_wa_photo", label:"Photos of the water turbine and the datasheets taken", opt:1}
  ]},
-{id:"q41", part:"p2", no:41, req:1, title:"Water turbine – running costs per year", when:eT("water"), skipWhy:"Water turbine not selected (Q18/19)", fields:[costField("p2_wa_cost")]},
-{id:"q42", part:"p2", no:42, title:"Water turbine – problems in the last 6 months", when:eT("water"), skipWhy:"Water turbine not selected (Q18/19)",
+{id:"q41", part:"p2", no:41, title:"Water turbine – running costs per year", when:eT("water"), skipWhy:"Water turbine not selected (Q{q18}/{q19})", fields:[costField("p2_wa_cost")]},
+{id:"q42", part:"p2", no:42, title:"Water turbine – problems in the last 6 months", when:eT("water"), skipWhy:"Water turbine not selected (Q{q18}/{q19})",
  fields:[{t:"multi", id:"p2_wa_prob", label:"Problems", hint:"Multiple selection possible", options:problems()}]},
 
 /* ---- Part 3 ---- */
-{id:"q43", part:"p3", no:43, req:1, sec:"Oxygen equipment", title:"Oxygen distribution",
+{id:"q43", part:"p3", no:43, sec:"Oxygen equipment", title:"Oxygen distribution",
  fields:[{t:"multi", id:"p3_dist", label:"Distribution options", hint:"Multiple selection possible", options:[{v:"tub", l:"Tubing"},{v:"central", l:"Central piping"},{v:"sub", l:"Sub-central piping"}]}]},
-{id:"q44", part:"p3", no:44, req:1, title:"Regulation & conditioning devices", help:"Count devices as electrical or mechanical (no electricity needed), independent of functionality. Then give the total number of non-functional devices, independent of electrical/mechanical. Enter 0 where none.",
+{id:"q44", part:"p3", no:44, noNA:1, title:"Regulation & conditioning devices", help:"Count devices as electrical or mechanical (no electricity needed), independent of functionality. Then give the total number of non-functional devices, independent of electrical/mechanical. Enter 0 where none.",
  fields:[
   {t:"grid", id:"p3_reg", label:"Total number of devices", rows:[{k:"fm", l:"Flowmeter"},{k:"fms", l:"Flowmeter stand (flow splitter)"},{k:"fmw", l:"Flowmeter (wall-mounted)"},{k:"humn", l:"Humidifier (non-heated)"},{k:"humh", l:"Humidifier (heated)"},{k:"blend", l:"Blender"},{k:"cpap", l:"CPAP"},{k:"vport", l:"Ventilator (portable)"},{k:"vicua", l:"Ventilator (intensive care – adult)"},{k:"vicup", l:"Ventilator (intensive care – paediatric)"}], cols:[{k:"el", l:"Electrical"},{k:"me", l:"Mechanical"},{k:"nf", l:"Non-functional"}], live:1},
   nfReasonsField("p3_reg_why","p3_reg","nf")
  ],
- warn:a=>{const w=[]; const g=a.p3_reg||{}; for(const r in g){const t=(num(g[r].el)||0)+(num(g[r].me)||0), nf=num(g[r].nf); if(nf!=null&&nf>t) w.push(`${({fm:"Flowmeter",fms:"Flowmeter stand",fmw:"Wall-mounted flowmeter",humn:"Humidifier (non-heated)",humh:"Humidifier (heated)",blend:"Blender",cpap:"CPAP",vport:"Portable ventilator",vicua:"ICU ventilator (adult)",vicup:"ICU ventilator (paediatric)"})[r]}: non-functional (${nf}) exceeds total (${t}).`);} if(elecNone(a) && (gridSum(a,"p3_reg","el")>0)) w.push("Electrical devices are counted, but question 18 says no electricity is available."); return w;}},
-{id:"q45", part:"p3", no:45, title:"Flowmeters & flow splitters – more information", when:a=>["fm","fmw","fms"].some(r=>((cell(a,"p3_reg",r,"el")||0)+(cell(a,"p3_reg",r,"me")||0))>0), skipWhy:"No flowmeters counted in Q44",
+ warn:a=>{const w=[]; const g=a.p3_reg||{}; for(const r in g){const t=(num(g[r].el)||0)+(num(g[r].me)||0), nf=num(g[r].nf); if(nf!=null&&nf>t) w.push(`${({fm:"Flowmeter",fms:"Flowmeter stand",fmw:"Wall-mounted flowmeter",humn:"Humidifier (non-heated)",humh:"Humidifier (heated)",blend:"Blender",cpap:"CPAP",vport:"Portable ventilator",vicua:"ICU ventilator (adult)",vicup:"ICU ventilator (paediatric)"})[r]}: non-functional (${nf}) exceeds total (${t}).`);} if(elecNone(a) && (gridSum(a,"p3_reg","el")>0)) w.push(`Electrical devices are counted, but question ${QN("q18")} says no electricity is available.`); return w;}},
+{id:"q45", part:"p3", no:45, title:"Flowmeters & flow splitters – more information", when:a=>["fm","fmw","fms"].some(r=>((cell(a,"p3_reg",r,"el")||0)+(cell(a,"p3_reg",r,"me")||0))>0), skipWhy:"No flowmeters counted in Q{q44}",
  fields:[
   {t:"grid", id:"p3_fm_rate", label:"Functional flowmeters by maximum flow rate", when:a=>["fm","fmw"].some(r=>((cell(a,"p3_reg",r,"el")||0)+(cell(a,"p3_reg",r,"me")||0))>0), rows:[{k:"2",l:"Up to 2 L/min"},{k:"5",l:"Up to 5 L/min"},{k:"10",l:"Up to 10 L/min"},{k:"15",l:"Up to 15 L/min"},{k:"gt15",l:"Greater than 15 L/min"}], cols:[{k:"n", l:"Total number"}]},
   {t:"grid", id:"p3_fs", label:"Functional flow splitters by number of outlets and maximum flow rate", when:a=>((cell(a,"p3_reg","fms","el")||0)+(cell(a,"p3_reg","fms","me")||0))>0, depNote:"Shown because flowmeter stands were counted", rows:[{k:"2",l:"2 outlets"},{k:"3",l:"3 outlets"},{k:"4",l:"4 outlets"},{k:"5",l:"5 outlets"}], cols:[{k:"1",l:"Up to 1 L/min"},{k:"2",l:"Up to 2 L/min"}]},
   {t:"repeat", id:"p3_fs_oth", label:"Other flow splitters not listed above", opt:1, when:a=>((cell(a,"p3_reg","fms","el")||0)+(cell(a,"p3_reg","fms","me")||0))>0, cols:[{k:"out", l:"Number of outlets", t:"number"},{k:"rate", l:"Maximum flow rate (L/min)", t:"number"},{k:"n", l:"Total number", t:"number"}], addLabel:"Add flow-splitter type"}
- ]},
-{id:"q46", part:"p3", no:46, req:1, sec:"Delivery devices", title:"Oxygen delivery devices",
+ ],
+ warn:a=>{const w=[]; const tot=r=>(cell(a,"p3_reg",r,"el")||0)+(cell(a,"p3_reg",r,"me")||0); const fm=tot("fm")+tot("fmw"); const byRate=gridSum(a,"p3_fm_rate"); if(fm>0 && byRate>fm) w.push(`${fmt(byRate)} functional flowmeters are listed by flow rate, but only ${fmt(fm)} flowmeters were counted in question ${QN("q44")}.`); const fs=tot("fms"); let sp=gridSum(a,"p3_fs"); (Array.isArray(a.p3_fs_oth)?a.p3_fs_oth:[]).forEach(r=>{const v=num(r.n); if(v!=null) sp+=v;}); if(fs>0 && sp>fs) w.push(`${fmt(sp)} functional flow splitters are listed, but only ${fmt(fs)} flowmeter stands were counted in question ${QN("q44")}.`); return w;}},
+{id:"q46", part:"p3", no:46, sec:"Delivery devices", title:"Oxygen delivery devices",
  fields:[{t:"grid", id:"p3_deliv", label:"Number of devices", rows:[{k:"nc",l:"Nasal cannula"},{k:"mask",l:"Oxygen masks"},{k:"venturi",l:"Venturi masks"},{k:"tub",l:"Tubing"},{k:"cath",l:"Nasal catheter"},{k:"hfnc",l:"High-flow nasal cannula (HFNC)"}], cols:APN.map(c=>({k:c[0], l:c[1]}))}]},
 {id:"q47", part:"p3", no:47, title:"Airway equipment – more information",
  fields:[
@@ -589,85 +635,87 @@ const STEPS = [
   {t:"grid", id:"p3_intub", label:"Intubation sets", rows:[{k:"ett",l:"Endotracheal tube set"},{k:"tube",l:"Tube"},{k:"guide",l:"Guide (stylet or bougie)"},{k:"lma",l:"Laryngeal mask"},{k:"etco2",l:"Colorimetric end-tidal CO₂ detector"}], cols:APN.map(c=>({k:c[0], l:c[1]}))},
   {t:"grid", id:"p3_airw", label:"Airways", rows:[{k:"opa",l:"Oropharyngeal (Guedel) airway"},{k:"npa",l:"Nasopharyngeal airway"}], cols:[{k:"su",l:"Single-use"},{k:"re",l:"Reusable"}]}
  ]},
-{id:"q48", part:"p3", no:48, req:1, sec:"Pulse oximeters & monitoring", title:"Pulse oximeters and patient monitors", help:"Note the total number of devices independent of functionality, then the number of non-functional devices.",
+{id:"q48", part:"p3", no:48, sec:"Pulse oximeters & monitoring", title:"Pulse oximeters and patient monitors", help:"Note the total number of devices independent of functionality, then the number of non-functional devices.",
  fields:[
   {t:"grid", id:"p3_mon", label:"Devices", rows:[{k:"fing",l:"Pulse oximeter – self-contained fingertip"},{k:"hand",l:"Pulse oximeter – portable handheld"},{k:"stat",l:"Pulse oximeter – stationary device"},{k:"ecg",l:"Vital sign monitor with integrated ECG"},{k:"noecg",l:"Vital sign monitor without integrated ECG"}], cols:[{k:"tot",l:"Total number"},{k:"nf",l:"Non-functional"}], live:1},
   nfReasonsField("p3_mon_why","p3_mon","nf")
  ],
- warn:a=>{const w=[]; const g=a.p3_mon||{}; for(const r in g){const t=num(g[r].tot), nf=num(g[r].nf); if(t!=null&&nf!=null&&nf>t) w.push(`Non-functional devices (${nf}) exceed total (${t}) in one row.`);} return w;}},
-{id:"q49", part:"p3", no:49, req:1, sec:"Other equipment", title:"Resuscitation bags and masks", help:"Count complete bag-and-mask units by size.",
+ warn:a=>{const w=[]; const g=a.p3_mon||{}; const L={fing:"Fingertip pulse oximeter",hand:"Handheld pulse oximeter",stat:"Stationary pulse oximeter",ecg:"Monitor with ECG",noecg:"Monitor without ECG"}; for(const r in g){const t=num(g[r].tot), nf=num(g[r].nf); if(nf!=null&&nf>(t||0)) w.push(`${L[r]||r}: non-functional (${nf}) exceeds total (${t==null?"not given":t}).`);} return w;}},
+{id:"q49", part:"p3", no:49, sec:"Other equipment", title:"Resuscitation bags and masks", help:"Count complete bag-and-mask units by size.",
  fields:[{t:"grid", id:"p3_bvm", label:"Resuscitation bag + mask units", rows:[{k:"ad",l:"Adult"},{k:"pa",l:"Paediatric"},{k:"ne",l:"Neonatal"}], cols:[{k:"n", l:"Total number"}]}]},
-{id:"q50", part:"p3", no:50, req:1, title:"Suction devices", help:"Count complete suction devices by type.",
+{id:"q50", part:"p3", no:50, title:"Suction devices", help:"Count complete suction devices by type.",
  fields:[
   {t:"grid", id:"p3_suc", label:"Suction devices", rows:[{k:"man",l:"Manual"},{k:"el",l:"Electric"},{k:"vac",l:"Central vacuum"}], cols:FUNC.map(c=>({k:c[0], l:c[1]})), live:1},
   nfReasonsField("p3_suc_why","p3_suc","nf")
  ]},
-{id:"q51", part:"p3", no:51, req:1, title:"Autoclave / sterilizer",
+{id:"q51", part:"p3", no:51, title:"Autoclave / sterilizer",
  fields:[
   {t:"grid", id:"p3_auto", label:"Autoclaves and sterilizers by capacity", rows:[{k:"40",l:"40–60 L"},{k:"90",l:"> 90 L"}], cols:FUNC.map(c=>({k:c[0], l:c[1]}))},
   {t:"repeat", id:"p3_auto_oth", label:"Other autoclave / sterilizer types not listed above", opt:1, cols:[{k:"cap", l:"Capacity (L)", t:"number"},{k:"type", l:"Type (e.g. ethylene oxide)", t:"text"},{k:"f", l:"Functional", t:"number"},{k:"nf", l:"Non-functional", t:"number"}], addLabel:"Add type"}
  ]},
-{id:"q52", part:"p3", no:52, req:1, title:"BiPAP & CPAP machines",
+{id:"q52", part:"p3", no:52, title:"BiPAP & CPAP machines",
  fields:[{t:"grid", id:"p3_bipap", label:"BiPAP & CPAP machines by size", rows:[{k:"ad",l:"Adult"},{k:"pa",l:"Paediatric"},{k:"ne",l:"Neonatal"}], cols:FUNC.map(c=>({k:c[0], l:c[1]}))}]},
-{id:"q53", part:"p3", no:53, req:1, sec:"Oxygen sources", title:"Main source(s) of oxygen", help:"Multiple selection possible. Detail questions are shown later only for the sources selected here or in question 54.",
+{id:"q53", part:"p3", no:53, noNA:1, sec:"Oxygen sources", title:"Main source(s) of oxygen", help:"Multiple selection possible. Detail questions are shown later only for the sources selected here or in question {q54}.",
  fields:[{t:"multi", id:"p3_main", label:"Main sources", options:[{v:"none", l:"No oxygen available", excl:1}, ...opts(O2_TECH)]}],
- warn:a=>{const w=[]; if(elecNone(a) && (has(a,"p3_main","conc")||has(a,"p3_main","psa"))) w.push("Concentrators and oxygen plants need electricity, but question 18 says no electricity is available."); return w;}},
-{id:"q54", part:"p3", no:54, req:1, title:"Oxygen bridging system", when:a=>!o2None(a), skipWhy:"No oxygen available (Q53)",
+ warn:a=>{const w=[]; if(elecNone(a) && (has(a,"p3_main","conc")||has(a,"p3_main","psa"))) w.push(`Concentrators and oxygen plants need electricity, but question ${QN("q18")} says no electricity is available.`); return w;}},
+{id:"q54", part:"p3", no:54, noNA:1, title:"Oxygen bridging system", when:a=>!o2None(a), skipWhy:"No oxygen available (Q{q53})",
  help:"Bridging system: if the main oxygen source fails, this system supplies oxygen until the main source is available again.",
  fields:[
   {t:"multi", id:"p3_br_type", label:"Type of bridging system", options:[{v:"none", l:"No bridging system", excl:1}, ...opts(O2_TECH)]},
   {t:"number", id:"p3_br_h", label:"Possible bridging time period", unit:"hours", step:"any", narrow:1, when:a=>any(a,"p3_br_type") && !o2BridgeNone(a)},
   {t:"textarea", id:"p3_br_desc", label:"Description of the oxygen bridging system", opt:1, when:a=>any(a,"p3_br_type") && !o2BridgeNone(a)}
- ]},
-{id:"q55", part:"p3", no:55, req:1, title:"Maintenance of oxygen supply", when:a=>!o2None(a), skipWhy:"No oxygen available (Q53)",
+ ],
+ warn:a=>{const w=[]; const m=a.p3_main||[], b=a.p3_br_type||[]; if(elecNone(a) && (b.includes("conc")||b.includes("psa"))) w.push(`Concentrators and oxygen plants need electricity, but question ${QN("q18")} says no electricity is available.`); if(m.length===1 && b.length===1 && m[0]===b[0] && m[0]!=="none" && m[0]!=="cyl") w.push("The bridging system is the same as the only main source. A bridging system usually has to be a different source."); return w;}},
+{id:"q55", part:"p3", no:55, title:"Maintenance of oxygen supply", when:a=>!o2None(a), skipWhy:"No oxygen available (Q{q53})",
  fields:[
-  {t:"text", id:"p3_mt_staff", label:"Responsible staff (name)"},
+  {t:"yn", id:"p3_mt_staff", label:"Is there a designated person responsible for maintenance?"},
   {t:"text", id:"p3_mt_int", label:"Maintenance interval", hint:"e.g. once a year, only when needed"},
   {t:"yn", id:"p3_mt_ext", label:"Need for external technical / professional support"},
   {t:"text", id:"p3_mt_fix", label:"Average time until problems are fixed", hint:"e.g. hours / days"}
  ]},
-{id:"q56", part:"p3", no:56, req:1, title:"Staff experience with ventilation / intubation",
+{id:"q56", part:"p3", no:56, title:"Staff experience with ventilation / intubation",
  fields:[
   {t:"yn", id:"p3_exp_inv", label:"Clinical staff with experience in invasive mechanical ventilation / intubation"},
   {t:"yn", id:"p3_exp_niv", label:"Clinical staff with experience in non-invasive ventilation"}
  ]},
-{id:"q57", part:"p3", no:57, req:1, sec:"Details – Cylinders", title:"Cylinders per week", when:oT("cyl"), skipWhy:"Cylinders not selected (Q53/54)", help:"For each cylinder size, count the number of cylinders needed in the facility in one week.",
+{id:"q57", part:"p3", no:57, sec:"Details – Cylinders", title:"Cylinders per week", when:oT("cyl"), skipWhy:"Cylinders not selected (Q{q53}/{q54})", help:"For each cylinder size, count the number of cylinders needed in the facility in one week.",
  fields:[
   {t:"grid", id:"p3_cyl", label:"Cylinders needed per week", rows:[...CYL.map(c=>({k:c[0], l:`Type ${c[0]}`, s:`${fmt(c[1])} L O₂`})),{k:"oth", l:"Other"}], cols:[{k:"n", l:"Number per week"}], live:1},
   {t:"number", id:"p3_cyl_othcap", label:"O₂ capacity of “Other” cylinders", unit:"L", opt:1, narrow:1, when:a=>cell(a,"p3_cyl","oth","n")>0},
   {t:"computed", fn:a=>{let L=0,n=0; CYL.forEach(([k,c])=>{const v=cell(a,"p3_cyl",k,"n"); if(v){L+=v*c;n+=v;}}); const o=cell(a,"p3_cyl","oth","n"), oc=num(a.p3_cyl_othcap); if(o){n+=o; if(oc) L+=o*oc;} return n?`≈ <b>${fmt(L)} L O₂ per week</b> from ${fmt(n)} cylinders (≈ ${fmt(L/7/1440,1)} L/min continuous average).`:"";}}
  ]},
-{id:"q58", part:"p3", no:58, req:1, title:"Cylinder costs", when:oT("cyl"), skipWhy:"Cylinders not selected (Q53/54)",
- fields:[costField("p3_cyl_wcost","Costs for cylinders per week"), costField("p3_cyl_ycost")]},
-{id:"q59", part:"p3", no:59, title:"Cylinder manifolds & assembly units", when:oT("cyl"), skipWhy:"Cylinders not selected (Q53/54)",
+{id:"q58", part:"p3", no:58, title:"Cylinder costs", when:oT("cyl"), skipWhy:"Cylinders not selected (Q{q53}/{q54})",
+ fields:[costField("p3_cyl_wcost","Costs for cylinders per week"), costField("p3_cyl_ycost")],
+ warn:a=>{const wk=num(a.p3_cyl_wcost), yr=num(a.p3_cyl_ycost); const same=(a.p3_cyl_wcost_cur||"").trim().toUpperCase()===(a.p3_cyl_ycost_cur||"").trim().toUpperCase(); return (wk!=null && yr!=null && wk>0 && same && yr<wk*12) ? [`The costs per year (${fmt(yr,2)}) are lower than three months of the weekly costs (${fmt(wk,2)} per week). Please check both amounts.`] : [];}},
+{id:"q59", part:"p3", no:59, title:"Cylinder manifolds & assembly units", when:oT("cyl"), skipWhy:"Cylinders not selected (Q{q53}/{q54})",
  fields:[
   {t:"grid", id:"p3_manif", label:"Oxygen cylinder manifolds", hint:"By number of cylinders that fit, and switching mechanism.", rows:[2,3,4,5,6,7,8].map(n=>({k:String(n), l:`${n} cylinders`})), cols:[{k:"man",l:"Manual switch"},{k:"el",l:"Electrical switch"}]},
   {t:"grid", id:"p3_asm", label:"Cylinder assembly units (pressure regulator and gauge)", rows:[{k:"pin",l:"Pin-index"},{k:"bull",l:"Bull-nose"}], cols:FUNC.map(c=>({k:c[0], l:c[1]}))}
  ]},
-{id:"q60", part:"p3", no:60, title:"Cylinders – problems in the last 6 months", when:oT("cyl"), skipWhy:"Cylinders not selected (Q53/54)",
+{id:"q60", part:"p3", no:60, title:"Cylinders – problems in the last 6 months", when:oT("cyl"), skipWhy:"Cylinders not selected (Q{q53}/{q54})",
  fields:[{t:"textarea", id:"p3_cyl_prob", label:"Problems", hint:"e.g. reliability of power supply, no qualified maintenance staff, long waiting period for spare parts and/or restocking"}]},
-{id:"q61", part:"p3", no:61, req:1, sec:"Details – Concentrators", title:"Concentrators – function", when:oT("conc"), skipWhy:"Concentrators not selected (Q53/54)",
+{id:"q61", part:"p3", no:61, sec:"Details – Concentrators", title:"Concentrators – function", when:oT("conc"), skipWhy:"Concentrators not selected (Q{q53}/{q54})",
  help:"For each maximum capacity, count functioning and non-functioning concentrators. If possible, test the purity after running the device for more than 5 minutes: count a concentrator as functional only if output purity is ≥ 85 %.",
  fields:[
   {t:"grid", id:"p3_conc", label:"Concentrators by maximum capacity", rows:[{k:"3",l:"Up to 3 L/min"},{k:"5",l:"Up to 5 L/min"},{k:"8",l:"Up to 8 L/min"},{k:"10",l:"Up to 10 L/min"},{k:"gt10",l:"Greater than 10 L/min"}], cols:FUNC.map(c=>({k:c[0], l:c[1]})), live:1},
   nfReasonsField("p3_conc_why","p3_conc","nf")
  ]},
-{id:"q62", part:"p3", no:62, req:1, title:"Concentrators – more information", when:oT("conc"), skipWhy:"Concentrators not selected (Q53/54)",
+{id:"q62", part:"p3", no:62, title:"Concentrators – more information", when:oT("conc"), skipWhy:"Concentrators not selected (Q{q53}/{q54})",
  fields:[
   {t:"row", fields:[{t:"number", id:"p3_conc_age", label:"Average age of devices", unit:"years", step:"any"},{t:"number", id:"p3_conc_l", label:"Amount of produced O₂ per week", unit:"L"}]},
   costField("p3_conc_cost")
  ]},
-{id:"q63", part:"p3", no:63, title:"Concentrators – problems in the last 6 months", when:oT("conc"), skipWhy:"Concentrators not selected (Q53/54)",
+{id:"q63", part:"p3", no:63, title:"Concentrators – problems in the last 6 months", when:oT("conc"), skipWhy:"Concentrators not selected (Q{q53}/{q54})",
  fields:[{t:"textarea", id:"p3_conc_prob", label:"Problems", hint:"e.g. no qualified maintenance staff, waiting period for spare parts and/or restocking"}]},
-{id:"q64", part:"p3", no:64, req:1, sec:"Details – On-site oxygen plant (PSA)", title:"Oxygen plant – technical details", when:oT("psa"), skipWhy:"Oxygen plant not selected (Q53/54)", help:"Found on the technical type plate.",
+{id:"q64", part:"p3", no:64, sec:"Details – On-site oxygen plant (PSA)", title:"Oxygen plant – technical details", when:oT("psa"), skipWhy:"Oxygen plant not selected (Q{q53}/{q54})", help:"Found on the technical type plate.",
  fields:[
   {t:"row", fields:[{t:"text", id:"p3_psa_man", label:"Manufacturer"},{t:"text", id:"p3_psa_mod", label:"Model name"}]},
   {t:"row", fields:[{t:"number", id:"p3_psa_w", label:"Rated power", unit:"W"},{t:"number", id:"p3_psa_age", label:"Age of the system", unit:"years", step:"any"}]},
   {t:"row", label:"Maximum production capacity", fields:[{t:"number", id:"p3_psa_cap", label:"Capacity", step:"any"},{t:"text", id:"p3_psa_capu", label:"Unit", list:["L/hr","L/min","m³/hr","Nm³/hr"], ph:"L/hr"}]}
  ]},
-{id:"q65", part:"p3", no:65, req:1, title:"Oxygen plant – more information", when:oT("psa"), skipWhy:"Oxygen plant not selected (Q53/54)",
+{id:"q65", part:"p3", no:65, title:"Oxygen plant – more information", when:oT("psa"), skipWhy:"Oxygen plant not selected (Q{q53}/{q54})",
  fields:[
-  {t:"number", id:"p3_psa_pct", label:"Concentration of produced oxygen", unit:"%", step:"any", narrow:1},
+  {t:"number", id:"p3_psa_pct", label:"Concentration of produced oxygen", unit:"%", step:"any", narrow:1, hint:"In percent, e.g. 93"},
   {t:"yn", id:"p3_psa_ramp", label:"Existence of a filling ramp / manifold for cylinders"},
   {t:"grid", id:"p3_psa_conn", label:"Number of cylinder connections on the ramp / manifold", when:a=>a.p3_psa_ramp==="yes", depNote:"Shown because a filling ramp exists", rows:[{k:"bull",l:"Bull-nose"},{k:"pin",l:"Pin-index"}], cols:[{k:"n",l:"Number of"}]},
   {t:"row", label:"Pressure in filled cylinders", when:a=>a.p3_psa_ramp==="yes", fields:[{t:"number", id:"p3_psa_bar", label:"Pressure", step:"any"},{t:"text", id:"p3_psa_baru", label:"Unit", list:["bar","psi","kPa"], ph:"bar"}]},
@@ -677,18 +725,18 @@ const STEPS = [
   {t:"number", id:"p3_psa_pipe_l", label:"Oxygen delivered through piping per week", unit:"L", narrow:1, when:a=>a.p3_psa_pipe==="yes"},
   costField("p3_psa_cost")
  ],
- warn:a=>{const w=[]; const p=num(a.p3_psa_pct); if(p!=null&&p<90) w.push(`Oxygen concentration of ${p} % is below the 90–96 % range expected for Oxygen 93 % from PSA plants.`); const g=a.p3_psa_cyl||{}; for(const r in g){const t=num(g[r].tot), o=num(g[r].ons); if(t!=null&&o!=null&&o>t) w.push(`Type ${r}: used on-site (${o}) exceeds total filled (${t}).`);} return w;}},
-{id:"q66", part:"p3", no:66, req:1, title:"Oxygen plant – function", when:oT("psa"), skipWhy:"Oxygen plant not selected (Q53/54)",
+ warn:a=>{const w=[]; const p=num(a.p3_psa_pct); if(p!=null&&p<90) w.push(`Oxygen concentration of ${p} % is below the 90–96 % range expected for Oxygen 93 % from PSA plants.`); const g=a.p3_psa_ramp==="yes" ? (a.p3_psa_cyl||{}) : {}; for(const r in g){const t=num(g[r].tot), o=num(g[r].ons); if(o!=null&&o>(t||0)) w.push(`${r==="oth"?"Other cylinders":"Type "+r}: used on-site (${o}) exceeds total filled (${t==null?"not given":t}).`);} return w;}},
+{id:"q66", part:"p3", no:66, title:"Oxygen plant – function", when:oT("psa"), skipWhy:"Oxygen plant not selected (Q{q53}/{q54})",
  fields:[
   {t:"yn", id:"p3_psa_24", label:"Is the oxygen plant operating 24 hours a day?"},
   {t:"yn", id:"p3_psa_backup", label:"Is the oxygen plant connected to a back-up source of electricity?"},
   {t:"yn", id:"p3_psa_surge", label:"Is there a surge suppressor for the oxygen plant?"},
   {t:"yn", id:"p3_psa_stab", label:"Is there a voltage stabilizer for the oxygen plant?"}
  ],
- warn:a=>(a.p3_psa_backup==="yes" && elecBridgeNone(a)) ? ["The plant is said to have back-up electricity, but question 19 says there is no electrical bridging system."] : []},
-{id:"q67", part:"p3", no:67, title:"Oxygen plant – problems in the last 6 months", when:oT("psa"), skipWhy:"Oxygen plant not selected (Q53/54)",
+ warn:a=>(a.p3_psa_backup==="yes" && elecBridgeNone(a)) ? [`The plant is said to have back-up electricity, but question ${QN("q19")} says there is no electrical bridging system.`] : []},
+{id:"q67", part:"p3", no:67, title:"Oxygen plant – problems in the last 6 months", when:oT("psa"), skipWhy:"Oxygen plant not selected (Q{q53}/{q54})",
  fields:[{t:"textarea", id:"p3_psa_prob", label:"Problems", hint:"e.g. reliability of power supply, no qualified maintenance staff, waiting period for spare parts or restocking empty cylinders"}]},
-{id:"q68", part:"p3", no:68, req:1, sec:"Details – Liquid oxygen", title:"Bulk liquid oxygen tank", when:oT("lox"), skipWhy:"Liquid oxygen not selected (Q53/54)",
+{id:"q68", part:"p3", no:68, sec:"Details – Liquid oxygen", title:"Bulk liquid oxygen tank", when:oT("lox"), skipWhy:"Liquid oxygen not selected (Q{q53}/{q54})",
  fields:[
   {t:"yn", id:"p3_lox_tank", label:"Existence of a bulk liquid oxygen tank"},
   {t:"number", id:"p3_lox_cap", label:"Tank capacity", unit:"L liquid O₂", narrow:1, when:a=>a.p3_lox_tank==="yes"},
@@ -696,9 +744,9 @@ const STEPS = [
   {t:"single", id:"p3_lox_refill", label:"Refill frequency", options:[{v:"d", l:"Daily"},{v:"w", l:"Weekly"},{v:"o", l:"Other", spec:"Specify"}]},
   costField("p3_lox_cost")
  ]},
-{id:"q69", part:"p3", no:69, title:"Liquid oxygen – problems in the last 6 months", when:oT("lox"), skipWhy:"Liquid oxygen not selected (Q53/54)",
+{id:"q69", part:"p3", no:69, title:"Liquid oxygen – problems in the last 6 months", when:oT("lox"), skipWhy:"Liquid oxygen not selected (Q{q53}/{q54})",
  fields:[{t:"textarea", id:"p3_lox_prob", label:"Problems", hint:"e.g. reliability of supply, no qualified maintenance staff, waiting period for restocking"}]},
-{id:"q70", part:"p3", no:70, title:"Description of the process", when:oT("lox"), skipWhy:"Liquid oxygen not selected (Q53/54)",
+{id:"q70", part:"p3", no:70, title:"Description of the process", when:oT("lox"), skipWhy:"Liquid oxygen not selected (Q{q53}/{q54})",
  fields:[{t:"textarea", id:"p3_lox_desc", label:"Description of the liquid oxygen supply process"}]},
 
 /* ---- Part 4 ---- */
@@ -709,20 +757,71 @@ const STEPS = [
 {id:"cons", part:"p5", title:"Essential power consumers", help:"Note all electrical consumers by category. Type: short description (ideally manufacturer and model). Power per device: from the datasheet or the type plate. Operates reliably: “No” if the device has frequent technical problems (apart from power cuts).",
  fields:[
   ...[["light","Light","e.g. Light bulbs"],["o2","Equipment for oxygen supply","e.g. O₂ concentrator up to 5 L/min (DeVilbiss Compact 525)"],["med","Other medical equipment","e.g. Heating mattress (Dräger Babyleo TN500)"],["cold","Cold chain","e.g. Fridge 6 °C, 140 L"],["oth","Others","e.g. Notebook / computer, water pump"]].map(([k,l,ph])=>(
-   {t:"repeat", id:"p5_"+k, label:l, opt:1, cols:[{k:"type", l:"Type", t:"text", ph},{k:"n", l:"Number of devices", t:"number"},{k:"w", l:"Power per device (W)", t:"number"},{k:"rel", l:"Operates reliably", t:"select", o:["Yes","No"]},{k:"age", l:"Oldest device (years)", t:"number"}], addLabel:"Add device", live:1, sum:1})),
+   {t:"repeat", id:"p5_"+k, label:l, opt:1, cols:[{k:"type", l:"Type", t:"text", ph},{k:"n", l:"Number of devices", t:"number"},{k:"w", l:"Power per device (W)", t:"number", wmax:50000, wmsg:"More than 50,000 W (50 kW) for one device is unusual. Please check: the unit is watt (1 kW = 1,000 W)."},{k:"rel", l:"Operates reliably", t:"select", o:["Yes","No"]},{k:"age", l:"Oldest device (years)", t:"number", max:100, wmax:40, wmsg:"An age above 40 years is unusual. Please check (age in years)."}], addLabel:"Add device", live:1, sum:1})),
   {t:"computed", fn:a=>{const cats=[["light","Light"],["o2","Oxygen supply"],["med","Other medical"],["cold","Cold chain"],["oth","Others"]]; let tot=0; const rows=cats.map(([k,l])=>{let s=0; (a["p5_"+k]||[]).forEach(r=>{const n=num(r.n), w=num(r.w); if(n!=null&&w!=null) s+=n*w;}); tot+=s; return `<tr><td>${l}</td><td class="mono" style="text-align:right">${fmt(s/1000,2)}</td></tr>`;}).join(""); return `<b style="font-family:var(--f-display);font-size:1.05rem">Installed power by category (kW)</b><table class="g" style="margin-top:6px;max-width:360px"><tbody>${rows}</tbody><tfoot><tr><td>Total installed</td><td class="mono" style="text-align:right">${fmt(tot/1000,2)}</td></tr></tfoot></table><div class="small muted" style="margin-top:6px">Number × power per device; not all devices run at the same time.</div>`;}}
- ]},
+ ],
+ warn:a=>{const w=[]; ["light","o2","med","cold","oth"].forEach(k=>(Array.isArray(a["p5_"+k])?a["p5_"+k]:[]).forEach((r,i)=>{ if(filled(r.n)!==filled(r.w) && (filled(r.n)||filled(r.w))) w.push(`${({light:"Light",o2:"Equipment for oxygen supply",med:"Other medical equipment",cold:"Cold chain",oth:"Others"})[k]}, row ${i+1}: number of devices and power per device are both needed to calculate the installed power.`); })); if(elecNone(a) && ["light","o2","med","cold","oth"].some(k=>(a["p5_"+k]||[]).some(r=>Object.values(r).some(filled)))) w.push(`Question ${QN("q18")} says no electricity is available. Please list here only devices that exist at the facility.`); return w;}},
 
 /* ---- Finish ---- */
 {id:"docs", part:"p6", title:"Photos & documents", help:"Please send the requested photos to the survey team (see the contact on the last page), quoting your survey ID.",
  fields:[
   {t:"check", id:"doc_aerial", label:"Aerial photo or land development plan of the health facility", opt:1},
   {t:"check", id:"doc_surr", label:"Photos of the health facility with the nearest surroundings", opt:1},
-  {t:"computed", fn:a=>{const L=[]; const t=elecTech(a); const ck=(id,l)=>L.push(`<div>${a[id]?"✓":"○"} ${esc(l)} <span class="muted small">${a[id]?"":"(not yet ticked)"}</span></div>`); if(t.has("grid")) ck("p2_grid_photo","Last electricity bill (Q22)"); if(t.has("gen")) ck("p2_gen_photo","Generators and type plates (Q24)"); if(t.has("solar")) ck("p2_sol_photo","Solar modules and type plate (Q29)"); if(t.has("batt")) ck("p2_bat_photo","Battery storage and datasheets (Q34)"); if(t.has("wind")) ck("p2_wi_photo","Wind turbine and datasheet (Q36)"); if(t.has("water")) ck("p2_wa_photo","Water turbine and datasheets (Q40)"); return L.length?`<b>Photos requested in Part 2</b>${L.join("")}`:"";}}
+  {t:"computed", fn:a=>{const L=[]; const t=elecTech(a); const ck=(id,l)=>L.push(`<div>${a[id]?"✓":"○"} ${esc(l)} <span class="muted small">${a[id]?"":"(not yet ticked)"}</span></div>`); if(t.has("grid")) ck("p2_grid_photo",`Last electricity bill (Q${QN("q22")})`); if(t.has("gen")) ck("p2_gen_photo",`Generators and type plates (Q${QN("q24")})`); if(t.has("solar")) ck("p2_sol_photo",`Solar modules and type plate (Q${QN("q29")})`); if(t.has("batt")) ck("p2_bat_photo",`Battery storage and datasheets (Q${QN("q34")})`); if(t.has("wind")) ck("p2_wi_photo",`Wind turbine and datasheet (Q${QN("q36")})`); if(t.has("water")) ck("p2_wa_photo",`Water turbine and datasheets (Q${QN("q40")})`); return L.length?`<b>Photos requested in Part 2</b>${L.join("")}`:"";}}
  ]},
 {id:"review", part:"p6", title:"Review & submit", custom:"review"}
 ];
 
+
+/* ---------- question numbers ----------
+   Pages are numbered consecutively in the order shown (1, 2, 3 …), so there are no gaps where pages of the original
+   questionnaire were removed. Set RENUMBER = false to keep the numbers of the original Excel questionnaire.
+   Texts refer to other questions with {q19} (static texts) or QN("q19") (texts built while the survey runs). */
+const RENUMBER = true;
+if (RENUMBER) { let n = 0; STEPS.forEach(s => { if (s.no) s.no = ++n; }); }
+const QN = id => { const s = STEPS.find(x => x.id===id); return s && s.no ? s.no : "?"; };
+(function fillRefs(){
+  const f = t => typeof t==="string" ? t.replace(/\{(q\d+)\}/g, (m, id) => QN(id)) : t;
+  const walk = fs => (fs||[]).forEach(x => { ["label","hint","depNote","collapsed"].forEach(k => { if (x[k]) x[k] = f(x[k]); }); if (x.fields) walk(x.fields); });
+  STEPS.forEach(s => { s.help = f(s.help); s.skipWhy = f(s.skipWhy); walk(s.fields); });
+})();
+const BEDGRID = () => STEPS.find(s => s.id==="q9").fields.find(f => f.id==="p1_deptbeds");
+
+/* ---------- plausibility rules for numeric fields ---------- */
+const YEAR = new Date().getFullYear();
+const AGE = {max:100, wmax:40, wmsg:"An age above 40 years is unusual. Please check (age in years)."};
+const NUMRULES = {
+  p1_lat:{signed:1, min:-90, max:90}, p1_lon:{signed:1, min:-180, max:180},
+  p2_wa_lat:{signed:1, min:-90, max:90}, p2_wa_lon:{signed:1, min:-180, max:180},
+  p1_hiv:{max:100, wmax:40, wmsg:"An HIV prevalence above 40 % is very unusual. Please check."},
+  p1_bedocc:{max:300, wmax:100, wmsg:"Above 100 % means more patients than beds. Please check."},
+  p1_los:{wmax:60, wmsg:"An average stay of more than 60 days is unusual. Please check (unit: days)."},
+  p1_tmax:{signed:1, min:-10, max:70, wmin:20, wmax:50, wmsg:"A maximum room temperature outside 20–50 °C is unusual. Please check."},
+  p2_br_h:{wmax:168, wmsg:"More than 7 days of bridging time is unusual. Please check (unit: hours)."},
+  p3_br_h:{wmax:168, wmsg:"More than 7 days of bridging time is unusual. Please check (unit: hours)."},
+  p2_bat_h:{wmax:72, wmsg:"More than 3 days of battery bridging is unusual. Please check (unit: hours)."},
+  p2_bat_since:{min:1950, max:YEAR},
+  p2_sol_age:AGE, p2_bat_age:AGE, p2_wi_age:AGE, p2_wa_age:AGE, p3_psa_age:AGE, p3_conc_age:AGE,
+  p2_sol_tilt:{max:90},
+  p2_sol_w:{wmax:3, wmsg:"Solar modules are usually 0.5–2.5 m wide or long. Please check (unit: metres)."},
+  p2_sol_len:{wmax:3, wmsg:"Solar modules are usually 0.5–2.5 m wide or long. Please check (unit: metres)."},
+  p2_sol_wp:{wmin:10, wmax:800, wmsg:"One solar module usually has 10–800 W. Please check."},
+  p2_bat_v:{wmin:2, wmax:1000, wmsg:"Battery systems usually have 2–1000 V. Please check."},
+  p2_wi_hub:{wmax:150}, p2_wi_blade:{wmax:80},
+  p3_psa_pct:{min:21, max:100},
+  p3_psa_w:{wmin:500, wmsg:"Oxygen plants usually need several kilowatts. Please check: the unit here is watt (1 kW = 1,000 W)."},
+  p1_beds:{wmax:5000, wmsg:"More than 5,000 beds is unusual. Please check."},
+  p2_sol_n:{wmax:20000, wmsg:"More than 20,000 modules is unusual for a health facility. Please check."}
+};
+const REPEAT_INT = {p1_depts_other:["ad","c514","u5"], p3_fs_oth:["out","n"], p3_auto_oth:["f","nf"], p5_light:["n"], p5_o2:["n"], p5_med:["n"], p5_cold:["n"], p5_oth:["n"]};
+(function applyNumRules(){
+  const walk = fs => (fs||[]).forEach(f => {
+    if (f.t==="row") { walk(f.fields); return; }
+    if (f.t==="number") { if (NUMRULES[f.id]) Object.assign(f, NUMRULES[f.id]); if (f.unit==="%" && f.max==null) f.max = 100; }
+    if (f.t==="repeat" && REPEAT_INT[f.id]) f.cols.forEach(c => { if (REPEAT_INT[f.id].includes(c.k)) c.int = 1; });
+  });
+  STEPS.forEach(s => walk(s.fields));
+})();
 /* ---------- diary config ---------- */
 const CH = {
   me:{l:"Main electricity", short:"Main elec.", lane:"--lane-me", reasons:["Unknown","Unstable grid","Power line damage","Lack of fuel","Discharged battery","Technical problem"]},
@@ -734,7 +833,7 @@ const TIMES = Array.from({length:49}, (_,i)=>`${String(Math.floor(i/2)).padStart
 const tmin = t => { const [h,m]=t.split(":").map(Number); return h*60+m; };
 
 /* ---------- state & storage ---------- */
-const APP_VERSION = "2.0";
+const APP_VERSION = "2.1";
 const KEY = "o2e-survey-v2";
 let storageOK = true;
 let S = {list:{}, cur:null, view:"home", step:"about", railOpen:false, lastSaved:null, showSkipped:false, consent:false, submit:null, demo:false, test:false};
@@ -762,11 +861,14 @@ function newAssessment(data){
 const countryName = c => (COUNTRIES.find(x => x[0]===c) || [c, c])[1];
 /* ---------- status ---------- */
 const activeSteps = a => STEPS.filter(s => !s.when || s.when(a));
+/* "information not available" is not offered on pages that other pages depend on (noNA) */
+const isNA = (s, c) => { c = c || cur(); return !s.noNA && !s.block && !s.custom && c && c.na ? (c.na[s.id] || false) : false; };
 function flatFields(fields, a){ const out=[]; (fields||[]).forEach(f=>{ if (f.when && !f.when(a)) return; if (f.t==="row") flatFields(f.fields, a).forEach(x=>out.push(x)); else out.push(f); }); return out; }
 function fieldAnswered(f, a){
   const v = a[f.id];
   switch(f.t){
-    case "multi": case "deptpick": return Array.isArray(v) && v.length>0 || (f.t==="deptpick" && filled(a[f.id+"__free"]));
+    case "multi": return Array.isArray(v) && v.length>0;
+    case "deptpick": return deptSel(a, f.id).length>0 || filled(a[f.id+"__free"]);
     case "grid": { if (!v) return false; for (const r in v) for (const c in v[r]) if (filled(v[r][c])) return true; return false; }
     case "repeat": return Array.isArray(v) && v.some(r => Object.values(r).some(filled));
     case "check": return !!v;
@@ -778,8 +880,8 @@ function fieldAnswered(f, a){
 const inputTypes = new Set(["country","text","email","tel","date","time","number","textarea","single","multi","yn","grid","repeat","money","check","select","deptpick","derived"]);
 function stepStatus(s, a){
   const c = cur();
-  if (c.na && c.na[s.id]) return "na";
-  if (s.custom==="diary"){ const d=c.diary; if(!d.from||!d.to) return d.events.length?"partial":"empty"; return "done"; }
+  if (isNA(s, c)) return "na";
+  if (s.custom==="diary"){ const d=c.diary; if(!d.from||!d.to) return d.events.length?"partial":"empty"; return d.to<d.from ? "partial" : "done"; }
   if (s.custom==="review") return "";
   const fs = flatFields(s.fields, a).filter(f => inputTypes.has(f.t));
   const reqF = fs.filter(f => !f.opt);
@@ -789,9 +891,56 @@ function stepStatus(s, a){
   if (ansReq===reqF.length) return "done";
   return ansAll ? "partial" : "empty";
 }
-function progress(a){ const st = activeSteps(a).filter(s => s.custom!=="review"); const done = st.filter(s => ["done","na"].includes(stepStatus(s,a))).length; const req = st.filter(s => s.req); const reqMissing = req.filter(s => !["done","na"].includes(stepStatus(s,a))); return {done, total:st.length, pct: st.length? Math.round(done/st.length*100):0, reqMissing}; }
+function progress(a){ const st = activeSteps(a).filter(s => s.custom!=="review"); const stat = st.map(s => stepStatus(s,a)); const done = stat.filter(x => x==="done"||x==="na").length; const reqMissing = st.filter((s,i) => s.req && !["done","na"].includes(stat[i]));
+  return {done, total:st.length, pct: st.length? Math.round(done/st.length*100):0, reqMissing, blank: st.filter((s,i) => stat[i]==="empty"), partial: st.filter((s,i) => stat[i]==="partial"), na: stat.filter(x => x==="na").length}; }
 
+
+function stepErrors(s, a){ return flatFields(s.fields, a).filter(f => (f.t==="number" && numCheck(f, a[f.id]).err) || (f.t==="money" && moneyCheck(f, a).err) || (f.t==="grid" && gridErrors(f, a)) || (f.t==="repeat" && repeatErrors(f, a))); }
+/* soft plausibility messages of a page: cross-field checks (warn) plus unusual values in number fields */
+function stepWarnings(s, a){ if (s.custom || isNA(s)) return []; const out = s.warn ? s.warn(a).slice() : [];
+  flatFields(s.fields, a).forEach(f => { if (f.t==="number") { const c = numCheck(f, a[f.id]); if (c.warn) out.push(`${f.label}: ${c.warn}`); } else if (f.t==="money") { const c = moneyCheck(f, a); if (c.warn) out.push(`${f.label}: ${c.warn}`); } else if (f.t==="repeat") repeatMsgs(f, a).forEach(m => { if (m.warn) out.push(`${f.label}, row ${m.row}, ${m.col}: ${m.warn}`); }); });
+  return out; }
+function stepBlock(s, a){
+  if (s.block) { const m = s.block(a); if (m) return m; }
+  if (s.custom==="diary") { const d = cur().diary; return d.from && d.to && d.to < d.from ? "The last day of the recorded period is before the first day." : ""; }
+  if (s.custom) return "";
+  if (!isNA(s) && stepErrors(s, a).length) return "Please correct the values marked in red.";
+  if (s.req && !["done","na"].includes(stepStatus(s, a))) return "This page is required: please answer it, or tick “Information not available”.";
+  return "";
+}
+function firstBlocked(a){ return activeSteps(a).find(s => stepBlock(s, a)) || null; }
 /* ---------- rendering: fields ---------- */
+/* ---------- numeric fields: allowed characters and plausibility ---------- */
+const numKind = f => f.kind || (f.signed ? "signed" : (f.step==="any" ? "dec" : "int"));
+const parseKind = k => k==="signed" ? "dec" : k;
+/* while typing: only remove characters that can never be part of a number */
+function cleanNum(s, kind){
+  let t = String(s||"").replace(/[\u2212\u2013\u2014]/g, "-").replace(kind==="signed" ? /[^0-9.,\- ]/g : /[^0-9., ]/g, "");
+  if (kind==="signed") t = (t.trimStart().startsWith("-") ? "-" : "") + t.replace(/-/g, "");
+  return t;
+}
+function numCheck(f, v){
+  if (!filled(v)) return {};
+  const k = numKind(f); const s = normNum(v, parseKind(k), f.max ?? null); const u = f.unit ? " " + f.unit : "";
+  if (s === null || s === "" || !isFinite(Number(s))) return {err:"Please enter a number, for example 1500 or 12.5."};
+  const n = Number(s);
+  if (k==="int" && !Number.isInteger(n)) return {err:"Please enter a whole number (no decimals)."};
+  const lo = f.min ?? (k==="signed" ? null : 0);
+  if (f.max!=null && n>f.max) return {err:`The highest possible value is ${fmt(f.max)}${u}.`};
+  if (lo!=null && n<lo) return {err:`The lowest possible value is ${fmt(lo)}${u}.`};
+  if (f.wmax!=null && n>f.wmax) return {warn: f.wmsg || `${fmt(n,2)}${u} is unusually high. Please check the value and its unit.`};
+  if (f.wmin!=null && n<f.wmin) return {warn: f.wmsg || `${fmt(n,2)}${u} is unusually low. Please check the value and its unit.`};
+  return {};
+}
+const colCheck = (c, v) => numCheck({kind: c.int ? "int" : "dec", max:c.max, wmax:c.wmax, wmin:c.wmin, wmsg:c.wmsg}, v);
+const cellBad = v => !!numCheck({kind:"int"}, v).err;
+function gridErrors(f, a){ const g = a[f.id]||{}; const rows = f.rowsFn ? f.rowsFn(a) : f.rows; return rows.some(r => f.cols.some(c => cellBad((g[r.k]||{})[c.k]))); }
+function repeatMsgs(f, a){ const out = []; (Array.isArray(a[f.id])?a[f.id]:[]).forEach((r,i) => f.cols.forEach(c => { if (c.t!=="number") return; const m = colCheck(c, r[c.k]); if (m.err||m.warn) out.push({row:i+1, col:c.l, err:m.err, warn:m.warn}); })); return out; }
+function repeatErrors(f, a){ return repeatMsgs(f, a).some(m => m.err); }
+function moneyCheck(f, a){ const c = numCheck({kind:"money"}, a[f.id]); if (c.err) return c; if (filled(a[f.id]) && !filled(a[f.id+"_cur"])) return {warn:"Please add the currency (for example ZMW, MWK or USD)."}; return {}; }
+const numMsg = c => c.err ? `<div class="ferr" role="alert">${esc(c.err)}</div>` : c.warn ? `<div class="fwarn">${esc(c.warn)}</div>` : "";
+const numAttrs = (kind, max) => `inputmode="${kind==="int"?"numeric":kind==="signed"?"text":"decimal"}" data-num="${kind}" ${max!=null?`data-max="${max}"`:""} autocomplete="off"`;
+
 function lbl(f, forId){ return f.label ? `<label ${forId?`for="${forId}"`:""}>${esc(f.label)}${f.opt?`<span class="opt-tag">optional</span>`:""}</label>` : ""; }
 const hint = f => f.hint ? `<div class="hint">${esc(f.hint)}</div>` : "";
 const dep = f => f.depNote ? `<span class="chip dep">↳ ${esc(f.depNote)}</span>` : "";
@@ -800,11 +949,12 @@ function inputHTML(f, a){
   const id = "f_"+f.id;
   if (f.t==="textarea") return `<textarea id="${id}" data-k="${f.id}">${esc(v)}</textarea>`;
   if (f.t==="select") return `<select id="${id}" data-k="${f.id}" data-live="1"><option value="">– select –</option>${f.o.map(o=>`<option ${v===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`;
-  const type = f.t==="number" ? "number" : f.t;
+  const type = f.t==="number" ? "text" : f.t;
+  const chk = f.t==="number" ? numCheck(f, v) : {};
   const list = f.list ? `list="dl_${f.id}"` : "";
   const dl = f.list ? `<datalist id="dl_${f.id}">${f.list.map(o=>`<option value="${esc(o)}">`).join("")}</datalist>` : "";
-  const inp = `<input type="${type}" id="${id}" data-k="${f.id}" value="${esc(v)}" ${f.t==="number"?`inputmode="decimal" step="${f.step||"1"}" min="${f.min??(f.step==="any"&&/lat|lon/.test(f.id)?"":0)}"`:""} ${f.ph?`placeholder="${esc(f.ph)}"`:""} ${list} ${f.live?'data-live="1"':""}>${dl}`;
-  return f.unit ? `<div class="unit ${f.narrow?"narrow":""}">${inp}<span>${esc(f.unit)}</span></div>` : inp;
+  const inp = `<input type="${type}" id="${id}" data-k="${f.id}" value="${esc(v)}" ${f.t==="number"?`${numAttrs(numKind(f), f.max)} ${chk.err?'aria-invalid="true" class="bad"':""}`:""} ${f.ph?`placeholder="${esc(f.ph)}"`:""} ${list} ${f.live?'data-live="1"':""}>${dl}`;
+  return (f.unit ? `<div class="unit ${f.narrow?"narrow":""}">${inp}<span>${esc(f.unit)}</span></div>` : inp) + numMsg(chk);
 }
 function choiceList(f, a, multi, options){
   const v = a[f.id]; const sel = multi ? (Array.isArray(v)?v:[]) : v;
@@ -823,10 +973,10 @@ function choiceList(f, a, multi, options){
 function gridHTML(f, a){
   const rows = f.rowsFn ? f.rowsFn(a) : f.rows; const g = a[f.id] || {};
   let h = `<div class="tbl-wrap"><table class="g"><thead><tr><th></th>${f.cols.map(c=>`<th scope="col">${esc(c.l)}</th>`).join("")}</tr></thead><tbody>`;
-  rows.forEach(r=>{ h += `<tr><th scope="row">${esc(r.l)}${r.s?`<span class="rs">${esc(r.s)}</span>`:""}</th>${f.cols.map(c=>`<td><input type="number" inputmode="numeric" min="0" step="any" id="g_${f.id}_${r.k}_${c.k}" data-k="${f.id}" data-r="${r.k}" data-c="${c.k}" value="${esc((g[r.k]||{})[c.k]??"")}" aria-label="${esc(r.l+" – "+c.l)}" ${f.live?'data-live="1"':""}></td>`).join("")}</tr>`; });
+  rows.forEach(r=>{ h += `<tr><th scope="row">${esc(r.l)}${r.s?`<span class="rs">${esc(r.s)}</span>`:""}</th>${f.cols.map(c=>`<td><input type="text" ${numAttrs("int")} ${cellBad((g[r.k]||{})[c.k])?'class="bad" aria-invalid="true"':""} id="g_${f.id}_${r.k}_${c.k}" data-k="${f.id}" data-r="${r.k}" data-c="${c.k}" value="${esc((g[r.k]||{})[c.k]??"")}" aria-label="${esc(r.l+" – "+c.l)}" ${f.live?'data-live="1"':""}></td>`).join("")}</tr>`; });
   h += `</tbody>`;
   if (f.total){ h += `<tfoot><tr><th>Total</th>${f.cols.map(c=>{let s=0; rows.forEach(r=>{const v=num((g[r.k]||{})[c.k]); if(v!=null) s+=v;}); return `<td class="mono">${fmt(s)}</td>`;}).join("")}</tr></tfoot>`; }
-  return h + `</table></div>`;
+  return h + `</table></div>` + (gridErrors(f, a) ? `<div class="ferr" role="alert">Only whole numbers are possible in this table (no decimals, no text).</div>` : "");
 }
 function repeatHTML(f, a){
   let rows = a[f.id]; if (!Array.isArray(rows)) rows = [];
@@ -836,10 +986,11 @@ function repeatHTML(f, a){
   rows.forEach((r,i)=>{
     h += `<tr><td class="mono muted">${i+1}</td>${f.cols.map(c=>{const val=r[c.k]??""; const id=`r_${f.id}_${i}_${c.k}`; const at=`id="${id}" data-k="${f.id}" data-i="${i}" data-c="${c.k}" aria-label="${esc(c.l)} ${i+1}" ${f.live?'data-live="1"':""}`;
       if(c.t==="select") return `<td><select ${at}><option value=""></option>${c.o.map(o=>`<option ${val===o?"selected":""}>${esc(o)}</option>`).join("")}</select></td>`;
-      if(c.t==="number") return `<td><input type="number" inputmode="decimal" min="0" step="any" ${at} value="${esc(val)}"></td>`;
+      if(c.t==="number") return `<td><input type="text" ${numAttrs(c.int?"int":"dec", c.max)} ${colCheck(c,val).err?'class="bad" aria-invalid="true"':""} ${at} value="${esc(val)}"></td>`;
       return `<td><input type="text" ${at} value="${esc(val)}" ${c.ph&&i===0?`placeholder="${esc(c.ph)}"`:""} style="min-width:160px"></td>`;}).join("")}${f.sum?`<td class="mono">${(()=>{const n=num(r.n),w=num(r.w);return n!=null&&w!=null?fmt(n*w/1000,2):"–";})()}</td>`:""}<td><button type="button" class="btn sm ghost" data-act="rmrow" data-k="${f.id}" data-i="${i}" aria-label="Remove row ${i+1}">✕</button></td></tr>`;
   });
   h += `</tbody></table></div><div class="rep-actions"><button type="button" class="btn sm" data-act="addrow" data-k="${f.id}">+ ${esc(f.addLabel||"Add row")}</button></div>`;
+  repeatMsgs(f, a).forEach(m => { h += numMsg(m.err ? {err:`Row ${m.row}, ${m.col}: ${m.err}`} : {warn:`Row ${m.row}, ${m.col}: ${m.warn}`}); });
   return h;
 }
 function fieldHTML(f, a){
@@ -855,12 +1006,12 @@ function fieldHTML(f, a){
     case "derived": { const d = f.fn(a); return `${wrapOpen}<div class="lbl">${esc(f.label)}</div><div class="derived"><span class="val">${d.v ? esc(d.v) : "–"}</span><span class="small muted">${esc(d.txt)}</span><button type="button" class="linkbtn small" data-act="goto" data-step="q19">Change in question 19</button></div></div>`; }
     case "single": return `${wrapOpen}<div class="lbl">${esc(f.label)}${f.opt?`<span class="opt-tag">optional</span>`:""}</div>${dep(f)}${hint(f)}${choiceList(f,a,false,f.options)}</div>`;
     case "multi": return `${wrapOpen}<div class="lbl">${esc(f.label)}${f.opt?`<span class="opt-tag">optional</span>`:""}</div>${dep(f)}${hint(f)}${choiceList(f,a,true,f.options)}</div>`;
-    case "deptpick": { const o = deptOptions(a); const free = a[f.id+"__free"]??""; return `${wrapOpen}<div class="lbl">${esc(f.label)}</div>${dep(f)}${o.length?choiceList(f,a,true,o):`<div class="hint">No departments were selected in question 9. Describe them below, or <button type="button" class="linkbtn" data-act="goto" data-step="q9">add them in question 9</button>.</div>`}<input type="text" id="f_${f.id}__free" data-k="${f.id}__free" value="${esc(free)}" placeholder="${o.length?"Other / details (optional)":"e.g. emergency, adult ICU, operating theatre, maternity"}" aria-label="Other departments"></div>`; }
+    case "deptpick": { const o = deptOptions(a); const free = a[f.id+"__free"]??""; return `${wrapOpen}<div class="lbl">${esc(f.label)}</div>${dep(f)}${o.length?choiceList(f,a,true,o):`<div class="hint">No departments were selected in question ${QN("q9")}. Describe them below, or <button type="button" class="linkbtn" data-act="goto" data-step="q9">add them in question ${QN("q9")}</button>.</div>`}<input type="text" id="f_${f.id}__free" data-k="${f.id}__free" value="${esc(free)}" placeholder="${o.length?"Other / details (optional)":"e.g. emergency, adult ICU, operating theatre, maternity"}" aria-label="Other departments"></div>`; }
     case "yn": { const v=a[f.id]; return `${wrapOpen}<div class="lbl">${esc(f.label)}</div>${dep(f)}${hint(f)}<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><div class="yn" role="radiogroup" aria-label="${esc(f.label)}">${[["yes","Yes"],["no","No"]].map(([k,l])=>`<label class="${v===k?"on":""}"><input type="radio" name="${f.id}" value="${k}" ${v===k?"checked":""} data-k="${f.id}" data-kind="single">${l}</label>`).join("")}</div>${filled(v)?`<button type="button" class="linkbtn clear" data-act="clear" data-k="${f.id}">Clear</button>`:""}</div></div>`; }
     case "grid": return `${wrapOpen}<div class="lbl">${esc(f.label)}${f.opt?`<span class="opt-tag">optional</span>`:""}</div>${dep(f)}${hint(f)}${gridHTML(f,a)}</div>`;
     case "repeat": return `${wrapOpen}<div class="lbl">${esc(f.label)}${f.opt?`<span class="opt-tag">optional</span>`:""}</div>${dep(f)}${hint(f)}${repeatHTML(f,a)}</div>`;
     case "check": return `${wrapOpen}<label class="check" for="f_${f.id}"><input type="checkbox" id="f_${f.id}" data-k="${f.id}" data-kind="check" ${a[f.id]?"checked":""} ${f.live?'data-live="1"':""}><span>${esc(f.label)}</span></label></div>`;
-    case "money": { const c=a[f.id+"_cur"]??""; return `${wrapOpen}${lbl(f,"f_"+f.id)}${hint(f)}<div class="money"><input type="number" inputmode="decimal" min="0" step="any" id="f_${f.id}" data-k="${f.id}" data-money="1" value="${esc(a[f.id]??"")}" aria-label="${esc(f.label)} amount"><input type="text" id="f_${f.id}_cur" data-k="${f.id}_cur" value="${esc(c)}" placeholder="Currency" list="dl_cur" aria-label="Currency"></div></div>`; }
+    case "money": { const c=a[f.id+"_cur"]??""; const mc=moneyCheck(f,a); return `${wrapOpen}${lbl(f,"f_"+f.id)}${hint(f)}<div class="money"><input type="text" ${numAttrs("money")} ${mc.err?'class="bad" aria-invalid="true"':""} id="f_${f.id}" data-k="${f.id}" data-money="1" value="${esc(a[f.id]??"")}" aria-label="${esc(f.label)} amount"><input type="text" id="f_${f.id}_cur" data-k="${f.id}_cur" value="${esc(c)}" placeholder="Currency" list="dl_cur" maxlength="12" aria-label="Currency"></div>${numMsg(mc)}</div>`; }
     default: return `${wrapOpen}${lbl(f,"f_"+f.id)}${dep(f)}${hint(f)}${inputHTML(f,a)}</div>`;
   }
 }
@@ -883,13 +1034,17 @@ function render(){
   const a = A();
   let st = STEPS.find(s=>s.id===S.step);
   if (!st || (st.when && !st.when(a))) { st = nextActive(S.step, 1) || activeSteps(a)[0]; S.step = st.id; }
+  const fb0 = firstBlocked(a);
+  if (fb0 && STEPS.indexOf(st) > STEPS.indexOf(fb0)) { st = fb0; S.step = st.id; }
+  if (S.returnTo) { const r = STEPS.find(x => x.id===S.returnTo); if (!r || (r.when && !r.when(a)) || r.id===S.step) S.returnTo = null; }
   const pi = posInfo(a);
   app.innerHTML = header() + `<div class="pbar-wrap"><div class="pbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pi.pct}" aria-label="Survey progress"><i style="width:${pi.pct}%"></i></div><span class="pbar-pct mono">${pi.pct}%</span></div><div class="shell">${railHTML(a)}${S.railOpen?`<div class="scrim" data-act="rail"></div>`:""}<main class="main" id="main"><div class="wrap">${stepHTML(st,a)}</div></main></div>${footHTML(st,a)}<datalist id="dl_cur">${currencies().map(c=>`<option value="${esc(c)}">`).join("")}</datalist>`;
 }
 function currencies(){ const set = new Set(["MGA","XOF","XAF","ZMW","KES","TZS","UGX","MWK","NGN","GHS","ETB","USD","EUR"]); const a=A(); Object.keys(a).forEach(k=>{ if(k.endsWith("_cur") && filled(a[k])) set.add(a[k]); }); return [...set]; }
 function railHTML(a){
   const p = progress(a);
-  let h = `<nav class="rail ${S.railOpen?"open":""}" aria-label="Question outline"><div class="prog"><div class="small"><b>${p.pct}%</b> of applicable questions answered · <span style="color:${p.reqMissing.length?"var(--req)":"var(--ok)"}">${p.reqMissing.length} required open</span></div><div class="bar"><i style="width:${p.pct}%"></i></div></div>`;
+  let h = `<nav class="rail ${S.railOpen?"open":""}" aria-label="Question outline"><div class="prog"><div class="small"><b>${p.done} of ${p.total}</b> pages answered (${p.pct}%)${p.reqMissing.length?` · <span style="color:var(--req)">${p.reqMissing.length} mandatory open</span>`:""}</div><div class="bar"><i style="width:${p.pct}%"></i></div></div>`;
+  const fb = firstBlocked(a); const fbIdx = fb ? STEPS.findIndex(x=>x.id===fb.id) : 1e9;
   PARTS.forEach(pt=>{
     const all = STEPS.filter(s=>s.part===pt.k); const act = all.filter(s=>!s.when||s.when(a)); const skipped = all.length-act.length;
     h += `<div class="part ${pt.k}"><div class="part-h">${esc(pt.l)}${skipped?`<span class="sk">${skipped} not applicable</span>`:""}</div>`;
@@ -900,7 +1055,8 @@ function railHTML(a){
       if (s.sec && s.sec!==sec){ sec=s.sec; h += `<div class="sec-h">${esc(s.sec)}</div>`; }
       const stt = on ? stepStatus(s,a) : "";
       const cls = stt==="done"?"done":stt==="partial"?"partial":stt==="na"?"na":(s.req?"missing":"");
-      h += on ? `<button type="button" class="nav-i ${s.id===S.step?"cur":""}" data-act="goto" data-step="${s.id}" ${s.id===S.step?'aria-current="step"':""}><span class="qn ${s.req?"req":""} ${s.no?"":"blank"}">${s.no||"·"}</span><span>${esc(s.title)}</span>${s.custom==="review"?"":`<span class="st ${cls}" title="${esc(stt||"open")}"></span>`}</button>`
+      const locked = on && STEPS.findIndex(x=>x.id===s.id) > fbIdx;
+      h += on ? `<button type="button" class="nav-i ${s.id===S.step?"cur":""} ${locked?"locked":""}" data-act="goto" data-step="${s.id}" ${s.id===S.step?'aria-current="step"':""} ${locked?`disabled title="First complete ${fb.no?"question "+fb.no:esc(fb.title)}"`:""}><span class="qn ${s.req?"req":""} ${s.no?"":"blank"}">${s.no||"·"}</span><span>${esc(s.title)}</span>${s.custom==="review"?"":`<span class="st ${cls}" title="${esc(stt||"open")}"></span>`}</button>`
               : `<div class="nav-i" style="opacity:.5;cursor:default"><span class="qn ${s.no?"":"blank"}">${s.no||"·"}</span><span><s>${esc(s.title)}</s><span class="small muted" style="display:block">${esc(s.skipWhy||"")}</span></span></div>`;
     });
     h += `</div>`;
@@ -910,9 +1066,9 @@ function railHTML(a){
 }
 function stepHTML(s, a){
   const pt = PARTS.find(p=>p.k===s.part);
-  const c = cur(); const na = c.na && c.na[s.id];
+  const na = isNA(s);
   const pi = posInfo(a);
-  let h = `<div class="eyebrow"><span class="chip ${s.part}">${esc(pt.l)}</span><span class="mono" style="text-transform:none;letter-spacing:0">Page ${pi.i+1} of ${pi.n}</span>${s.sec?`<span>${esc(s.sec)}</span>`:""}${s.req?`<span class="chip req">Required</span>`:""}</div>
+  let h = `<div class="eyebrow"><span class="chip ${s.part}">${esc(pt.l)}</span>${pi.n-1-pi.i>0?`<span class="mono" style="text-transform:none;letter-spacing:0">${pi.n-1-pi.i} page${pi.n-1-pi.i>1?"s":""} to go</span>`:""}${s.sec?`<span>${esc(s.sec)}</span>`:""}${s.req||s.block?`<span class="chip req">Required</span>`:(s.custom?"":`<span class="chip opt">Optional</span>`)}</div>
   <div class="step-h">${s.no?`<div class="bignum ${s.req?"req":""}" aria-label="Question ${s.no}">${s.no}</div>`:""}<div><h2>${esc(s.title)}</h2>${s.help?`<p class="help">${esc(s.help)}</p>`:""}</div></div>`;
   if (s.custom==="diary") return h + diaryHTML(a);
   if (s.custom==="review") return h + reviewHTML(a);
@@ -926,10 +1082,10 @@ function nextActive(fromId, dir){ const a=A(); const i=STEPS.findIndex(s=>s.id==
 function footHTML(s, a){
   const prev = nextActive(s.id,-1), next = nextActive(s.id,1);
   const skippedAhead = (()=>{ if(!next) return 0; const i=STEPS.findIndex(x=>x.id===s.id), j=STEPS.findIndex(x=>x.id===next.id); return j-i-1; })();
-  const canNA = !s.custom && s.part!=="p0" && s.part!=="p6" && !s.block;
-  const na = cur().na && cur().na[s.id];
-  const block = s.block ? s.block(a) : "";
-  const ret = S.returnTo && S.returnTo!==s.id ? STEPS.find(x=>x.id===S.returnTo) : null;
+  const canNA = !s.custom && s.part!=="p0" && s.part!=="p6" && !s.block && !s.noNA;
+  const na = isNA(s);
+  const block = stepBlock(s, a);
+  const ret = S.returnTo && S.returnTo!==s.id ? (activeSteps(a).find(x=>x.id===S.returnTo) || null) : null;
   return `<div class="foot"><div class="in">
     <button type="button" class="btn" data-act="prev" ${prev?"":"disabled"}>← Back</button>
     ${canNA && !na?`<label class="na-tog"><input type="checkbox" data-act="na" data-step="${s.id}"> Information not available</label>`:""}
@@ -944,23 +1100,27 @@ function footHTML(s, a){
 /* ---------- diary ---------- */
 function diaryHTML(a){
   const c = cur(); const d = c.diary; const chs = channels(a);
-  const evs = d.events.slice().sort((x,y)=> (x.date+x.start).localeCompare(y.date+y.start));
-  const days = dayRange(d.from, d.to);
+  const all = d.events.slice().sort((x,y)=> (x.date+x.start).localeCompare(y.date+y.start));
+  const evs = all.filter(e => !evIssue(e, d, chs)); const off = all.length - evs.length;
+  const days = dayRange(d.from, d.to); const today = localISO(new Date());
+  const maxDate = d.to && d.to < today ? d.to : today;
   let h = `<div class="card">
    <div class="fld"><div class="lbl">Recorded time period</div><div class="row2"><div class="fld"><label for="d_from">From</label><input type="date" id="d_from" data-d="from" value="${esc(d.from)}"></div><div class="fld"><label for="d_to">To</label><input type="date" id="d_to" data-d="to" value="${esc(d.to)}"></div></div>
-   ${days.length? `<div class="hint">${days.length} day(s) recorded${days.length<14?` · <span style="color:var(--warn)">at least 14 days recommended</span>`:""}</div>`:""}</div>
+   ${d.from&&d.to&&d.to<d.from?`<div class="ferr" role="alert">The last day is before the first day. Please correct the dates.</div>`:""}
+   ${d.from && d.from>today?`<div class="fwarn">The first day lies in the future. Interruptions can only be entered for days that have passed.</div>`:""}
+   ${days.length? `<div class="hint">${days.length} day(s) recorded${days.length<14?` · <span style="color:var(--warn)">at least 14 days recommended</span>`:""}${days.length>=366?` · <span style="color:var(--warn)">periods longer than one year are cut off at 366 days</span>`:""}${d.to>today?` · the period ends in the future: add interruptions as they happen and submit an update at the end`:""}</div>`:(d.from||d.to)&&!(d.from&&d.to)?`<div class="hint">Enter the first and the last day of the period in which interruptions are recorded.</div>`:""}</div>
    <div class="fld"><div class="lbl">Supplies monitored</div><div class="hint">Derived from Parts 2 and 3: only systems that exist at this facility are listed.</div><div class="lanes-key">${Object.keys(CH).map(k=>`<span style="${chs.includes(k)?"":"opacity:.45;text-decoration:line-through"}"><i style="background:var(${CH[k].lane})"></i>${CH[k].l}</span>`).join("")}</div></div>
    <div class="fld" style="border-top:1px solid var(--line);padding-top:16px"><div class="lbl">Add an interruption</div>
     <div class="form-grid">
-     <div class="fld"><label for="ev_date">Date</label><input type="date" id="ev_date" value="${esc(S.evDraft?.date||d.from||"")}" ${d.from?`min="${d.from}"`:""} ${d.to?`max="${d.to}"`:""}></div>
+     <div class="fld"><label for="ev_date">Date</label><input type="date" id="ev_date" value="${esc(S.evDraft?.date||(d.from&&d.from<=today?d.from:"")||"")}" ${d.from?`min="${d.from}"`:""} max="${maxDate}"></div>
      <div class="fld"><label for="ev_ch">Supply</label><select id="ev_ch" data-evch="1">${chs.map(k=>`<option value="${k}" ${S.evDraft?.ch===k?"selected":""}>${CH[k].l}</option>`).join("")}</select></div>
      <div class="fld"><label for="ev_s">Failure from</label><select id="ev_s">${TIMES.slice(0,48).map(t=>`<option ${S.evDraft?.start===t?"selected":""}>${t}</option>`).join("")}</select></div>
      <div class="fld"><label for="ev_e">until</label><select id="ev_e">${TIMES.slice(1).map(t=>`<option ${(S.evDraft?.end||"00:30")===t?"selected":""}>${t}</option>`).join("")}</select></div>
-     <div class="fld"><label for="ev_r">Reason</label><select id="ev_r">${CH[S.evDraft?.ch||chs[0]||"me"].reasons.map(r=>`<option ${S.evDraft?.reason===r?"selected":""}>${r}</option>`).join("")}</select></div>
+     <div class="fld"><label for="ev_r">Reason</label><select id="ev_r">${CH[chs.includes(S.evDraft?.ch)?S.evDraft.ch:(chs[0]||"me")].reasons.map(r=>`<option ${S.evDraft?.reason===r?"selected":""}>${r}</option>`).join("")}</select></div>
     </div>
     <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:8px"><input type="text" id="ev_note" placeholder="Note (optional)" style="flex:1;min-width:180px" value="${esc(S.evDraft?.note||"")}"><label class="check small"><input type="checkbox" id="ev_est" ${S.evDraft?.est?"checked":""}> Times estimated</label><button type="button" class="btn pri" data-act="addev">Add interruption</button></div>
     <div id="ev_msg" class="small" role="status"></div>
-    <div class="hint">Outages past midnight are split into two entries automatically (choose an end time earlier than the start time).</div>
+    <div class="hint">Outages past midnight are split into two entries automatically (choose an end time earlier than the start time). For an outage of 24 hours or more, enter each day separately (00:00 until 24:00 for a full day).</div>
    </div>
   </div>`;
   // timeline
@@ -969,18 +1129,22 @@ function diaryHTML(a){
     h += `<div class="card"><div class="lbl" style="font-weight:600">Timeline</div><div class="dstrip"><div></div>${axisSVG()}${show.map(day=>`<div class="dl">${day.slice(5)} ${weekday(day)}</div>${daySVG(day, evs.filter(e=>e.date===day), chs)}`).join("")}</div>${days.length>42?`<div class="small muted">Showing the first 42 days.</div>`:""}</div>`;
   }
   // summary
-  if (evs.length) {
+  if (all.length) {
     const total = days.length*24;
     h += `<div class="card"><div class="lbl" style="font-weight:600">Summary</div><div class="tbl-wrap"><table class="g sumtbl"><thead><tr><th>Supply</th><th>Interruptions</th><th>Total hours</th><th>% of recorded time</th><th>Longest (h)</th><th>Most frequent reason</th></tr></thead><tbody>${chs.map(k=>{const es=evs.filter(e=>e.ch===k); const hrs=es.reduce((s,e)=>s+dur(e),0)/60; const lg=es.reduce((m,e)=>Math.max(m,dur(e)),0)/60; const rc={}; es.forEach(e=>rc[e.reason]=(rc[e.reason]||0)+1); const top=Object.entries(rc).sort((x,y)=>y[1]-x[1])[0]; return `<tr><th>${CH[k].l}</th><td class="mono">${es.length}</td><td class="mono">${fmt(hrs,1)}</td><td class="mono">${total?fmt(hrs/total*100,1)+" %":"–"}</td><td class="mono">${fmt(lg,1)}</td><td>${top?esc(top[0])+` (${top[1]})`:"–"}</td></tr>`;}).join("")}</tbody></table></div></div>`;
-    h += `<div class="card"><div class="lbl" style="font-weight:600">Recorded interruptions (${evs.length})</div><div class="ev-list">${evs.map(e=>`<div class="ev"><span class="sw" style="background:var(${CH[e.ch].lane})"></span><div><div><b>${CH[e.ch].l}</b> · ${esc(e.reason)}${e.est?` <span class="small muted">(estimated)</span>`:""}</div><div class="t">${e.date} ${weekday(e.date)} · ${e.start}–${e.end} · ${fmt(dur(e)/60,1)} h${e.note?` · <span style="font-family:var(--f-body)">${esc(e.note)}</span>`:""}</div></div><button type="button" class="btn sm ghost" data-act="rmev" data-id="${e.id}" aria-label="Delete interruption">✕</button></div>`).join("")}</div></div>`;
+    h += `<div class="card"><div class="lbl" style="font-weight:600">Recorded interruptions (${evs.length})</div>${off?`<div class="fwarn">${off} entr${off>1?"ies are":"y is"} not counted (marked below): change the recorded period or the supply questions, or delete the entr${off>1?"ies":"y"}.</div>`:""}<div class="ev-list">${all.map(e=>{ const iss=evIssue(e,d,chs); return `<div class="ev ${iss?"off":""}"><span class="sw" style="background:var(${(CH[e.ch]||CH.me).lane})"></span><div><div><b>${(CH[e.ch]||{l:e.ch}).l}</b> · ${esc(e.reason)}${e.est?` <span class="small muted">(estimated)</span>`:""}${iss?` <span class="small" style="color:var(--warn)">not counted: ${esc(iss)}</span>`:""}</div><div class="t">${e.date} ${weekday(e.date)} · ${e.start}–${e.end} · ${fmt(dur(e)/60,1)} h${e.note?` · <span style="font-family:var(--f-body)">${esc(e.note)}</span>`:""}</div></div><button type="button" class="btn sm ghost" data-act="rmev" data-id="${e.id}" aria-label="Delete interruption">✕</button></div>`; }).join("")}</div></div>`;
   } else {
     h += `<div class="card"><div class="muted">No interruptions recorded yet. If a supply failed, add it above; days without entries are counted as uninterrupted.</div></div>`;
   }
   return h;
 }
 const dur = e => tmin(e.end) - tmin(e.start);
+const localISO = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+/* an interruption is counted only if its supply still exists in the survey and its day lies in the recorded period */
+function evIssue(e, d, chs){ if (!chs.includes(e.ch)) return "this supply is no longer part of the survey answers"; if ((d.from && e.date < d.from) || (d.to && e.date > d.to)) return "outside the recorded period"; return ""; }
+function validEvents(c, a){ const chs = channels(a); return (c.diary.events||[]).filter(e => !evIssue(e, c.diary, chs)); }
 const weekday = d => { try { return new Date(d+"T12:00:00").toLocaleDateString("en-GB",{weekday:"short"}); } catch(e){ return ""; } };
-function dayRange(from, to){ if(!from||!to) return []; const out=[]; let d=new Date(from+"T12:00:00"), e=new Date(to+"T12:00:00"); if(isNaN(d)||isNaN(e)||e<d) return []; while(d<=e && out.length<366){ out.push(d.toISOString().slice(0,10)); d.setDate(d.getDate()+1);} return out; }
+function dayRange(from, to){ if(!from||!to) return []; const out=[]; let d=new Date(from+"T12:00:00"), e=new Date(to+"T12:00:00"); if(isNaN(d)||isNaN(e)||e<d) return []; while(d<=e && out.length<366){ out.push(localISO(d)); d.setDate(d.getDate()+1);} return out; }
 function axisSVG(){ return `<svg viewBox="0 0 480 14" preserveAspectRatio="none" aria-hidden="true">${[0,6,12,18,24].map(hh=>`<text x="${hh===24?478:hh*20+(hh?0:2)}" y="11" font-size="10" fill="var(--muted)" text-anchor="${hh===24?"end":hh?"middle":"start"}" font-family="IBM Plex Mono, monospace">${String(hh).padStart(2,"0")}:00</text>`).join("")}</svg>`; }
 function daySVG(day, evs, chs){
   const lh=6, gap=1, H = Math.max(1,chs.length)*(lh+gap)+1;
@@ -992,13 +1156,19 @@ function daySVG(day, evs, chs){
 
 /* ---------- review ---------- */
 function reviewHTML(a){
-  const p = progress(a); const c = cur();
+  const p = progress(a); const c = cur(); const nEv = validEvents(c, a).length;
+  const tag = s => s.no ? `Q${s.no}` : esc(s.title);
+  const chips = list => `<div style="display:flex;flex-wrap:wrap;gap:6px">${list.map(s=>`<button type="button" class="btn sm" data-act="goto" data-step="${s.id}" title="${esc(s.title)}">${s.no?`<span class="qn">${s.no}</span> `:""}${esc(s.title)}</button>`).join("")}</div>`;
+  const W = []; activeSteps(a).forEach(s => stepWarnings(s, a).forEach(x => W.push([s, x])));
+  const dia = STEPS.find(s => s.custom==="diary"); const d = c.diary;
+  if (dia && activeSteps(a).includes(dia)) { const days = dayRange(d.from, d.to); if (!d.from || !d.to) W.push([dia, "The recorded time period of the interruption diary is not filled in yet. You can submit now and send an update when the diary is complete."]); else if (days.length < 14) W.push([dia, `The interruption diary covers ${days.length} day(s); at least 14 days are recommended.`]); const off = d.events.length - nEv; if (off) W.push([dia, `${off} diary entr${off>1?"ies are":"y is"} not counted (outside the recorded period, or for a supply that is no longer selected).`]); }
   let h = `<div class="card"><div class="row2">
-    <div><div class="small muted">Applicable questions answered</div><div style="font-family:var(--f-display);font-size:2rem;font-weight:600">${p.done} / ${p.total}</div></div>
-    <div><div class="small muted">Required questions still open</div><div style="font-family:var(--f-display);font-size:2rem;font-weight:600;color:${p.reqMissing.length?"var(--req)":"var(--ok)"}">${p.reqMissing.length}</div></div>
-    <div><div class="small muted">Interruptions recorded</div><div style="font-family:var(--f-display);font-size:2rem;font-weight:600">${c.diary.events.length}</div></div></div>
-    ${p.reqMissing.length?`<div><div class="lbl" style="font-weight:600;margin-bottom:6px">Open required questions</div><div style="display:flex;flex-wrap:wrap;gap:6px">${p.reqMissing.map(s=>`<button type="button" class="btn sm" data-act="goto" data-step="${s.id}"><span class="qn req">${s.no||"·"}</span> ${esc(s.title)}</button>`).join("")}</div></div>`:`<div class="note-ok">All required questions are answered or marked as not available.</div>`}
-    ${(()=>{const W=[]; activeSteps(a).forEach(s=>{ if(s.warn) s.warn(a).forEach(x=>W.push([s,x])); }); return W.length?`<div><div class="lbl" style="font-weight:600;margin-bottom:6px">Plausibility checks</div><div class="warns">${W.map(([s,x])=>`<div class="warn"><button type="button" class="linkbtn" data-act="goto" data-step="${s.id}">Q${s.no}</button> ${esc(x)}</div>`).join("")}</div></div>`:"";})()}
+    <div><div class="small muted">Pages answered</div><div style="font-family:var(--f-display);font-size:2rem;font-weight:600">${p.done} / ${p.total}</div></div>
+    <div><div class="small muted">Pages left blank</div><div style="font-family:var(--f-display);font-size:2rem;font-weight:600">${p.blank.length}</div></div>
+    <div><div class="small muted">Interruptions recorded</div><div style="font-family:var(--f-display);font-size:2rem;font-weight:600">${nEv}</div></div></div>
+    ${p.partial.length?`<div><div class="lbl" style="font-weight:600;margin-bottom:6px">Partly answered pages (${p.partial.length})</div>${chips(p.partial)}</div>`:""}
+    ${p.blank.length?`<details><summary style="cursor:pointer;font-weight:600">Blank pages (${p.blank.length}) – open one to answer it; “Back to Review” brings you back here</summary><div style="margin-top:8px">${chips(p.blank)}</div></details>`:`<div class="note-ok">Every applicable page is answered or marked as not available.</div>`}
+    ${W.length?`<div><div class="lbl" style="font-weight:600;margin-bottom:6px">Please check (${W.length})</div><div class="warns">${W.map(([s,x])=>`<div class="warn"><button type="button" class="linkbtn" data-act="goto" data-step="${s.id}">${tag(s)}</button> ${esc(x)}</div>`).join("")}</div></div>`:""}
   </div>
   ${submitCardHTML(a)}
   <div class="card"><div class="lbl" style="font-weight:600">Answers overview</div>${overviewHTML(a)}</div>`;
@@ -1018,14 +1188,13 @@ function overviewHTML(a){
 
 function submitCardHTML(a){
   const c = cur(); const p = progress(a); const okSubs = (c.submissions||[]).filter(x=>x.ok);
-  const missing = [!filled(a.meta_name)||!filled(a.meta_country) ? ["about","your name and country"] : null, !filled(a.p1_type) ? ["q2","the facility type (question 2)"] : null].filter(Boolean);
+  const missing = activeSteps(a).filter(s => s.custom!=="review" && stepBlock(s, a)).map(s => [s.id, s.id==="about" ? "your name and country" : s.custom==="diary" ? "the recorded period of the interruption diary" : `${s.title.toLowerCase()} (question ${s.no})`]);
   const st = S.submit || {};
   let h = `<div class="card" id="submitCard"><div><div class="lbl" style="font-weight:600;font-size:1.15rem;font-family:var(--f-display)">${okSubs.length?"Submit an update":"Submit the survey"}</div>
     <div class="small muted" style="margin-top:4px;max-width:65ch">${okSubs.length
       ? `You already submitted this survey (ID <b class="mono">${esc(c.code)}</b>). If you add information later, for example more days of the interruption diary, submit again: the newest submission replaces the earlier one.`
       : `Your answers are encrypted on this device and sent to the workshop organisers with your survey ID <b class="mono">${esc(c.code)}</b>. You can submit now and send an update later with the same ID, for example after finishing the interruption diary.`}</div></div>`;
-  if (missing.length) h += `<div class="warn">Please enter ${missing.map(m=>`<button type="button" class="linkbtn" data-act="goto" data-step="${m[0]}">${esc(m[1])}</button>`).join(" and ")} first.</div>`;
-  else if (p.reqMissing.length) h += `<div class="warn">${p.reqMissing.length} required question(s) are still open. You can submit anyway, but complete answers are much more useful.</div>`;
+  if (missing.length) h += `<div class="warn">Please complete or correct ${missing.map(m=>`<button type="button" class="linkbtn" data-act="goto" data-step="${m[0]}">${esc(m[1])}</button>`).join(", ")} first.</div>`;
   if (st.state==="sending") h += `<div class="note-ok" role="status">Encrypting and sending your answers…</div>`;
   if (st.state==="ok") h += `<div class="note-ok" role="status"><b>Thank you, your answers have been submitted.</b><br>Survey ID <b class="mono">${esc(c.code)}</b> · ${esc(new Date(st.at).toLocaleString("en-GB",{dateStyle:"medium",timeStyle:"short"}))}</div>`;
   if (st.state==="fail") h += `<div class="warn" role="alert"><b>Your answers could not be sent automatically.</b> (${esc(st.err)})<br>Nothing is lost: your answers stay saved on this device. Please try again later${st.url?`, or download the encrypted file below and send it by e-mail to ${CONFIG.CONTACT?esc(CONFIG.CONTACT):"the workshop organisers"}. Only the organisers can open it.`:"."}
@@ -1042,15 +1211,16 @@ function flatten(a){
   const out=[]; const c = cur();
   activeSteps(a).forEach(s=>{
     const part = PARTS.find(p=>p.k===s.part).l; const base = {part, no:s.no||"", q:s.title, req:!!s.req};
-    if (c.na && c.na[s.id]) { out.push({...base, field:"Status", item:"", value:"Information not available"+(typeof c.na[s.id]==="string"&&c.na[s.id]?` – ${c.na[s.id]}`:"")}); return; }
-    if (s.custom==="diary"){ const d=c.diary; out.push({...base, field:"Recorded period", item:"", value:`${d.from||"?"} – ${d.to||"?"}`}); out.push({...base, field:"Interruptions recorded", item:"", value:String(d.events.length)}); return; }
+    const na = isNA(s, c);
+    if (na) { out.push({...base, field:"Status", item:"", value:"Information not available"+(typeof na==="string"&&na?` – ${na}`:"")}); return; }
+    if (s.custom==="diary"){ const d=c.diary; const ev=validEvents(c,a); if(!d.from&&!d.to&&!ev.length) return; out.push({...base, field:"Recorded period", item:"", value:`${d.from||"?"} – ${d.to||"?"} (${dayRange(d.from,d.to).length} days)`}); out.push({...base, field:"Interruptions recorded", item:"", value:String(ev.length)}); channels(a).forEach(k=>{ const es=ev.filter(e=>e.ch===k); if(es.length) out.push({...base, field:CH[k].l, item:"", value:`${es.length} interruption(s), ${fmt(es.reduce((t,e)=>t+dur(e),0)/60,1)} h`}); }); return; }
     if (s.custom) return;
     flatFields(s.fields, a).forEach(f=>{
       if (!inputTypes.has(f.t)) return; const v=a[f.id]; const L=f.ex||f.label||"";
       switch(f.t){
         case "single": if(filled(v)) out.push({...base, field:L, item:"", value:optLabel(f,a,v)}); break;
         case "yn": if(filled(v)) out.push({...base, field:L, item:"", value:v==="yes"?"Yes":"No"}); break;
-        case "multi": case "deptpick": { const arr=Array.isArray(v)?v:[]; const parts=arr.map(x=>optLabel(f,a,x)); if(f.t==="deptpick"&&filled(a[f.id+"__free"])) parts.push(a[f.id+"__free"]); if(parts.length) out.push({...base, field:L, item:"", value:parts.join("; ")}); break; }
+        case "multi": case "deptpick": { const arr=f.t==="deptpick"?deptSel(a,f.id):(Array.isArray(v)?v:[]); const parts=arr.map(x=>optLabel(f,a,x)); if(f.t==="deptpick"&&filled(a[f.id+"__free"])) parts.push(a[f.id+"__free"]); if(parts.length) out.push({...base, field:L, item:"", value:parts.join("; ")}); break; }
         case "grid": { const rows=f.rowsFn?f.rowsFn(a):f.rows; rows.forEach(r=>f.cols.forEach(cc=>{ const x=((v||{})[r.k]||{})[cc.k]; if(filled(x)) out.push({...base, field:L, item:f.cols.length>1?`${r.l} – ${cc.l}`:r.l, value:String(x)}); })); break; }
         case "repeat": (Array.isArray(v)?v:[]).forEach((r,i)=>{ const txt=f.cols.filter(cc=>filled(r[cc.k])).map(cc=>`${cc.l}: ${r[cc.k]}`).join("; "); if(txt) out.push({...base, field:L, item:`Row ${i+1}`, value:txt}); }); break;
         case "check": if(v) out.push({...base, field:L, item:"", value:"Yes"}); break;
@@ -1069,7 +1239,7 @@ const DEPT_ROWS = DEPTS.filter(d => d[0]!=="none" && !(d[2]||{}).nobeds).map(d =
 const META_COLS = [
   ["id","Survey ID"],["submitted_at","Submitted at (UTC)"],["started_at","Started at (UTC)"],["submission_no","Submission number for this ID"],["app_version","App version"],
   ["respondent_name","Respondent name"],["respondent_country","Respondent country"],["respondent_country_code","Respondent country (ISO code)"],["consent_at","Consent given at (UTC)"],
-  ["status","Status (complete = no required question open)"],["required_open","Number of required questions open"],["required_open_list","Required questions open (numbers)"],["pct_answered","% of applicable questions answered"],["na_questions","Questions marked 'information not available'"]];
+  ["pages_total","Number of applicable pages"],["pages_answered","Pages answered or marked 'not available'"],["pages_blank","Pages left blank"],["pct_answered","% of applicable pages answered"],["na_questions","Questions marked 'information not available'"],["checks_open","Number of open plausibility hints"],["checks_list","Open plausibility hints"]];
 function allFields(fields){ const out=[]; (fields||[]).forEach(f => { if (f.t==="row") allFields(f.fields).forEach(x => out.push(x)); else out.push(f); }); return out; }
 const hasSpec = f => (f.options||[]).some(o => o.spec);
 let _cols = null;
@@ -1077,11 +1247,11 @@ function columns(){
   if (_cols) return _cols;
   const cols = []; const seen = new Set();
   const add = (key, label, s, type) => { if (seen.has(key)) return; seen.add(key); cols.push({key, label, q: s && s.no ? "Q"+s.no : "", title: s ? s.title : "", part: s ? PARTS.find(p=>p.k===s.part).l : "Meta", type}); };
-  META_COLS.forEach(([k,l]) => add(k, l, null, ["submission_no","required_open","pct_answered"].includes(k) ? "number" : "text"));
+  META_COLS.forEach(([k,l]) => add(k, l, null, ["submission_no","pages_total","pages_answered","pages_blank","pct_answered","checks_open"].includes(k) ? "number" : "text"));
   STEPS.forEach(s => {
     if (s.custom==="review") return;
     if (s.custom==="diary"){
-      [["diary_from","Recorded from","text"],["diary_to","Recorded until","text"],["diary_days","Days recorded","number"],["diary_events","Interruptions recorded (all supplies)","number"]].forEach(([k,l,t]) => add(k,l,s,t));
+      [["diary_from","Recorded from","text"],["diary_to","Recorded until","text"],["diary_days","Days recorded","number"],["diary_events","Interruptions recorded (all supplies)","number"],["diary_not_counted","Diary entries not counted (outside the period or supply no longer selected)","number"]].forEach(([k,l,t]) => add(k,l,s,t));
       Object.keys(CH).forEach(c => { add(`diary_${c}_n`, `${CH[c].l}: number of interruptions`, s, "number"); add(`diary_${c}_h`, `${CH[c].l}: hours interrupted`, s, "number"); add(`diary_${c}_pct`, `${CH[c].l}: % of recorded time interrupted`, s, "number"); add(`diary_${c}_maxh`, `${CH[c].l}: longest interruption (h)`, s, "number"); add(`diary_${c}_reasons`, `${CH[c].l}: reasons (count)`, s, "text"); });
       add("diary_log", "Interruption log (date from–to supply: reason)", s, "text");
       return;
@@ -1106,21 +1276,21 @@ function columns(){
 }
 const clean = v => v==null ? "" : String(v).replace(/[\t\r\n]+/g, " ").trim();
 function record(c, submittedAt, subNo){
-  const a = c.answers; const v = {}; const p = progress(a);
+  const a = c.answers; const v = {}; const p = progress(a); const W = []; activeSteps(a).forEach(s => stepWarnings(s, a).forEach(x => W.push(`${s.no?"Q"+s.no:s.title}: ${x}`)));
   Object.assign(v, {id:c.code, submitted_at:submittedAt, started_at:c.created, submission_no:subNo, app_version:APP_VERSION,
     respondent_name:a.meta_name, respondent_country: a.meta_country ? countryName(a.meta_country) : "", respondent_country_code:a.meta_country, consent_at:c.consent,
-    status: p.reqMissing.length ? "incomplete" : "complete", required_open:p.reqMissing.length, required_open_list:p.reqMissing.map(s=>s.no).join(" "), pct_answered:p.pct,
-    na_questions: Object.keys(c.na||{}).map(id => (STEPS.find(s=>s.id===id)||{}).no).filter(Boolean).join(" ")});
+    pages_total:p.total, pages_answered:p.done, pages_blank:p.blank.length, pct_answered:p.pct,
+    na_questions: activeSteps(a).filter(s => isNA(s, c)).map(s => s.no).filter(Boolean).join(" "), checks_open:W.length, checks_list:W.join(" | ")});
   const active = new Set(activeSteps(a).map(s => s.id));
   STEPS.forEach(s => {
-    if (!active.has(s.id) || (c.na && c.na[s.id]) || s.custom==="review") return;
+    if (!active.has(s.id) || isNA(s, c) || s.custom==="review") return;
     if (s.custom==="diary"){
-      const d = c.diary; const days = dayRange(d.from, d.to); const chs = channels(a);
-      Object.assign(v, {diary_from:d.from, diary_to:d.to, diary_days:days.length, diary_events:d.events.length});
-      chs.forEach(k => { const es = d.events.filter(e => e.ch===k); const mins = es.reduce((t,e)=>t+dur(e),0); const rc = {}; es.forEach(e => rc[e.reason]=(rc[e.reason]||0)+1);
+      const d = c.diary; const days = dayRange(d.from, d.to); const chs = channels(a); const ev = validEvents(c, a);
+      Object.assign(v, {diary_from:d.from, diary_to:d.to, diary_days:days.length, diary_events:ev.length, diary_not_counted:d.events.length-ev.length});
+      chs.forEach(k => { const es = ev.filter(e => e.ch===k); const mins = es.reduce((t,e)=>t+dur(e),0); const rc = {}; es.forEach(e => rc[e.reason]=(rc[e.reason]||0)+1);
         v[`diary_${k}_n`] = es.length; v[`diary_${k}_h`] = +(mins/60).toFixed(2); v[`diary_${k}_pct`] = days.length ? +(mins/(days.length*1440)*100).toFixed(2) : "";
         v[`diary_${k}_maxh`] = +(es.reduce((m,e)=>Math.max(m,dur(e)),0)/60).toFixed(2); v[`diary_${k}_reasons`] = Object.entries(rc).map(([r,n])=>`${r} ${n}`).join("; "); });
-      v.diary_log = d.events.slice().sort((x,y)=>(x.date+x.start).localeCompare(y.date+y.start)).map(e => `${e.date} ${e.start}-${e.end} ${CH[e.ch].short}: ${e.reason}${e.est?" (est.)":""}`).join(" | ");
+      v.diary_log = ev.slice().sort((x,y)=>(x.date+x.start).localeCompare(y.date+y.start)).map(e => `${e.date} ${e.start}-${e.end} ${CH[e.ch].short}: ${e.reason}${e.est?" (est.)":""}`).join(" | ");
       return;
     }
     const visible = new Set(flatFields(s.fields, a).map(f => f.id).filter(Boolean));
@@ -1129,14 +1299,14 @@ function record(c, submittedAt, subNo){
       const x = a[f.id];
       switch (f.t) {
         case "country": return;
-        case "money": v[f.id] = x; v[f.id+"_cur"] = a[f.id+"_cur"]; return;
+        case "money": v[f.id] = x; v[f.id+"_cur"] = filled(a[f.id+"_cur"]) ? String(a[f.id+"_cur"]).trim().toUpperCase() : ""; return;
         case "single": if (filled(x)) { const o = f.options.find(o => o.v===x); v[f.id] = o ? o.l : x; if (hasSpec(f)) v[f.id+"_spec"] = a[f.id+"__"+x] || ""; } return;
         case "yn": v[f.id] = x==="yes" ? "Yes" : x==="no" ? "No" : ""; return;
         case "check": v[f.id] = x ? "Yes" : "No"; return;
         case "derived": v[f.id] = f.fn(a).v || ""; return;
         case "multi": { const arr = Array.isArray(x) ? x : []; if (arr.length) f.options.forEach(o => v[`${f.id}__${o.v}`] = arr.includes(o.v) ? 1 : 0);
           if (hasSpec(f)) v[f.id+"_spec"] = f.options.filter(o => o.spec && arr.includes(o.v)).map(o => a[f.id+"__"+o.v]).filter(filled).join("; "); return; }
-        case "deptpick": { const arr = Array.isArray(x) ? x : []; const ls = arr.map(k => k.startsWith("o:") ? k.slice(2) : (DEPT_L[k]||k)); if (filled(a[f.id+"__free"])) ls.push(a[f.id+"__free"]); v[f.id] = ls.join("; "); return; }
+        case "deptpick": { const arr = deptSel(a, f.id); const ls = arr.map(k => k.startsWith("o:") ? k.slice(2) : (DEPT_L[k]||k)); if (filled(a[f.id+"__free"])) ls.push(a[f.id+"__free"]); v[f.id] = ls.join("; "); return; }
         case "grid": { const rows = f.rowsFn ? f.rowsFn(a) : f.rows; const g = x || {}; rows.forEach(r => f.cols.forEach(c => { const y = (g[r.k]||{})[c.k]; if (filled(y)) v[`${f.id}__${r.k}__${c.k}`] = y; })); return; }
         case "repeat": { const rows = (Array.isArray(x)?x:[]).filter(r => Object.values(r).some(filled)); v[f.id+"__rows"] = rows.length;
           if (f.sum) v[f.id+"__kw"] = +(rows.reduce((t,r)=>{ const n=num(r.n), w=num(r.w); return t + (n!=null&&w!=null ? n*w : 0); },0)/1000).toFixed(3);
@@ -1186,8 +1356,11 @@ async function ghPut(path, text, message){
   }
 }
 function payloadFor(c, at, subNo){
+  const copy = JSON.parse(JSON.stringify(c)); const chs = channels(c.answers);
+  (copy.diary.events||[]).forEach(e => { const i = evIssue(e, c.diary, chs); if (i) e.not_counted = i; });
+  delete copy.submissions;
   return {format:"o2e-response", version:3, app_version:APP_VERSION, id:c.code, submitted_at:at, submission_no:subNo,
-          record: record(c, at, subNo), overview: flatten(c.answers), columns: columns().map(x => [x.key, x.label, x.q, x.type]), assessment: c};
+          record: record(c, at, subNo), overview: flatten(c.answers), columns: columns().map(x => [x.key, x.label, x.q, x.type]), assessment: copy};
 }
 async function submitSurvey(){
   const c = cur(); if (!c) return;
@@ -1220,6 +1393,7 @@ function testHTML(){
   const t = S.testResult; const tok = ghToken();
   const okRow = (l, ok, v) => `<tr><th>${l}</th><td>${ok?"✓":"<b style=\"color:var(--bad)\">missing</b>"} ${v||""}</td></tr>`;
   return `<div class="home"><h2 style="font-size:2rem">Connection test</h2><p class="muted" style="max-width:65ch">For the workshop team: sends a small encrypted test file to the GitHub repository with the current settings. It is stored under <span class="mono">${esc((CONFIG.GITHUB_PATH||"responses")+"/_test/")}</span> and ignored by the dashboard.</p>
+   <p class="small muted">Settings read from: <b>${CONFIG._file ? "o2e-config.js (next to this file)" : "this file (no o2e-config.js found)"}</b> · survey version ${APP_VERSION}</p>
    <div class="card"><div class="info"><table>
      ${okRow("Repository", CONFIG.GITHUB_OWNER && CONFIG.GITHUB_REPO, `<span class="mono">${esc(CONFIG.GITHUB_OWNER+"/"+CONFIG.GITHUB_REPO)}</span> · branch <span class="mono">${esc(CONFIG.GITHUB_BRANCH||"main")}</span>`)}
      ${okRow("Access token", !!tok, tok?`<span class="mono">${esc(tok.slice(0,11))}…</span>`:"")}
@@ -1279,19 +1453,22 @@ function draftHTML(it){
 }
 /* ---------- events ---------- */
 function setVal(k, v){ A()[k] = v; save(); }
-function rerenderKeepFocus(){ const ae=document.activeElement; const id=ae&&ae.id; const sel = ae && typeof ae.selectionStart==="number" ? ae.selectionStart : null; const y = window.scrollY; render(); window.scrollTo(0,y); if(id){ const el=document.getElementById(id); if(el){ el.focus({preventScroll:true}); try{ if(sel!=null) el.setSelectionRange(sel,sel);}catch(e){} } } }
+function rerenderKeepFocus(){ const ae=document.activeElement; const id=ae&&ae.id; let sel = null, selE = null; try { if (ae && typeof ae.selectionStart==="number") { sel = ae.selectionStart; selE = ae.selectionEnd; } } catch(e){} const y = window.scrollY; render(); window.scrollTo(0,y); if(id){ const el=document.getElementById(id); if(el){ el.focus({preventScroll:true}); try{ if(sel!=null) el.setSelectionRange(Math.min(sel, el.value.length), Math.min(selE ?? sel, el.value.length)); }catch(e){} } } }
 function refreshRailAndFoot(){ if(!cur()||S.view!=="step") return; const a=A(); const st=STEPS.find(s=>s.id===S.step); const rail=document.querySelector(".rail"); if(rail){ const t=rail.scrollTop; rail.outerHTML=railHTML(a); document.querySelector(".rail").scrollTop=t; } const foot=document.querySelector(".foot"); if(foot&&st) foot.outerHTML=footHTML(st,a); }
 
 app.addEventListener("input", e=>{
   const t=e.target; if(!S.cur || S.view!=="step") return;
   if (t.dataset.na){ cur().na[t.dataset.na] = t.value || true; save(); return; }
   if (t.dataset.d){ cur().diary[t.dataset.d] = t.value; save(); return; }
+  if (t.dataset.num) { const c0 = t.value, cl = cleanNum(c0, t.dataset.num); if (cl !== c0) { const pos = Math.max(0, (t.selectionStart||cl.length) - (c0.length - cl.length)); t.value = cl; try { t.setSelectionRange(pos, pos); } catch(err){} t.classList.remove("reject"); void t.offsetWidth; t.classList.add("reject"); { const m = t.dataset.num==="signed" ? "Numbers only (digits, decimal point, minus sign)" : "Numbers only"; announce(m); toast(m); } } }
   const k=t.dataset.k; if(!k) return;
   if (t.dataset.kind) return; // handled on change
   const a=A();
-  if (t.dataset.r!==undefined){ a[k]=a[k]||{}; a[k][t.dataset.r]=a[k][t.dataset.r]||{}; a[k][t.dataset.r][t.dataset.c]=t.value; }
-  else if (t.dataset.i!==undefined){ a[k]=a[k]||[]; a[k][+t.dataset.i]=a[k][+t.dataset.i]||{}; a[k][+t.dataset.i][t.dataset.c]=t.value; }
-  else { a[k]=t.value; if (t.dataset.money && filled(t.value) && !filled(a[k+"_cur"])) { const last = lastCurrency(); if (last){ a[k+"_cur"]=last; const ci=document.getElementById("f_"+k+"_cur"); if(ci) ci.value=last; } } }
+  // numbers are stored in one notation (1234.5); what was typed stays visible until the field is left
+  const val = t.dataset.num ? (normNum(t.value, parseKind(t.dataset.num), t.dataset.max!==undefined ? +t.dataset.max : null) ?? t.value) : t.value;
+  if (t.dataset.r!==undefined){ a[k]=a[k]||{}; a[k][t.dataset.r]=a[k][t.dataset.r]||{}; a[k][t.dataset.r][t.dataset.c]=val; }
+  else if (t.dataset.i!==undefined){ a[k]=Array.isArray(a[k])?a[k]:[]; a[k][+t.dataset.i]=a[k][+t.dataset.i]||{}; a[k][+t.dataset.i][t.dataset.c]=val; }
+  else { a[k]=val; if (t.dataset.money && filled(t.value) && !filled(a[k+"_cur"])) { const last = lastCurrency(); if (last){ a[k+"_cur"]=last; const ci=document.getElementById("f_"+k+"_cur"); if(ci) ci.value=last; } } }
   if (k.endsWith("_cur")) cur().lastCur = t.value;
   save(); clearTimeout(railT); railT=setTimeout(refreshRailAndFoot, k==="meta_name"?0:400);
 });
@@ -1323,6 +1500,7 @@ app.addEventListener("change", e=>{
     if (t.tagName==="SELECT"){ if (t.dataset.r!==undefined){} else if (t.dataset.i!==undefined){ a[k]=a[k]||[]; a[k][+t.dataset.i]=a[k][+t.dataset.i]||{}; a[k][+t.dataset.i][t.dataset.c]=t.value; } else a[k]=t.value; save(); }
     scheduleRender(); return;
   }
+  if (t.dataset.num) { scheduleRender(); return; }
   // other text/number change: refresh warnings/computed only where the step has them
   const st=STEPS.find(x=>x.id===S.step); if (st && (st.warn || (st.fields||[]).some(f=>f.t==="computed"||(f.t==="row"&&f.fields.some(x=>x.t==="computed"))))) scheduleRender(); else refreshRailAndFoot();
 });
@@ -1330,11 +1508,11 @@ function readDraft(){ const g=id=>document.getElementById(id); return g("ev_date
 app.addEventListener("click", e=>{
   const b=e.target.closest("[data-act]"); if(!b || b.tagName==="INPUT") return; const act=b.dataset.act;
   switch(act){
-    case "home": saveNow(); S.view="home"; S.submit=null; render(); window.scrollTo(0,0); break;
-    case "new": { if(!S.consent) break; const id=newAssessment(); S.cur=id; S.view="step"; S.step="about"; S.submit=null; saveNow(); render(); window.scrollTo(0,0); break; }
+    case "home": saveNow(); S.view="home"; S.submit=null; S.returnTo=null; S.evDraft=null; render(); window.scrollTo(0,0); break;
+    case "new": { if(!S.consent) break; const id=newAssessment(); S.cur=id; S.view="step"; S.step="about"; S.submit=null; S.returnTo=null; S.evDraft=null; saveNow(); render(); window.scrollTo(0,0); break; }
     case "example": { const id=newAssessment(exampleData()); S.list[id].example=true; saveNow(); render(); break; }
     case "import": document.getElementById("importFile").click(); break;
-    case "open": S.cur=b.dataset.id; S.view="step"; S.submit=null; S.step = S.list[S.cur].lastStep || "about"; render(); window.scrollTo(0,0); break;
+    case "open": S.cur=b.dataset.id; S.view="step"; S.submit=null; S.returnTo=null; S.evDraft=null; S.step = S.list[S.cur].lastStep || "about"; render(); window.scrollTo(0,0); break;
     case "submit": submitSurvey(); break;
     case "backup": downloadBackup(); break;
     case "runtest": runTest(); break;
@@ -1348,26 +1526,34 @@ app.addEventListener("click", e=>{
     case "clear": delete A()[b.dataset.k]; save(); rerenderKeepFocus(); break;
     case "unna": delete cur().na[b.dataset.step]; save(); render(); break;
     case "addrow": { const a=A(); a[b.dataset.k]=Array.isArray(a[b.dataset.k])?a[b.dataset.k]:[]; a[b.dataset.k].push({}); save(); render(); const i=a[b.dataset.k].length-1; const first=document.querySelector(`[data-k="${b.dataset.k}"][data-i="${i}"]`); first&&first.focus(); break; }
-    case "rmrow": { const a=A(); a[b.dataset.k].splice(+b.dataset.i,1); save(); rerenderKeepFocus(); break; }
+    case "rmrow": { const a=A(); if (Array.isArray(a[b.dataset.k])) a[b.dataset.k].splice(+b.dataset.i,1); save(); rerenderKeepFocus(); break; }
     case "addev": addEvent(); break;
     case "rmev": { const d=cur().diary; d.events=d.events.filter(x=>x.id!==b.dataset.id); save(); rerenderKeepFocus(); break; }
   }
 });
-function go(id){ if (id===S.returnTo) S.returnTo=null; S.step=id; S.railOpen=false; cur().lastStep=id; save(); render(); window.scrollTo(0,0); const h=document.querySelector(".step-h h2"); if(h){ h.setAttribute("tabindex","-1"); h.focus({preventScroll:true}); } }
+function announce(msg){ let el=document.getElementById("liveMsg"); if(!el){ el=document.createElement("div"); el.id="liveMsg"; el.className="sr-only"; el.setAttribute("aria-live","polite"); document.body.appendChild(el);} el.textContent=""; setTimeout(()=>{ el.textContent=msg; },30); }
+function go(id){
+  const a0 = A(); const fb = firstBlocked(a0);
+  if (fb && STEPS.findIndex(x=>x.id===id) > STEPS.findIndex(x=>x.id===fb.id)) { if (S.step!==fb.id) { S.step=fb.id; render(); } toast(`First complete ${fb.no?"question "+fb.no:fb.title}`); return; }
+  if (id===S.returnTo) S.returnTo=null; S.step=id; S.railOpen=false; cur().lastStep=id; save(); render(); window.scrollTo(0,0); const h=document.querySelector(".step-h h2"); if(h){ h.setAttribute("tabindex","-1"); h.focus({preventScroll:true}); } }
 function addEvent(){
   const d=readDraft(); const msg=document.getElementById("ev_msg"); const bad=t=>{ msg.textContent=t; msg.style.color="var(--bad)"; };
   if(!d.date) return bad("Choose the date of the interruption.");
-  if(!d.ch) return bad("There is no supply to record. Check questions 18 and 53.");
-  const diary=cur().diary;
+  if(!d.ch) return bad(`There is no supply to record. Check questions ${QN("q18")} and ${QN("q53")}.`);
+  const diary=cur().diary; const today=localISO(new Date());
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d.date)) return bad("Choose a valid date.");
+  if(diary.from && diary.to && diary.to<diary.from) return bad("First correct the recorded time period above.");
   if(diary.from && d.date<diary.from || diary.to && d.date>diary.to) return bad("The date lies outside the recorded time period.");
+  if(d.date>today) return bad("This date lies in the future. Interruptions can only be entered after they happened.");
+  if(d.start===d.end) return bad("Start and end time are the same. For an outage of 24 hours or more, enter each day separately (00:00 until 24:00 for a full day).");
   const base={ch:d.ch, reason:d.reason, note:d.note, est:d.est};
-  const list=[];
+  const list=[]; let cut=false;
   if (tmin(d.end) > tmin(d.start)) list.push({...base, id:uid(), date:d.date, start:d.start, end:d.end});
-  else { const nd=new Date(d.date+"T12:00:00"); nd.setDate(nd.getDate()+1); const next=nd.toISOString().slice(0,10); list.push({...base, id:uid(), date:d.date, start:d.start, end:"24:00"}); if (d.end!=="00:00") list.push({...base, id:uid(), date:next, start:"00:00", end:d.end}); }
+  else { const nd=new Date(d.date+"T12:00:00"); nd.setDate(nd.getDate()+1); const next=localISO(nd); list.push({...base, id:uid(), date:d.date, start:d.start, end:"24:00"}); if (d.end!=="00:00") { if ((diary.to && next>diary.to) || next>today) cut = true; else list.push({...base, id:uid(), date:next, start:"00:00", end:d.end}); } }
   const overlap = list.some(n=>diary.events.some(x=>x.ch===n.ch && x.date===n.date && tmin(n.start)<tmin(x.end) && tmin(x.start)<tmin(n.end)));
   if (overlap) return bad(`This overlaps an interruption already recorded for ${CH[d.ch].l} on that day.`);
   diary.events.push(...list); S.evDraft={date:d.date, ch:d.ch, start:d.start, end:d.end, reason:d.reason}; save(); rerenderKeepFocus();
-  const m=document.getElementById("ev_msg"); if(m){ m.textContent = list.length>1?"Added (split at midnight into two entries).":"Interruption added."; m.style.color="var(--ok)"; }
+  const m=document.getElementById("ev_msg"); if(m){ m.textContent = cut ? "Added until midnight only: the part after midnight lies outside the recorded period (or in the future). Extend the period and add it if needed." : list.length>1?"Added (split at midnight into two entries).":"Interruption added."; m.style.color = cut ? "var(--warn)" : "var(--ok)"; }
 }
 document.getElementById("importFile").addEventListener("change", e=>{
   const f=e.target.files[0]; if(!f) return; const r=new FileReader();
@@ -1389,7 +1575,7 @@ function exampleData(){
     p1_deptbeds:{triage:{ad:"4",c514:"2",u5:"2"},ed:{ad:"6",c514:"2",u5:"2"},icu_g:{ad:"4",c514:"2",u5:"2"},gw_p:{ad:"0",c514:"14",u5:"20"},gw_a:{ad:"40",c514:"0",u5:"0"},mat:{ad:"16",c514:"0",u5:"0"},ot:{ad:"2",c514:"1",u5:"1"}},
     p1_loc:"1", p1_24h:true, p1_water:"yes", p1_wsrc:"Borehole", p1_temp:["vent"], p1_tmax:"35",
     p2_main:["grid"], p2_br_type:["gen"], p2_br_h:"8", p2_br_dep:"some", p2_br_depts:["icu_g","ot","mat"],
-    p2_mt_staff:"C. Technician", p2_mt_int:"Every 3 months", p2_mt_ext:"yes", p2_mt_train:"yes", p2_mt_fix:"1–3 days",
+    p2_mt_staff:"yes", p2_mt_int:"Every 3 months", p2_mt_ext:"yes", p2_mt_train:"yes", p2_mt_fix:"1–3 days",
     p2_grid_dep:"all", p2_grid_kwh:"48000", p2_grid_cost:"9600000", p2_grid_cost_cur:"MGA",
     p2_gens:[{man:"Example Power", mod:"EP-40", rated:"40", standby:"44", unit:"kVA", age:"9"}], p2_fuel_type:"Diesel", p2_fuel_l:"6500",
     p3_dist:["tub"], p3_reg:{fm:{el:"0",me:"14",nf:"3"},fms:{el:"0",me:"2",nf:"0"},cpap:{el:"2",me:"0",nf:"1"}}, p3_reg_why:["spare"],
