@@ -778,8 +778,12 @@ const STEPS = [
    questionnaire were removed. Set RENUMBER = false to keep the numbers of the original Excel questionnaire.
    Texts refer to other questions with {q19} (static texts) or QN("q19") (texts built while the survey runs). */
 const RENUMBER = true;
+/* s.xno = number of the question in the original Excel questionnaire (O2Electricity_Assessment_V02).
+   Used for everything internal: export, codebook, dashboard, Excel export. s.no = number shown to participants. */
+STEPS.forEach(s => { if (s.no) s.xno = s.no; });
 if (RENUMBER) { let n = 0; STEPS.forEach(s => { if (s.no) s.no = ++n; }); }
-const QN = id => { const s = STEPS.find(x => x.id===id); return s && s.no ? s.no : "?"; };
+let QN_EXCEL = false; // true while texts for the export are built
+const QN = id => { const s = STEPS.find(x => x.id===id); return s && s.no ? (QN_EXCEL ? s.xno : s.no) : "?"; };
 (function fillRefs(){
   const f = t => typeof t==="string" ? t.replace(/\{(q\d+)\}/g, (m, id) => QN(id)) : t;
   const walk = fs => (fs||[]).forEach(x => { ["label","hint","depNote","collapsed"].forEach(k => { if (x[k]) x[k] = f(x[k]); }); if (x.fields) walk(x.fields); });
@@ -833,16 +837,40 @@ const TIMES = Array.from({length:49}, (_,i)=>`${String(Math.floor(i/2)).padStart
 const tmin = t => { const [h,m]=t.split(":").map(Number); return h*60+m; };
 
 /* ---------- state & storage ---------- */
-const APP_VERSION = "2.1";
+const APP_VERSION = "2.3";
 const KEY = "o2e-survey-v2";
 let storageOK = true;
 let S = {list:{}, cur:null, view:"home", step:"about", railOpen:false, lastSaved:null, showSkipped:false, consent:false, submit:null, demo:false, test:false};
-function load(){ try { const raw = localStorage.getItem(KEY); if (raw) S.list = JSON.parse(raw) || {}; } catch(e){ storageOK = false; } }
+/* Only one survey is "current" on a device (S.active). Starting a new survey archives the previous one:
+   it stays stored on the device but is no longer offered on the start page. */
+const ACTIVE_KEY = KEY + "-active";
+function load(){
+  try { const raw = localStorage.getItem(KEY); if (raw) S.list = JSON.parse(raw) || {}; S.active = localStorage.getItem(ACTIVE_KEY); } catch(e){ storageOK = false; }
+  if (!S.active || !S.list[S.active] || S.list[S.active].archived) {
+    const open = Object.values(S.list).filter(x => !x.archived).sort((x,y) => (y.updated||"").localeCompare(x.updated||""));
+    S.active = open.length ? open[0].id : null;
+  }
+  if (S.active) Object.values(S.list).forEach(x => { if (x.id !== S.active) x.archived = true; });
+}
+function setActive(id){
+  Object.values(S.list).forEach(x => { x.archived = x.id !== id; }); S.active = id;
+  try { localStorage.setItem(ACTIVE_KEY, id); } catch(e){}
+}
+/* fingerprint of the answers, to see whether anything changed since the last submission */
+function contentHash(c){ const s = JSON.stringify([c.answers, c.na, c.diary]); let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return String(h >>> 0); }
+function subState(c){
+  const ok = (c.submissions||[]).filter(x => x.ok); const last = ok.length ? ok[ok.length-1].at : null;
+  const hasAnswers = Object.keys(c.answers||{}).some(k => filled(c.answers[k])) || (c.diary && c.diary.events && c.diary.events.length);
+  if (!last) return {state: hasAnswers ? "unsent" : "empty", last};
+  if (!c.subHash) return {state:"sent", last};
+  return {state: c.subHash === contentHash(c) ? "sent" : "changed", last};
+}
 let saveT = null;
 function save(){ clearTimeout(saveT); saveT = setTimeout(saveNow, 300); }
 function saveNow(){ const c = cur(); if (c) c.updated = new Date().toISOString(); try { localStorage.setItem(KEY, JSON.stringify(S.list)); S.lastSaved = new Date(); storageOK = true; } catch(e){ storageOK = false; } const el = document.getElementById("saveState"); if (el) el.innerHTML = saveLabel(); }
 const saveLabel = () => storageOK ? (S.lastSaved ? `Saved on this device ${S.lastSaved.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}` : "Answers are saved on this device") : `<span style="color:var(--bad)">This browser cannot save. Do not close the page before submitting.</span>`;
 const cur = () => S.list[S.cur];
+function saveListOnly(){ try { localStorage.setItem(KEY, JSON.stringify(S.list)); S.lastSaved = new Date(); storageOK = true; } catch(e){ storageOK = false; } }
 const A = () => cur().answers;
 const ID_ALPHA = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
 function makeCode(){
@@ -1210,7 +1238,7 @@ function optLabel(f, a, v){ const o = (f.t==="deptpick" ? deptOptions(a) : f.opt
 function flatten(a){
   const out=[]; const c = cur();
   activeSteps(a).forEach(s=>{
-    const part = PARTS.find(p=>p.k===s.part).l; const base = {part, no:s.no||"", q:s.title, req:!!s.req};
+    const part = PARTS.find(p=>p.k===s.part).l; const base = {part, no:s.no||"", xno:s.xno||"", q:s.title, req:!!s.req};
     const na = isNA(s, c);
     if (na) { out.push({...base, field:"Status", item:"", value:"Information not available"+(typeof na==="string"&&na?` – ${na}`:"")}); return; }
     if (s.custom==="diary"){ const d=c.diary; const ev=validEvents(c,a); if(!d.from&&!d.to&&!ev.length) return; out.push({...base, field:"Recorded period", item:"", value:`${d.from||"?"} – ${d.to||"?"} (${dayRange(d.from,d.to).length} days)`}); out.push({...base, field:"Interruptions recorded", item:"", value:String(ev.length)}); channels(a).forEach(k=>{ const es=ev.filter(e=>e.ch===k); if(es.length) out.push({...base, field:CH[k].l, item:"", value:`${es.length} interruption(s), ${fmt(es.reduce((t,e)=>t+dur(e),0)/60,1)} h`}); }); return; }
@@ -1246,7 +1274,7 @@ let _cols = null;
 function columns(){
   if (_cols) return _cols;
   const cols = []; const seen = new Set();
-  const add = (key, label, s, type) => { if (seen.has(key)) return; seen.add(key); cols.push({key, label, q: s && s.no ? "Q"+s.no : "", title: s ? s.title : "", part: s ? PARTS.find(p=>p.k===s.part).l : "Meta", type}); };
+  const add = (key, label, s, type) => { if (seen.has(key)) return; seen.add(key); cols.push({key, label, q: s && s.xno ? "Q"+s.xno : "", title: s ? s.title : "", part: s ? PARTS.find(p=>p.k===s.part).l : "Meta", type}); };
   META_COLS.forEach(([k,l]) => add(k, l, null, ["submission_no","pages_total","pages_answered","pages_blank","pct_answered","checks_open"].includes(k) ? "number" : "text"));
   STEPS.forEach(s => {
     if (s.custom==="review") return;
@@ -1276,11 +1304,12 @@ function columns(){
 }
 const clean = v => v==null ? "" : String(v).replace(/[\t\r\n]+/g, " ").trim();
 function record(c, submittedAt, subNo){
-  const a = c.answers; const v = {}; const p = progress(a); const W = []; activeSteps(a).forEach(s => stepWarnings(s, a).forEach(x => W.push(`${s.no?"Q"+s.no:s.title}: ${x}`)));
+  const a = c.answers; const v = {}; const p = progress(a); const W = [];
+  QN_EXCEL = true; try { activeSteps(a).forEach(s => stepWarnings(s, a).forEach(x => W.push(`${s.xno?"Q"+s.xno:s.title}: ${x}`))); } finally { QN_EXCEL = false; }
   Object.assign(v, {id:c.code, submitted_at:submittedAt, started_at:c.created, submission_no:subNo, app_version:APP_VERSION,
     respondent_name:a.meta_name, respondent_country: a.meta_country ? countryName(a.meta_country) : "", respondent_country_code:a.meta_country, consent_at:c.consent,
     pages_total:p.total, pages_answered:p.done, pages_blank:p.blank.length, pct_answered:p.pct,
-    na_questions: activeSteps(a).filter(s => isNA(s, c)).map(s => s.no).filter(Boolean).join(" "), checks_open:W.length, checks_list:W.join(" | ")});
+    na_questions: activeSteps(a).filter(s => isNA(s, c)).map(s => s.xno).filter(Boolean).join(" "), checks_open:W.length, checks_list:W.join(" | ")});
   const active = new Set(activeSteps(a).map(s => s.id));
   STEPS.forEach(s => {
     if (!active.has(s.id) || isNA(s, c) || s.custom==="review") return;
@@ -1359,7 +1388,7 @@ function payloadFor(c, at, subNo){
   const copy = JSON.parse(JSON.stringify(c)); const chs = channels(c.answers);
   (copy.diary.events||[]).forEach(e => { const i = evIssue(e, c.diary, chs); if (i) e.not_counted = i; });
   delete copy.submissions;
-  return {format:"o2e-response", version:3, app_version:APP_VERSION, id:c.code, submitted_at:at, submission_no:subNo,
+  return {format:"o2e-response", version:3, app_version:APP_VERSION, numbering:"excel", id:c.code, submitted_at:at, submission_no:subNo,
           record: record(c, at, subNo), overview: flatten(c.answers), columns: columns().map(x => [x.key, x.label, x.q, x.type]), assessment: copy};
 }
 async function submitSurvey(){
@@ -1374,7 +1403,9 @@ async function submitSurvey(){
     fileText = JSON.stringify(Object.assign({id:c.code, submitted_at:at}, enc));
     if (!ghReady()) throw new Error("the survey is not connected to the storage yet");
     await ghPut(`${CONFIG.GITHUB_PATH || "responses"}/${c.code}/${stamp(now)}.json`, fileText, `Response ${c.code} (${subNo})`);
-    c.submissions.push({at, ok:true}); S.submit = {state:"ok", at};
+    c.submissions.push({at, ok:true}); c.subHash = contentHash(c); c.lastStep = "review";
+    S.submit = null; S.view = "home"; S.cur = null; S.homeNote = {code:c.code, at}; S.returnTo = null; S.evDraft = null;
+    saveListOnly(); render(); window.scrollTo(0,0); return;
   } catch(e){
     c.submissions.push({at, ok:false, err:e.message});
     S.submit = {state:"fail", err:e.message, name, url: fileText ? URL.createObjectURL(new Blob([fileText], {type:"application/json"})) : ""};
@@ -1416,33 +1447,55 @@ async function runTest(){
 window.O2E = {columns: () => columns().map(c => ({...c}))};
 /* ---------- welcome ---------- */
 function welcomeHTML(){
-  const drafts = Object.values(S.list).sort((x,y)=>(y.updated||"").localeCompare(x.updated||""));
+  const c0 = S.active ? S.list[S.active] : null;
+  const note = S.homeNote;
   return `<div class="home">
    ${storageOK?"":`<div class="banner">This browser does not allow saving answers on this device (for example in a private window). You can still fill in the survey, but please submit before closing the page.</div>`}
    <div class="welcome">
+    ${note ? `<div class="note-ok" role="status"><b>Thank you, your answers have been submitted.</b><br>Survey ID <b class="mono">${esc(note.code)}</b> · ${esc(new Date(note.at).toLocaleString("en-GB",{dateStyle:"medium",timeStyle:"short"}))}. The survey stays on this device: you can change or complete it at any time and submit an update.</div>` : ""}
     <div class="eyebrow"><span class="chip p1">Pre-workshop survey</span><span>${esc(CONFIG.PROJECT)}</span></div>
     <h2>Power and oxygen supply of your health facility</h2>
-    <p class="lead">This survey looks at how your facility is supplied with electricity and medical oxygen, where interruptions happen, and which devices depend on them. The results help to develop suggestions for a more reliable supply.</p>
+    ${c0 ? "" : `<p class="lead">This survey looks at how your facility is supplied with electricity and medical oxygen, where interruptions happen, and which devices depend on them. The results help to develop suggestions for a more reliable supply.</p>
     <div class="facts">
      <div><b>One question per page</b><span>Questions that do not apply to your facility are skipped automatically.</span></div>
      <div><b>Several sessions</b><span>Some questions need records (bills, device counts), and supply interruptions are noted daily over 2–3 weeks.</span></div>
      <div><b>Continue any time</b><span>Answers are saved on this device. You can submit now and send an update later.</span></div>
-    </div>
-    ${drafts.length?`<div class="drafts"><div class="lbl" style="font-weight:600">Continue on this device</div>${drafts.map(draftHTML).join("")}</div>`:""}
+    </div>`}
+    ${c0 ? currentHTML(c0) : ""}
     <div class="card privacy">
-     <div class="lbl" style="font-weight:600;font-family:var(--f-display);font-size:1.15rem">Data protection</div>
+     <div class="lbl" style="font-weight:600;font-family:var(--f-display);font-size:1.15rem">${c0 ? "Start a new survey" : "Data protection"}</div>
+     ${c0 ? `<p class="small muted" style="margin:0">For another health facility. The new survey gets a new survey ID. The current survey (<span class="mono">${esc(c0.code)}</span>) is then no longer shown here; what you submitted stays with the organisers.</p>` : ""}
      <ul>
       <li>We collect your <b>name and country</b>, and information about your facility: its supply, equipment and staffing. We do not ask for phone numbers or e-mail addresses.</li>
       <li>Each survey gets a random <b>survey ID</b>. When you submit, your answers are <b>encrypted on your device</b> and stored in a private repository; only the workshop organisers hold the key to read them.</li>
       <li>Participation is voluntary; you can stop at any time.${CONFIG.CONTACT?` To have your data corrected or deleted, contact ${esc(CONFIG.CONTACT)} and quote your survey ID.`:""}</li>
      </ul>
      <label class="check"><input type="checkbox" id="consent" ${S.consent?"checked":""} data-act="consent"><span>I have read this information and agree to take part.</span></label>
-     <div><button type="button" class="btn pri" data-act="new" ${S.consent?"":"disabled"}>Start a new survey →</button></div>
+     ${S.confirmNew && c0 ? confirmNewHTML(c0) : `<div><button type="button" class="btn ${c0?"":"pri"}" data-act="new" ${S.consent?"":"disabled"}>${c0 ? "Start a new survey (new survey ID)" : "Start a new survey →"}</button></div>`}
     </div>
     <div class="small muted" style="display:flex;gap:14px;flex-wrap:wrap"><button type="button" class="linkbtn" data-act="import">Restore from a backup file</button><button type="button" class="linkbtn" data-act="testview">Connection test (for the survey team)</button>${S.demo?`<button type="button" class="linkbtn" data-act="example">Load example (fictitious data)</button>`:""}</div>
     <div id="homeMsg" class="small" role="status"></div>
     <p class="small muted">Survey tool developed by Sabrina Krähmer (Ulm University of Applied Sciences) with Dr. Hans-Jörg Lang (ALIMA) and Dr. Diavolana Koecher Andrianarimanana (CHU PZaGa Mahajanga).</p>
    </div></div>`;
+}
+const fmtAt = at => new Date(at).toLocaleString("en-GB",{dateStyle:"medium",timeStyle:"short"});
+function currentHTML(it){
+  const a = it.answers; const save = S.cur; S.cur = it.id; const p = progress(a); S.cur = save; const st = subState(it);
+  const status = st.state==="sent" ? `<span style="color:var(--ok)">✓ Submitted ${esc(fmtAt(st.last))}${it.subHash ? " · no changes since then" : ""}</span>`
+    : st.state==="changed" ? `<span style="color:var(--warn)">Submitted ${esc(fmtAt(st.last))} · <b>changed since then: please submit again</b></span>`
+    : st.state==="unsent" ? `<span style="color:var(--warn)">Not submitted yet</span>` : `<span class="muted">No answers yet</span>`;
+  return `<div class="card current-survey">
+   <div class="lbl" style="font-weight:600;font-family:var(--f-display);font-size:1.15rem">Your survey on this device</div>
+   <div><b class="mono">${esc(it.code)}</b>${it.example?` <span class="tag-ex">example</span>`:""}</div>
+   <div class="small muted">${esc([a.meta_name, a.p1_town, a.meta_country?countryName(a.meta_country):""].filter(Boolean).join(" · ")||"No answers yet")} · ${p.done} of ${p.total} pages answered (${p.pct}%)</div>
+   <div class="small">${status}</div>
+   <div><button type="button" class="btn pri" data-act="open" data-id="${it.id}">${st.state==="empty" ? "Continue this survey →" : st.state==="unsent" ? "Continue this survey →" : "Change or complete this survey →"}</button></div>
+  </div>`;
+}
+function confirmNewHTML(c0){
+  const st = subState(c0);
+  return `<div class="warn" role="alert"><b>${st.state==="changed" ? "The current survey has changes that were not submitted." : "The current survey has not been submitted yet."}</b><br>Survey <span class="mono">${esc(c0.code)}</span> will no longer be shown on this page after you start a new one${st.state==="changed" ? ", and the changes will not reach the organisers" : ", and the organisers will not receive it"}.
+   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"><button type="button" class="btn pri" data-act="openreview" data-id="${c0.id}">Open the current survey to submit it</button><button type="button" class="btn" data-act="newforce">Start a new survey anyway</button><button type="button" class="btn ghost" data-act="cancelnew">Cancel</button></div></div>`;
 }
 function draftHTML(it){
   const a = it.answers; const save = S.cur; S.cur = it.id; const p = progress(a); S.cur = save;
@@ -1508,11 +1561,15 @@ function readDraft(){ const g=id=>document.getElementById(id); return g("ev_date
 app.addEventListener("click", e=>{
   const b=e.target.closest("[data-act]"); if(!b || b.tagName==="INPUT") return; const act=b.dataset.act;
   switch(act){
-    case "home": saveNow(); S.view="home"; S.submit=null; S.returnTo=null; S.evDraft=null; render(); window.scrollTo(0,0); break;
-    case "new": { if(!S.consent) break; const id=newAssessment(); S.cur=id; S.view="step"; S.step="about"; S.submit=null; S.returnTo=null; S.evDraft=null; saveNow(); render(); window.scrollTo(0,0); break; }
-    case "example": { const id=newAssessment(exampleData()); S.list[id].example=true; saveNow(); render(); break; }
+    case "home": saveNow(); S.view="home"; S.submit=null; S.returnTo=null; S.evDraft=null; S.homeNote=null; S.confirmNew=false; render(); window.scrollTo(0,0); break;
+    case "new": case "newforce": { if(!S.consent) break; const c0=S.active?S.list[S.active]:null;
+      if (act==="new" && c0 && ["unsent","changed"].includes(subState(c0).state)) { S.confirmNew=true; render(); const w=document.querySelector(".privacy .warn"); if(w) w.scrollIntoView({block:"center"}); break; }
+      const id=newAssessment(); setActive(id); S.cur=id; S.view="step"; S.step="about"; S.submit=null; S.returnTo=null; S.evDraft=null; S.homeNote=null; S.confirmNew=false; saveNow(); render(); window.scrollTo(0,0); break; }
+    case "cancelnew": S.confirmNew=false; render(); break;
+    case "openreview": S.cur=b.dataset.id; S.view="step"; S.submit=null; S.returnTo=null; S.evDraft=null; S.homeNote=null; S.confirmNew=false; S.step="review"; render(); window.scrollTo(0,0); break;
+    case "example": { const id=newAssessment(exampleData()); S.list[id].example=true; setActive(id); S.homeNote=null; S.confirmNew=false; saveNow(); render(); break; }
     case "import": document.getElementById("importFile").click(); break;
-    case "open": S.cur=b.dataset.id; S.view="step"; S.submit=null; S.returnTo=null; S.evDraft=null; S.step = S.list[S.cur].lastStep || "about"; render(); window.scrollTo(0,0); break;
+    case "open": S.cur=b.dataset.id; S.view="step"; S.submit=null; S.returnTo=null; S.evDraft=null; S.homeNote=null; S.confirmNew=false; S.step = S.list[S.cur].lastStep || "about"; render(); window.scrollTo(0,0); break;
     case "submit": submitSurvey(); break;
     case "backup": downloadBackup(); break;
     case "runtest": runTest(); break;
@@ -1557,7 +1614,7 @@ function addEvent(){
 }
 document.getElementById("importFile").addEventListener("change", e=>{
   const f=e.target.files[0]; if(!f) return; const r=new FileReader();
-  r.onload=()=>{ const msg=document.getElementById("homeMsg"); try { const j=JSON.parse(r.result); const as=j.assessment||j; if(!as||typeof as.answers!=="object") throw new Error("not an assessment file"); let id; if (as.id && /^[2-9A-Z]{4}-[2-9A-Z]{4}$/.test(as.id)) { id=as.id; S.list[id]=Object.assign({na:{}, diary:{from:"",to:"",events:[]}, submissions:[]}, as, {id, code:"O2E-"+id}); } else id=newAssessment({answers:as.answers, na:as.na||{}, diary:as.diary||{from:"",to:"",events:[]}, created:as.created, lastCur:as.lastCur}); saveNow(); render(); const m2=document.getElementById("homeMsg"); if(m2){m2.textContent=`Restored survey ${S.list[id].code}.`; m2.style.color="var(--ok)";} } catch(err){ if(msg){ msg.textContent="This file could not be imported: "+err.message+". Choose a .json backup exported from this app."; msg.style.color="var(--bad)"; } } e.target.value=""; };
+  r.onload=()=>{ const msg=document.getElementById("homeMsg"); try { const j=JSON.parse(r.result); const as=j.assessment||j; if(!as||typeof as.answers!=="object") throw new Error("not an assessment file"); let id; if (as.id && /^[2-9A-Z]{4}-[2-9A-Z]{4}$/.test(as.id)) { id=as.id; S.list[id]=Object.assign({na:{}, diary:{from:"",to:"",events:[]}, submissions:[]}, as, {id, code:"O2E-"+id}); } else id=newAssessment({answers:as.answers, na:as.na||{}, diary:as.diary||{from:"",to:"",events:[]}, created:as.created, lastCur:as.lastCur}); setActive(id); S.homeNote=null; S.confirmNew=false; saveNow(); render(); const m2=document.getElementById("homeMsg"); if(m2){m2.textContent=`Restored survey ${S.list[id].code}. It is now the current survey on this device.`; m2.style.color="var(--ok)";} } catch(err){ if(msg){ msg.textContent="This file could not be imported: "+err.message+". Choose a .json backup exported from this app."; msg.style.color="var(--bad)"; } } e.target.value=""; };
   r.readAsText(f);
 });
 document.addEventListener("keydown", e=>{ if(e.key==="Escape" && S.railOpen){ S.railOpen=false; render(); } });
