@@ -317,7 +317,7 @@ const COUNTRIES = [["AF","Afghanistan"],["AL","Albania"],["DZ","Algeria"],["AS",
    Source: 2026_11_Pre-workshop_survey_hospital_energy_O2_5min_04.xlsx
    Question numbers and wording follow the Excel sheet.
    ===================================================================== */
-const PW_VERSION = "1.1";
+const PW_VERSION = "1.3";
 const PW_FOLDER = "pre-workshop";          // folder in the private repository (the facility assessment uses "responses")
 const PW_PREFIX = "PRE";                   // survey IDs: PRE-XXXX-XXXX
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -379,8 +379,9 @@ const SECTIONS = [
   {no:27, label:"Lighting at night sufficient for clinical procedures?", fields:[{id:"q27", t:"single", options:O(["yes","Yes"],["partly","Partly"],["no","No"])}]}
  ]},
  {id:"F", title:"Patient flow and priorities", chip:"p1", noComment:1, q:[
-  {no:28, label:"Triage of sick children / mothers and adult patients at 'point of entry' - using WHO triage tool", fields:[{id:"q28", t:"single", options:O(["yes","Yes"],["informal","Informal"],["no","No"])}]},
-  {no:29, label:"The ONE change that would most improve emergency care at your hospital", hint:"Energy, oxygen, water, building, staff …", fields:[{id:"q29", t:"area"}]}
+  {no:28, label:"Triage of sick children / mothers and adult patients at 'point of entry' - using WHO triage tool", fields:[{id:"q28", t:"single", options:O(["yes","Yes"],["no","No"],["informal","Informal",{old:1}])}]},   // "Informal" was an answer up to version 1.1: no longer offered, still shown in the results if present
+  {no:29, label:"Please describe the journey of a critically ill child – from triage, emergency care, critical care unit / general paediatric ward – to discharge", hint:"A few sentences are enough: what happens at each step, who is involved, where delays or gaps occur.", fields:[{id:"journey", t:"area", rows:9, max:6000}]},
+  {no:30, label:"The ONE change that would most improve emergency care at your hospital", hint:"Energy, oxygen, water, building, staff …", fields:[{id:"change", t:"area"}]}
  ]}
 ];
 SECTIONS.forEach(s => s.q.forEach(q => { q.sec = s.id; }));
@@ -404,6 +405,9 @@ function intCheck(f, v){
   if ((f.wmax != null && n > f.wmax) || (f.wmin != null && n < f.wmin)) return {warn:f.wmsg || "Please check this number."};
   return {};
 }
+/* up to version 1.2 the two free-text answers were stored as q29 (the ONE change) and q30 (journey of a child);
+   since 1.3 the questions are in the opposite order and stored under their own names */
+function migrate(a){ if (a && typeof a === "object") { if ("q29" in a) { if (!filled(a.change)) a.change = a.q29; delete a.q29; } if ("q30" in a) { if (!filled(a.journey)) a.journey = a.q30; delete a.q30; } } return a; }
 const visible = (q, a) => !q.when || q.when(a);
 function fieldAnswered(f, a){
   const v = a[f.id];
@@ -491,7 +495,7 @@ const app = document.getElementById("app");
 function load(){
   try { const raw = localStorage.getItem(KEY); const c = raw ? JSON.parse(raw) : null;
     S.c = (c && typeof c === "object" && c.id && c.answers && typeof c.answers === "object" && !Array.isArray(c.answers)) ? c : null;
-    if (S.c) { S.c.submissions = Array.isArray(S.c.submissions) ? S.c.submissions : []; }
+    if (S.c) { S.c.submissions = Array.isArray(S.c.submissions) ? S.c.submissions : []; migrate(S.c.answers); }
   } catch(e){ storageOK = false; S.c = null; }
 }
 function save(){ if (!S.c) return; S.c.updated = new Date().toISOString(); try { localStorage.setItem(KEY, JSON.stringify(S.c)); storageOK = true; } catch(e){ storageOK = false; } }
@@ -534,7 +538,7 @@ function pbarHTML(){
 }
 function choiceHTML(q, f, a){
   const multi = f.t === "multi"; const sel = multi ? (Array.isArray(a[f.id]) ? a[f.id] : []) : [a[f.id]];
-  let h = `<div class="choices pw-row" role="group" aria-label="${esc(f.label || q.label)}">` + f.options.map(o => { const on = sel.includes(o.v);
+  let h = `<div class="choices pw-row" role="group" aria-label="${esc(f.label || q.label)}">` + f.options.filter(o => !o.old || sel.includes(o.v)).map(o => { const on = sel.includes(o.v);
     return `<button type="button" class="choice ${on ? "on" : ""} ${o.excl ? "excl" : ""}" data-f="${f.id}" data-v="${esc(o.v)}" aria-pressed="${on}"><span class="pw-box ${multi ? "sq" : ""}" aria-hidden="true">${on ? (multi ? "✓" : "●") : ""}</span><span>${esc(o.l)}</span></button>`; }).join("") + `</div>`;
   f.options.filter(o => o.spec && sel.includes(o.v)).forEach(o => { h += `<input type="text" class="pw-spec" data-k="${f.id}__${o.v}" value="${esc(a[`${f.id}__${o.v}`] ?? "")}" placeholder="${esc(o.spec)}" aria-label="${esc(o.spec)}" maxlength="120">`; });
   return h;
@@ -545,7 +549,7 @@ function fieldHTML(q, f, a){
     case "single": case "multi": return `<div class="pw-f">${q.fields.length > 1 && f.label ? `<div class="pw-sub">${esc(f.label)}</div>` : ""}${choiceHTML(q, f, a)}</div>`;
     case "int": { const c = intCheck(f, a[f.id]); return `<div class="pw-f">${sub}<div class="pw-num"><input type="text" inputmode="numeric" autocomplete="off" id="f_${f.id}" data-k="${f.id}" data-int="1" value="${esc(a[f.id] ?? "")}" ${c.err ? 'class="bad" aria-invalid="true"' : ""} aria-label="${esc(q.label)}">${f.unit && f.unit !== "n" ? `<span class="muted">${esc(f.unit)}</span>` : ""}</div>${f.hint ? `<div class="hint">${esc(f.hint)}</div>` : ""}<div id="m_${f.id}">${msgHTML(c)}</div></div>`; }
     case "country": return `<div class="pw-f">${sub}<select id="f_${f.id}" data-k="${f.id}" aria-label="${esc(f.label || q.label)}"><option value="">– select your country –</option>${COUNTRY_LIST.map(([c, n]) => `<option value="${c}" ${a[f.id] === c ? "selected" : ""}>${esc(n)}</option>`).join("")}${filled(a[f.id]) && a[f.id] !== OTHER_COUNTRY && !SSA.includes(a[f.id]) ? `<option value="${esc(a[f.id])}" selected>${esc(countryName(a[f.id]))}</option>` : ""}<option disabled>──────────</option><option value="${OTHER_COUNTRY}" ${a[f.id] === OTHER_COUNTRY ? "selected" : ""}>Other country</option></select>${a[f.id] === OTHER_COUNTRY ? `<input type="text" class="pw-spec" data-k="q2_country__other" value="${esc(a.q2_country__other ?? "")}" placeholder="Which country?" aria-label="Which country?" maxlength="80">` : ""}</div>`;
-    case "area": return `<div class="pw-f">${sub}<textarea id="f_${f.id}" data-k="${f.id}" rows="4" maxlength="2000" aria-label="${esc(f.label || q.label)}">${esc(a[f.id] ?? "")}</textarea></div>`;
+    case "area": return `<div class="pw-f">${sub}<textarea id="f_${f.id}" data-k="${f.id}" rows="${f.rows || 4}" maxlength="${f.max || 2000}" aria-label="${esc(f.label || q.label)}">${esc(a[f.id] ?? "")}</textarea></div>`;
     default: return `<div class="pw-f">${sub}<input type="text" id="f_${f.id}" data-k="${f.id}" value="${esc(a[f.id] ?? "")}" maxlength="200" ${f.id === "name" ? 'autocomplete="name"' : ""} aria-label="${esc(f.label || q.label)}"></div>`;
   }
 }
@@ -606,13 +610,13 @@ function homeHTML(){
   return `<div class="home"><div class="welcome">
    ${storageOK ? "" : `<div class="banner">This browser does not allow saving answers on this device (for example in a private window). You can still fill in the survey, but please submit before closing the page.</div>`}
    ${n ? `<div class="note-ok" role="status"><b>Thank you, your answers have been submitted.</b><br>Survey ID <b class="mono">${esc(n.code)}</b> · ${esc(fmtAt(n.at))}. You can still change your answers on this device and submit an update.</div>` : ""}
-   <div class="eyebrow"><span class="chip p1">About 5–7 minutes</span><span>${esc(CONFIG.PROJECT)}</span></div>
+   <div class="eyebrow"><span class="chip p1">About 10 minutes</span><span>${esc(CONFIG.PROJECT)}</span></div>
    <h2>Your hospital, energy, oxygen and working conditions</h2>
    <p class="lead">DAAD workshop “Self-sustaining health facilities in remote, resource-constrained settings”, Lilongwe, 30 Nov – 4 Dec 2026. Please answer for the hospital where you work. Estimates are fine.</p>
    ${cur}
    <div class="card privacy"><div class="pw-ql" style="font-size:1.15rem">${c ? "Start a new survey" : "Before you start"}</div>
     ${c ? `<p class="small muted" style="margin:0">For another hospital or another person on this device. The new survey gets a new survey ID and replaces the current one (<span class="mono">${esc(c.code)}</span>), which is deleted from this device.</p>` : ""}
-    <ul><li>29 short questions in 6 parts. Only your <b>name</b>, <b>role</b> and <b>country</b> are required; everything else can be left blank.</li>
+    <ul><li>30 questions in 6 parts; the last one asks for a short description in your own words. Only your <b>name</b>, <b>role</b> and <b>country</b> are required; everything else can be left blank.</li>
      <li>We ask for your name so that the organisers can relate your answers to you in the workshop. We do not ask for your phone number or e-mail address. The hospital name is optional.</li>
      <li>Answers are used only to prepare the workshop sessions. They are <b>encrypted on your device</b> when you submit, and only the workshop organisers can read them.</li>
      <li>Your answers are saved on this device, so you can pause and continue later. Participation is voluntary.${CONFIG.CONTACT ? ` Questions, or to have your answers deleted: ${esc(CONFIG.CONTACT)} (quote your survey ID).` : ""}</li>
